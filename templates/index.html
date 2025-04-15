@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SciWeb 3.0 - Academic Excellence for All</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="logo">
+            <div class="logo-text">SciWeb</div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/" class="active">Home</a></li>
+            <li><a href="/tree">Tree</a></li>
+            <li><a href="#">Schedule</a></li>
+            <li><a href="#">Login</a></li>
+        </ul>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="particles"></div>
+        <div class="hero-content">
+            <h1 class="hero-title">Academic Excellence for All</h1>
+            <p class="hero-subtitle">SciWeb uses AI to provide structured learning, organizes your academic journey, and connects you with a community of learners.</p>
+            <div class="hero-buttons">
+                <a href="/tree" class="btn btn-primary">Get Started</a>
+                <a href="#" class="btn btn-secondary">Learn More</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mission Section -->
+    <section class="mission">
+        <h2 class="section-title">Our Mission</h2>
+        <div class="mission-content">
+            <p class="mission-statement scroll-animation">To build a platform that makes academic excellence universally accessible.</p>
+            <div class="floating-element floating scroll-animation">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Icon" style="width: 100px; height: 100px;">
+            </div>
+        </div>
+    </section>
+
+    <!-- Values Section -->
+    <section class="values">
+        <h2 class="section-title">Our Values</h2>
+        <div class="values-grid">
+            <div class="value-card scroll-animation">
+                <h3 class="value-title">Excellence</h3>
+                <p class="value-description">SciWeb uses structured AI to provide the highest quality of support for students.</p>
+            </div>
+            <div class="value-card scroll-animation">
+                <h3 class="value-title">Accessibility</h3>
+                <p class="value-description">SciWeb is a free, open-source, and community-driven platform that is accessible to all students.</p>
+            </div>
+            <div class="value-card scroll-animation">
+                <h3 class="value-title">Discovery</h3>
+                <p class="value-description">SciWeb guides students to derive concepts from within their own knowledge, and to discover new connections between concepts.</p>
+            </div>
+            <div class="value-card scroll-animation">
+                <h3 class="value-title">Connection</h3>
+                <p class="value-description">SciWeb fosters community within academic circles and enables the seamless sharing of ideas and resources.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- History Section -->
+    <section class="history">
+        <h2 class="section-title">Our Journey</h2>
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <p class="timeline-date">2023</p>
+                    <h3>The Beginning</h3>
+                    <p>SciWeb was founded by 3 Bronx Science students who were frustrated with the lack of academic resources available to them.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <p class="timeline-date">2024</p>
+                    <h3>Development Phase</h3>
+                    <p>After 2 rejected club applications, the team continued to develop the platform, writing 5 million lines of code over 1000+ hours.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <p class="timeline-date">2025</p>
+                    <h3>The Launch</h3>
+                    <p>SciWeb was finally launched as a state-of-the-art academic platform with almost 15 collaborators over 3 departments.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <p class="timeline-date">Today</p>
+                    <h3>Growing Impact</h3>
+                    <p>We've received many endorsements from students, faculty, and administrators as we continue to expand our impact.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Philosophy Section -->
+    <section class="values">
+        <h2 class="section-title">Our Philosophy</h2>
+        <div class="mission-content">
+            <p class="mission-statement scroll-animation">We believe that during the learning process, the brain organizes information into a hierarchy of interconnected concepts, and that this hierarchy is the key to understanding and retaining information.</p>
+            <div class="values-grid">
+                <div class="value-card scroll-animation">
+                    <h3 class="value-title">Concept Hierarchy</h3>
+                    <p class="value-description">Knowledge is structured in a hierarchical manner, with foundational concepts supporting more complex ones.</p>
+                </div>
+                <div class="value-card scroll-animation">
+                    <h3 class="value-title">Self-Derivation</h3>
+                    <p class="value-description">The best way to learn is to derive concepts from within one's own knowledge given minimal external guidance.</p>
+                </div>
+                <div class="value-card scroll-animation">
+                    <h3 class="value-title">Visual Representation</h3>
+                    <p class="value-description">We represent the knowledge accrued by the student in a visual hierarchy, which we call a "concept map".</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Innovations Section -->
+    <section class="mission">
+        <h2 class="section-title">Our Innovations</h2>
+        <div class="mission-content">
+            <div class="value-card scroll-animation" style="max-width: 800px;">
+                <h3 class="value-title">Structured AI</h3>
+                <p class="value-description">SciWeb exploits structured, decentralized AI to combine the accessibility of AI with the precision and organization of human instruction and guidance.</p>
+            </div>
+            <div class="value-card scroll-animation" style="max-width: 800px;">
+                <h3 class="value-title">Motivational Design</h3>
+                <p class="value-description">SciWeb plays into the motivational and reward structures of the human brain by linking everything to your personal goals and aspirations.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-info">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="footer-logo">
+                <p>Building the future of education together.</p>
+            </div>
+            <div class="footer-links">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/tree">Tree</a></li>
+                    <li><a href="#">Schedule</a></li>
+                    <li><a href="#">Login</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h3>Features</h3>
+                <ul>
+                    <li><a href="#">Study Tools</a></li>
+                    <li><a href="#">Grade Analysis</a></li>
+                    <li><a href="#">AI Counselors</a></li>
+                    <li><a href="#">Community</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h3>Connect</h3>
+                <ul>
+                    <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
+                    <li><a href="#"><i class="fab fa-github"></i> GitHub</a></li>
+                    <li><a href="#"><i class="fab fa-discord"></i> Discord</a></li>
+                    <li><a href="#"><i class="fas fa-envelope"></i> Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 SciWeb. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html> 

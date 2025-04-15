@@ -1,0 +1,775 @@
+/* Tree Page Specific Styling */
+:root {
+  /* Node Type Colors */
+  --node-motivator: linear-gradient(135deg, #ff1a75, #ff4d94);
+  --node-task: linear-gradient(135deg, #4285F4, #34A5FF);
+  --node-challenge: linear-gradient(135deg, #FF9900, #FFB84D);
+  --node-class: linear-gradient(135deg, #8E44AD, #A569BD);
+  --node-assignment: linear-gradient(135deg, #27AE60, #2ECC71);
+  --node-test: linear-gradient(135deg, #E74C3C, #F5B7B1);
+  --node-project: linear-gradient(135deg, #16A085, #1ABC9C);
+  --node-essay: linear-gradient(135deg, #F1C40F, #F9E79F);
+  --node-image: linear-gradient(135deg, #3498DB, #AED6F1);
+  
+  /* Node Shadows */
+  --node-shadow-light: 0 10px 20px rgba(0, 0, 0, 0.1);
+  --node-shadow-dark: 0 10px 20px rgba(0, 0, 0, 0.4);
+  
+  /* Animation Speeds */
+  --anim-speed-fast: 0.2s;
+  --anim-speed-medium: 0.5s;
+  --anim-speed-slow: 1s;
+}
+
+.tree-container {
+  width: 100%;
+  height: calc(100vh - 70px);
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-light);
+  transition: background-color var(--transition-speed);
+}
+
+.dark-mode .tree-container {
+  background: var(--bg-dark);
+}
+
+/* Canvas for drawing edges between nodes */
+.tree-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Container for nodes */
+.nodes-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+
+/* Node Styling */
+.node {
+  position: absolute;
+  width: 180px;
+  min-height: 60px;
+  border-radius: 12px;
+  padding: 15px;
+  cursor: grab;
+  box-shadow: var(--node-shadow-light);
+  transform-origin: center;
+  z-index: 5;
+  transition: transform 0.2s, box-shadow 0.2s, background-color var(--transition-speed);
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-weight: 500;
+  overflow: hidden;
+}
+
+.dark-mode .node {
+  box-shadow: var(--node-shadow-dark);
+}
+
+.node:hover {
+  transform: scale(1.05);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+.dark-mode .node:hover {
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+}
+
+.node:active {
+  cursor: grabbing;
+  transform: scale(1.02);
+}
+
+.node-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* Node Types */
+.node-motivator {
+  background: var(--node-motivator);
+  animation: pulse 3s infinite alternate;
+}
+
+.node-task {
+  background: var(--node-task);
+}
+
+.node-challenge {
+  background: var(--node-challenge);
+  animation: wobble 5s infinite alternate;
+}
+
+.node-class {
+  background: var(--node-class);
+}
+
+.node-assignment {
+  background: var(--node-assignment);
+}
+
+.node-test {
+  background: var(--node-test);
+  animation: heartbeat 2s infinite;
+}
+
+.node-project {
+  background: var(--node-project);
+}
+
+.node-essay {
+  background: var(--node-essay);
+}
+
+.node-image {
+  background: var(--node-image);
+  padding: 10px;
+  width: auto;
+  height: auto;
+  max-width: 300px;
+  max-height: 300px;
+}
+
+.node-image img {
+  max-width: 100%;
+  max-height: 250px;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+/* Node Controls */
+.node-controls {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.node-control {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.2s;
+}
+
+.node-control:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Toolbar */
+.tree-toolbar {
+  position: fixed;
+  top: 80px;
+  left: 20px;
+  z-index: 100;
+  background: var(--bg-light);
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: background-color var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.dark-mode .tree-toolbar {
+  background: var(--bg-dark);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.tool-button {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+  position: relative;
+}
+
+.tool-button:hover {
+  transform: scale(1.1);
+}
+
+.tool-button:active {
+  transform: scale(0.95);
+}
+
+.tool-button::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 60px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.tool-button:hover::after {
+  opacity: 1;
+}
+
+.btn-motivator {
+  background: var(--node-motivator);
+}
+
+.btn-task {
+  background: var(--node-task);
+}
+
+.btn-challenge {
+  background: var(--node-challenge);
+}
+
+.btn-class {
+  background: var(--node-class);
+}
+
+.btn-assignment {
+  background: var(--node-assignment);
+}
+
+.btn-test {
+  background: var(--node-test);
+}
+
+.btn-project {
+  background: var(--node-project);
+}
+
+.btn-essay {
+  background: var(--node-essay);
+}
+
+.btn-image {
+  background: var(--node-image);
+}
+
+.btn-clear {
+  background: #95a5a6;
+}
+
+.btn-save {
+  background: #2ecc71;
+}
+
+.upload-form {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--bg-light);
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  z-index: 1000;
+  display: none;
+  transition: background-color var(--transition-speed);
+}
+
+.dark-mode .upload-form {
+  background: var(--bg-dark);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.upload-form input {
+  margin-bottom: 10px;
+}
+
+.upload-form button {
+  padding: 8px 15px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.upload-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: none;
+}
+
+/* Overlay for dragging connection */
+.connection-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 500;
+  cursor: crosshair;
+  display: none;
+}
+
+/* Status Message */
+.status-message {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-weight: 500;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.status-message.show {
+  opacity: 1;
+}
+
+/* Mini-Map */
+.mini-map {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 200px;
+  height: 150px;
+  background: var(--bg-light);
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  overflow: hidden;
+  transition: background-color var(--transition-speed), transform 0.3s;
+  display: none;
+}
+
+.dark-mode .mini-map {
+  background: var(--bg-dark);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.mini-map.visible {
+  display: block;
+  animation: fadeIn 0.3s forwards;
+}
+
+.mini-map-viewport {
+  position: absolute;
+  border: 2px solid var(--primary);
+  background: rgba(255, 26, 117, 0.1);
+  pointer-events: none;
+}
+
+.mini-map-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  background: var(--primary);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(255, 26, 117, 0.3);
+  z-index: 101;
+  transition: transform 0.3s;
+}
+
+.mini-map-toggle:hover {
+  transform: scale(1.1);
+}
+
+.mini-map-toggle.active {
+  transform: scale(1.1) rotate(180deg);
+}
+
+/* Zoom Controls */
+.zoom-controls {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  background: var(--bg-light);
+  border-radius: 30px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  padding: 5px 10px;
+  z-index: 100;
+  transition: background-color var(--transition-speed);
+}
+
+.dark-mode .zoom-controls {
+  background: var(--bg-dark);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.zoom-controls button {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: var(--primary);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.zoom-controls button:hover {
+  transform: scale(1.1);
+}
+
+.zoom-level {
+  margin: 0 10px;
+  font-weight: 500;
+  min-width: 60px;
+  text-align: center;
+}
+
+/* Animations */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 5px 15px rgba(255, 26, 117, 0.2);
+  }
+  100% {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(255, 26, 117, 0.4);
+  }
+}
+
+@keyframes wobble {
+  0% {
+    transform: rotate(-1deg);
+  }
+  100% {
+    transform: rotate(1deg);
+  }
+}
+
+@keyframes heartbeat {
+  0% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.1);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.1);
+  }
+  70% {
+    transform: scale(1);
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  100% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.appear {
+  animation: appear 0.3s forwards;
+}
+
+/* Media Query */
+@media (max-width: 768px) {
+  .tree-toolbar {
+    bottom: 20px;
+    top: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 90%;
+    max-width: 400px;
+  }
+  
+  .node {
+    width: 150px;
+    min-height: 50px;
+    padding: 10px;
+  }
+  
+  .tool-button {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+  
+  .tool-button::after {
+    display: none;
+  }
+  
+  .mini-map, .mini-map-toggle {
+    display: none;
+  }
+  
+  .zoom-controls {
+    bottom: auto;
+    top: 80px;
+  }
+}
+
+/* AI Assistant Sidebar */
+.ai-sidebar {
+  position: fixed;
+  right: -350px; /* Start hidden */
+  top: 70px; /* Below navbar */
+  width: 350px;
+  height: calc(100vh - 70px);
+  background: var(--bg-light-accent);
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+  z-index: 500;
+  transition: right 0.4s ease-in-out, background-color var(--transition-speed);
+  display: flex;
+  flex-direction: column;
+}
+
+.ai-sidebar.visible {
+  right: 0;
+}
+
+.dark-mode .ai-sidebar {
+  background: var(--bg-dark-accent);
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+}
+
+.ai-header {
+  padding: 15px;
+  background: var(--primary);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ai-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.ai-close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.ai-close-btn:hover {
+  transform: scale(1.2);
+}
+
+.ai-chat-box {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.message {
+  margin-bottom: 15px;
+  padding: 10px 15px;
+  border-radius: 15px;
+  max-width: 80%;
+  word-wrap: break-word;
+  line-height: 1.4;
+}
+
+.user-message {
+  background: var(--primary);
+  color: white;
+  border-bottom-right-radius: 0;
+  align-self: flex-end;
+}
+
+.ai-message {
+  background: var(--bg-light);
+  color: var(--text-dark);
+  border-bottom-left-radius: 0;
+  align-self: flex-start;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: background-color var(--transition-speed), color var(--transition-speed);
+}
+
+.dark-mode .ai-message {
+  background: var(--bg-dark);
+  color: var(--text-light);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.ai-message code {
+  display: block;
+  background: var(--bg-light-accent);
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 5px;
+  font-family: monospace;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+.dark-mode .ai-message code {
+  background: var(--bg-dark-accent);
+}
+
+.ai-input-area {
+  display: flex;
+  padding: 15px;
+  border-top: 1px solid var(--bg-light-accent);
+  transition: border-color var(--transition-speed);
+}
+
+.dark-mode .ai-input-area {
+  border-top-color: var(--bg-dark-accent);
+}
+
+#ai-input {
+  flex-grow: 1;
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  margin-right: 10px;
+  background: var(--bg-light);
+  color: var(--text-dark);
+  transition: background-color var(--transition-speed), color var(--transition-speed);
+}
+
+.dark-mode #ai-input {
+  background: var(--bg-dark);
+  color: var(--text-light);
+  border-color: #444;
+}
+
+#ai-send-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+#ai-send-btn:hover {
+  transform: scale(1.1);
+}
+
+.ai-toggle-btn {
+  position: fixed;
+  right: 20px;
+  bottom: 90px; /* Above minimap toggle */
+  width: 50px;
+  height: 50px;
+  background: var(--primary);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(255, 26, 117, 0.3);
+  z-index: 101;
+  transition: transform 0.3s;
+}
+
+.ai-toggle-btn:hover {
+  transform: scale(1.1);
+}
+
+.ai-toggle-btn.hidden {
+  transform: scale(0);
+}
+
+/* Media Query */
+@media (max-width: 768px) {
+  /* ... existing media query ... */
+  .ai-sidebar {
+    width: 100%;
+    right: -100%; /* Start hidden */
+  }
+  .ai-sidebar.visible {
+    right: 0;
+  }
+  .ai-toggle-btn {
+    bottom: 150px; /* Adjust position */
+  }
+} 
