@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SciWeb 3.0 - Schedule</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/schedule.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Draggable JS library -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+</head>
+<body>
+    <div class="schedule-bg-pattern"></div>
+    
+    <!-- Floating Elements -->
+    <div class="floating-elements">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
+    
+    <!-- Stars -->
+    <div class="stars">
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+    </div>
+
+    <!-- Main Title -->
+    <h1 class="main-title">Schedule Planner</h1>
+
+    <header>
+        <nav class="navbar">
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="logo">
+                <div class="logo-text">SciWeb</div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/tree">Tree</a></li>
+                <li><a href="/schedule" class="active">Schedule</a></li>
+                <li><a href="/counselor">Counselor</a></li>
+                <li><a href="/signup">Sign Up</a></li>
+            </ul>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
+        </nav>
+    </header>
+
+    <main class="schedule-container">
+        <div class="schedule-header">
+            <h1>My Schedule</h1>
+            <div class="date-controls">
+                <button class="date-nav-btn" id="prev-day"><i class="fas fa-chevron-left"></i></button>
+                <h2 id="current-date">Today, April 16, 2025</h2>
+                <button class="date-nav-btn" id="next-day"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+
+        <div class="schedule-grid">
+            <!-- Today's Tasks Section -->
+            <section class="today-tasks panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-tasks"></i> Today's Tasks</h2>
+                    <div class="panel-controls">
+                        <button class="panel-btn" id="add-task" title="Add Task"><i class="fas fa-plus"></i></button>
+                        <button class="panel-btn" id="add-break" title="Add Break"><i class="fas fa-coffee"></i></button>
+                    </div>
+                </div>
+                
+                <div class="task-list" id="sortable-tasks">
+                    {% for task in today_tasks %}
+                    <div class="task-item" data-id="{{ task.id }}" data-category="{{ task.category }}" data-priority="{{ task.priority }}">
+                        <div class="task-drag-handle"><i class="fas fa-grip-lines"></i></div>
+                        <div class="task-time">{{ task.time }}</div>
+                        <div class="task-content">
+                            <h3>{{ task.title }}</h3>
+                            <p><i class="fas fa-map-marker-alt"></i> {{ task.location }}</p>
+                            <div class="task-category {{ task.category }}">{{ task.category }}</div>
+                        </div>
+                        <div class="task-actions">
+                            <button class="task-btn edit-task" title="Edit"><i class="fas fa-edit"></i></button>
+                            <button class="task-btn delete-task" title="Delete"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="course-selection">
+                    <a href="/tree" class="course-link">
+                        <i class="fas fa-graduation-cap"></i> Course Selection & Academic Planning
+                    </a>
+                </div>
+            </section>
+
+            <!-- Focus Tools Section -->
+            <section class="focus-tools panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-bullseye"></i> Focus Tools</h2>
+                </div>
+                
+                <div class="tools-container">
+                    <div class="focus-tool" id="pomodoro-timer">
+                        <div class="tool-header">
+                            <h3><i class="fas fa-clock"></i> Pomodoro Timer</h3>
+                        </div>
+                        <div class="timer-display">
+                            <span id="timer-minutes">25</span>:<span id="timer-seconds">00</span>
+                        </div>
+                        <div class="timer-controls">
+                            <button class="timer-btn" id="start-timer"><i class="fas fa-play"></i></button>
+                            <button class="timer-btn" id="pause-timer" disabled><i class="fas fa-pause"></i></button>
+                            <button class="timer-btn" id="reset-timer"><i class="fas fa-redo"></i></button>
+                        </div>
+                        <div class="timer-modes">
+                            <button class="mode-btn active" data-time="25">Focus</button>
+                            <button class="mode-btn" data-time="5">Short Break</button>
+                            <button class="mode-btn" data-time="15">Long Break</button>
+                        </div>
+                    </div>
+
+                    <div class="focus-tool" id="focus-mode">
+                        <div class="tool-header">
+                            <h3><i class="fas fa-eye"></i> Focus Mode</h3>
+                        </div>
+                        <p>Eliminate distractions and focus on your current task.</p>
+                        <button class="focus-btn" id="activate-focus-mode">
+                            <i class="fas fa-eye"></i> Activate Focus Mode
+                        </button>
+                        <div class="focus-options">
+                            <div class="focus-option">
+                                <input type="checkbox" id="block-notifications" checked>
+                                <label for="block-notifications">Block Notifications</label>
+                            </div>
+                            <div class="focus-option">
+                                <input type="checkbox" id="white-noise" checked>
+                                <label for="white-noise">White Noise</label>
+                            </div>
+                            <div class="focus-option">
+                                <input type="checkbox" id="breathing-reminders">
+                                <label for="breathing-reminders">Breathing Reminders</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="focus-tool" id="task-tracker">
+                        <div class="tool-header">
+                            <h3><i class="fas fa-tasks"></i> Task Tracker</h3>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-label">Today's Progress</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 40%;"></div>
+                            </div>
+                            <div class="progress-stats">2/5 Tasks Completed</div>
+                        </div>
+                        <div class="streak-container">
+                            <div class="streak-label">Current Streak</div>
+                            <div class="streak-value">
+                                <i class="fas fa-fire"></i> 4 Days
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SciEvents Section -->
+            <section class="scievents panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-calendar-alt"></i> SciEvents™</h2>
+                    <div class="panel-controls">
+                        <button class="panel-btn" id="create-event" title="Create Event"><i class="fas fa-plus"></i> Create Event</button>
+                    </div>
+                </div>
+                
+                <div class="events-list">
+                    {% for event in upcoming_events %}
+                    <div class="event-item">
+                        <div class="event-date">
+                            <div class="event-day">{{ event.date.split(',')[0] }}</div>
+                            <div class="event-time">{{ event.time }}</div>
+                        </div>
+                        <div class="event-content">
+                            <div class="event-category {{ event.category }}">{{ event.category.replace('_', ' ').title() }}</div>
+                            <h3>{{ event.title }}</h3>
+                            <p><i class="fas fa-map-marker-alt"></i> {{ event.location }}</p>
+                            <p class="event-host"><i class="fas fa-user"></i> Host: {{ event.host }}</p>
+                            <div class="event-rsvp">
+                                <span><i class="fas fa-users"></i> {{ event.rsvp_count }} RSVPs</span>
+                                <button class="rsvp-btn" data-event-id="{{ event.id }}">RSVP</button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Counselor Meeting Reminder -->
+            <section class="counselor-reminder panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-user-tie"></i> Counselor Meeting</h2>
+                </div>
+                
+                <div class="counselor-reminder-content">
+                    <p>It's been 6 days since your last counselor meeting. Weekly check-ins help you stay on track with your academic goals.</p>
+                    
+                    <div class="meeting-topics">
+                        <h3>Topics to review:</h3>
+                        <ul>
+                            <li><i class="fas fa-check-circle"></i> Grade review for this week</li>
+                            <li><i class="fas fa-check-circle"></i> Extracurricular activities update</li>
+                            <li><i class="fas fa-check-circle"></i> College application progress</li>
+                            <li><i class="fas fa-check-circle"></i> Academic plan adjustments</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="schedule-actions">
+                        <button class="schedule-btn primary">
+                            <i class="fas fa-calendar-plus"></i> Schedule Meeting
+                        </button>
+                        <button class="schedule-btn secondary">
+                            <i class="fas fa-calendar-day"></i> See Available Times
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Modal for Adding/Editing Tasks -->
+    <div class="modal" id="task-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Add New Task</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="task-form">
+                    <input type="hidden" id="task-id">
+                    <div class="form-group">
+                        <label for="task-title">Title</label>
+                        <input type="text" id="task-title" required>
+                    </div>
+                    <div class="form-group time-group">
+                        <div>
+                            <label for="task-start-time">Start Time</label>
+                            <input type="time" id="task-start-time" required>
+                        </div>
+                        <div>
+                            <label for="task-end-time">End Time</label>
+                            <input type="time" id="task-end-time" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-location">Location</label>
+                        <input type="text" id="task-location">
+                    </div>
+                    <div class="form-group">
+                        <label for="task-category">Category</label>
+                        <select id="task-category">
+                            <option value="class">Class</option>
+                            <option value="lab">Lab</option>
+                            <option value="study">Study</option>
+                            <option value="break">Break</option>
+                            <option value="extracurricular">Extracurricular</option>
+                            <option value="meeting">Meeting</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-priority">Priority</label>
+                        <select id="task-priority">
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn">Cancel</button>
+                        <button type="submit" class="submit-btn">Save Task</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Creating Events -->
+    <div class="modal" id="event-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New SciEvent™</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="event-form">
+                    <div class="form-group">
+                        <label for="event-title">Event Title</label>
+                        <input type="text" id="event-title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="event-category">Event Type</label>
+                        <select id="event-category">
+                            <option value="study_group">Study Group</option>
+                            <option value="study_session">Study Session</option>
+                            <option value="tutoring">Tutoring Session</option>
+                            <option value="scigame">SciGame</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="event-date">Date</label>
+                        <input type="date" id="event-date" required>
+                    </div>
+                    <div class="form-group time-group">
+                        <div>
+                            <label for="event-start-time">Start Time</label>
+                            <input type="time" id="event-start-time" required>
+                        </div>
+                        <div>
+                            <label for="event-end-time">End Time</label>
+                            <input type="time" id="event-end-time" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="event-location">Location</label>
+                        <input type="text" id="event-location" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="event-description">Description</label>
+                        <textarea id="event-description" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="event-capacity">Capacity (Max. Participants)</label>
+                        <input type="number" id="event-capacity" min="1" value="10">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn">Cancel</button>
+                        <button type="submit" class="submit-btn">Create Event</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Focus Mode Overlay -->
+    <div id="focus-mode-overlay" class="hidden">
+        <div class="focus-content">
+            <h2>FOCUS MODE ACTIVE</h2>
+            <div class="current-task">
+                <h3>Current Task</h3>
+                <p id="focus-task-name">Study Session - Chemistry</p>
+                <p id="focus-task-time">02:30 PM - 03:30 PM</p>
+            </div>
+            <div class="breathing-guide">
+                <div class="breathing-circle"></div>
+                <p>Breathe in... breathe out...</p>
+            </div>
+            <div class="focus-message">Stay focused! You're doing great.</div>
+            <button id="exit-focus-mode">Exit Focus Mode</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2023 SciWeb 3.0. All rights reserved.</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/schedule.js') }}"></script>
+</body>
+</html> 

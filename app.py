@@ -14,6 +14,106 @@ def tree():
 def counselor():
     return render_template('counselor.html')
 
+@app.route('/schedule')
+def schedule():
+    # In a real application, this would pull data from a database
+    # Mock data for schedule demonstration
+    today_tasks = [
+        {
+            'id': 1,
+            'time': '08:00 AM - 09:30 AM',
+            'title': 'AP Calculus',
+            'category': 'class',
+            'location': 'Room 203',
+            'priority': 'high'
+        },
+        {
+            'id': 2,
+            'time': '09:45 AM - 11:15 AM',
+            'title': 'Physics Lab',
+            'category': 'lab',
+            'location': 'Science Building, Lab 4',
+            'priority': 'high'
+        },
+        {
+            'id': 3,
+            'time': '11:30 AM - 12:30 PM',
+            'title': 'Lunch Break',
+            'category': 'break',
+            'location': 'Cafeteria',
+            'priority': 'medium'
+        },
+        {
+            'id': 4,
+            'time': '12:45 PM - 02:15 PM',
+            'title': 'English Literature',
+            'category': 'class',
+            'location': 'Room 105',
+            'priority': 'medium'
+        },
+        {
+            'id': 5,
+            'time': '02:30 PM - 03:30 PM',
+            'title': 'Study Session - Chemistry',
+            'category': 'study',
+            'location': 'Library',
+            'priority': 'high'
+        },
+        {
+            'id': 6,
+            'time': '04:00 PM - 05:30 PM',
+            'title': 'Robotics Club',
+            'category': 'extracurricular',
+            'location': 'Tech Lab',
+            'priority': 'medium'
+        }
+    ]
+    
+    upcoming_events = [
+        {
+            'id': 101,
+            'date': 'April 18, 2025',
+            'time': '03:30 PM - 05:00 PM',
+            'title': 'Biology Study Group',
+            'category': 'study_group',
+            'location': 'Science Building, Room 302',
+            'rsvp_count': 12,
+            'host': 'Jane Smith'
+        },
+        {
+            'id': 102,
+            'date': 'April 19, 2025',
+            'time': '01:00 PM - 02:30 PM',
+            'title': 'Math Competition Prep',
+            'category': 'study_session',
+            'location': 'Math Department, Room 201',
+            'rsvp_count': 8,
+            'host': 'Prof. Johnson'
+        },
+        {
+            'id': 103,
+            'date': 'April 20, 2025',
+            'time': '11:00 AM - 12:30 PM',
+            'title': 'SciGames: History Trivia Challenge',
+            'category': 'scigame',
+            'location': 'Virtual Meeting Room',
+            'rsvp_count': 24,
+            'host': 'History Department'
+        },
+        {
+            'id': 104,
+            'date': 'April 22, 2025',
+            'time': '04:00 PM - 05:00 PM',
+            'title': 'Chemistry Tutoring Session',
+            'category': 'tutoring',
+            'location': 'Chemistry Lab',
+            'rsvp_count': 5,
+            'host': 'David Wilson (TA)'
+        }
+    ]
+    
+    return render_template('schedule.html', today_tasks=today_tasks, upcoming_events=upcoming_events)
+
 @app.route('/envision/<motivator_id>')
 def envision(motivator_id):
     # In a real application, you would fetch motivator data from a database
