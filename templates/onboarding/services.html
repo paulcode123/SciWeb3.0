@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SciWeb 3.0 - Choose Your Services</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/onboarding.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="logo">
+            <div class="logo-text">SciWeb</div>
+        </div>
+        <div class="onboarding-progress">
+            <div class="progress-text">Step 2 of 7</div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 28.56%"></div>
+            </div>
+        </div>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
+    </nav>
+
+    <!-- Onboarding Content -->
+    <div class="onboarding-container">
+        <div class="onboarding-card">
+            <div class="onboarding-header">
+                <h1>Choose Your SciWeb Experience</h1>
+                <p>Select the features that will help you achieve your academic goals</p>
+            </div>
+            
+            <form id="services-form" method="post" action="/onboarding/services" class="onboarding-form">
+                <div class="services-selection">
+                    <p class="selection-intro">SciWeb offers a suite of powerful tools to enhance your academic journey. Choose the features you'd like to use:</p>
+                    
+                    <div class="service-options">
+                        <div class="service-option">
+                            <div class="service-checkbox">
+                                <input type="checkbox" id="tree" name="services" value="tree" checked>
+                                <label for="tree" class="custom-checkbox">
+                                    <i class="fas fa-check"></i>
+                                </label>
+                            </div>
+                            <div class="service-info">
+                                <div class="service-header">
+                                    <h3>My Web - Organizational Tree</h3>
+                                    <div class="service-icon">
+                                        <i class="fas fa-sitemap"></i>
+                                    </div>
+                                </div>
+                                <p class="service-description">Visualize and organize your academic priorities, tasks, projects, and goals in an intuitive hierarchical structure. Track progress and deadlines for each item.</p>
+                                <div class="service-features">
+                                    <span class="feature-tag">Task Management</span>
+                                    <span class="feature-tag">Priority Setting</span>
+                                    <span class="feature-tag">Visual Organization</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="service-option">
+                            <div class="service-checkbox">
+                                <input type="checkbox" id="study" name="services" value="study" checked>
+                                <label for="study" class="custom-checkbox">
+                                    <i class="fas fa-check"></i>
+                                </label>
+                            </div>
+                            <div class="service-info">
+                                <div class="service-header">
+                                    <h3>Study System</h3>
+                                    <div class="service-icon">
+                                        <i class="fas fa-brain"></i>
+                                    </div>
+                                </div>
+                                <p class="service-description">Our AI-powered learning system builds personalized concept maps, identifies knowledge gaps, and creates tailored study plans to maximize your learning and retention.</p>
+                                <div class="service-features">
+                                    <span class="feature-tag">Concept Maps</span>
+                                    <span class="feature-tag">AI Tutor</span>
+                                    <span class="feature-tag">Practice Problems</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="service-option">
+                            <div class="service-checkbox">
+                                <input type="checkbox" id="social" name="services" value="social" checked>
+                                <label for="social" class="custom-checkbox">
+                                    <i class="fas fa-check"></i>
+                                </label>
+                            </div>
+                            <div class="service-info">
+                                <div class="service-header">
+                                    <h3>Social Platform</h3>
+                                    <div class="service-icon">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                </div>
+                                <p class="service-description">Connect with peers in your classes, form study groups, share resources, and collaborate on projects. Schedule study sessions and access shared notes and materials.</p>
+                                <div class="service-features">
+                                    <span class="feature-tag">Study Groups</span>
+                                    <span class="feature-tag">Resource Sharing</span>
+                                    <span class="feature-tag">Event Planning</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <a href="/onboarding/usertype" class="btn btn-secondary">Back</a>
+                    <button type="submit" id="continue-btn" class="btn btn-primary">Continue</button>
+                </div>
+            </form>
+            
+            <div class="onboarding-helper">
+                <div class="helper-avatar">
+                    <img src="{{ url_for('static', filename='images/assistant-avatar.png') }}" alt="Assistant Avatar">
+                </div>
+                <div class="helper-message">
+                    <p>We recommend starting with all features enabled to get the full SciWeb experience.</p>
+                    <p>You can always adjust your selections later in your profile settings.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="onboarding-sidebar">
+            <div class="sidebar-content">
+                <h2>How SciWeb Works</h2>
+                <div class="services-diagram">
+                    <div class="diagram-circle">
+                        <div class="diagram-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <div class="circle-label">Learn</div>
+                    </div>
+                    <div class="diagram-connector"></div>
+                    <div class="diagram-circle">
+                        <div class="diagram-icon">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <div class="circle-label">Organize</div>
+                    </div>
+                    <div class="diagram-connector"></div>
+                    <div class="diagram-circle">
+                        <div class="diagram-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="circle-label">Connect</div>
+                    </div>
+                </div>
+                
+                <div class="integration-info">
+                    <h3>Seamless Integration</h3>
+                    <p>All SciWeb services work together to create a comprehensive academic ecosystem. Your study materials connect to your schedule, your tasks link to your concept maps, and your collaborative projects integrate with your personal goals.</p>
+                </div>
+                
+                <div class="testimonial">
+                    <div class="quote-mark">"</div>
+                    <p>The way SciWeb combines organization, learning, and collaboration completely transformed how I approach my education.</p>
+                    <div class="testimonial-author">
+                        <img src="{{ url_for('static', filename='images/testimonial-avatar2.png') }}" alt="Student">
+                        <div>
+                            <h4>Maya Johnson</h4>
+                            <p>College Sophomore, Pre-Med</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Animated Background -->
+    <div class="animated-bg"></div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/onboarding.js') }}"></script>
+</body>
+</html> 

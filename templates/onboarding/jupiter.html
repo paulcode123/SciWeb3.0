@@ -1,0 +1,81 @@
+{% extends 'onboarding/base.html' %}
+
+{% block title %}Connect Jupiter Account - SciWeb{% endblock %}
+
+{% block header_title %}Connect Your Jupiter Account{% endblock %}
+{% block header_subtitle %}Link your Jupiter account to automatically import your classes and assignments{% endblock %}
+
+{% block onboarding_content %}
+<div class="onboarding-step">
+    <div class="jupiter-connection">
+        <form id="jupiter-form" method="post" class="onboarding-form">
+            <div class="form-group">
+                <label for="jupiter-username">Jupiter Username</label>
+                <input type="text" id="jupiter-username" name="jupiter_username" placeholder="Your Jupiter username">
+            </div>
+            
+            <div class="form-group password-input">
+                <label for="jupiter-password">Jupiter Password</label>
+                <div class="password-field">
+                    <input type="password" id="jupiter-password" name="jupiter_password" placeholder="Your Jupiter password">
+                    <button type="button" class="toggle-password">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <p class="privacy-note">
+                <i class="fas fa-lock"></i> Your login credentials are encrypted and never stored on our servers
+            </p>
+            
+            <div class="form-actions">
+                <button type="button" class="skip-btn">Skip for now</button>
+                <button type="submit" class="continue-btn">Connect <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Onboarding Progress -->
+    <div class="onboarding-progress">
+        <div class="progress-step completed">1</div>
+        <div class="progress-step completed">2</div>
+        <div class="progress-step active">3</div>
+        <div class="progress-step">4</div>
+        <div class="progress-step">5</div>
+        <div class="progress-step">6</div>
+        <div class="progress-step">7</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block helper_message %}
+Connecting your Jupiter account will allow us to automatically import your classes, assignments, and grades. Your login information is securely encrypted and not stored.
+{% endblock %}
+
+{% block sidebar_title %}Seamless Integration{% endblock %}
+
+{% block sidebar_content %}
+<div class="integration-info">
+    <h3>Why Connect Jupiter?</h3>
+    <p>By connecting your Jupiter account, SciWeb can automatically:
+        <ul style="margin-top: 10px; margin-left: 20px;">
+            <li>Import your classes and schedule</li>
+            <li>Track your assignments and due dates</li>
+            <li>Monitor your grades and performance</li>
+            <li>Provide personalized academic insights</li>
+        </ul>
+    </p>
+</div>
+
+<div class="testimonial">
+    <div class="quote-mark">"</div>
+    <p>Connecting my Jupiter account saved me hours of manual entry and keeps all my academic information in sync automatically.</p>
+    <div class="testimonial-author">
+        <img src="{{ url_for('static', filename='images/testimonial-avatar2.png') }}" alt="Student">
+        <div>
+            <h4>Lucas Chen</h4>
+            <p>High School Senior</p>
+        </div>
+    </div>
+</div>
+{% endblock %} 

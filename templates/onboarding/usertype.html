@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SciWeb 3.0 - Tell Us About Yourself</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/onboarding.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="logo">
+            <div class="logo-text">SciWeb</div>
+        </div>
+        <div class="onboarding-progress">
+            <div class="progress-text">Step 1 of 7</div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 14.28%"></div>
+            </div>
+        </div>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
+    </nav>
+
+    <!-- Onboarding Content -->
+    <div class="onboarding-container">
+        <div class="onboarding-card">
+            <div class="onboarding-header">
+                <h1>Tell Us About Yourself</h1>
+                <p>Help us tailor SciWeb to your academic journey</p>
+            </div>
+            
+            <form id="usertype-form" method="post" action="/onboarding/usertype" class="onboarding-form">
+                <div class="user-type-selection">
+                    <h2>I am a...</h2>
+                    
+                    <div class="type-options">
+                        <div class="type-option" data-value="student-k12">
+                            <div class="option-icon">
+                                <i class="fas fa-school"></i>
+                            </div>
+                            <div class="option-content">
+                                <h3>Middle/High School Student</h3>
+                                <p>6th-12th grade students focused on college prep and academic excellence</p>
+                            </div>
+                            <div class="option-check">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="type-option" data-value="student-college">
+                            <div class="option-icon">
+                                <i class="fas fa-university"></i>
+                            </div>
+                            <div class="option-content">
+                                <h3>College/Graduate Student</h3>
+                                <p>Undergraduate, graduate, or professional degree students</p>
+                            </div>
+                            <div class="option-check">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="type-option" data-value="professional">
+                            <div class="option-icon">
+                                <i class="fas fa-briefcase"></i>
+                            </div>
+                            <div class="option-content">
+                                <h3>Career Professional</h3>
+                                <p>Working professionals focusing on continued learning and skill development</p>
+                            </div>
+                            <div class="option-check">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" id="selected-type" name="user_type" required>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" id="continue-btn" class="btn btn-primary" disabled>Continue</button>
+                </div>
+            </form>
+            
+            <div class="onboarding-helper">
+                <div class="helper-avatar">
+                    <img src="{{ url_for('static', filename='images/assistant-avatar.png') }}" alt="Assistant Avatar">
+                </div>
+                <div class="helper-message">
+                    <p>Your selection helps us customize SciWeb's features to your specific academic needs and goals.</p>
+                    <p>This information will be used to create a personalized experience throughout the platform.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="onboarding-sidebar">
+            <div class="sidebar-content">
+                <h2>Why SciWeb Works</h2>
+                <div class="sidebar-features">
+                    <div class="sidebar-feature">
+                        <i class="fas fa-brain"></i>
+                        <div>
+                            <h3>Scientifically Backed</h3>
+                            <p>Our approach is based on proven cognitive science and learning methodologies</p>
+                        </div>
+                    </div>
+                    <div class="sidebar-feature">
+                        <i class="fas fa-robot"></i>
+                        <div>
+                            <h3>AI-Powered Assistance</h3>
+                            <p>Personalized guidance that adapts to your unique learning style and goals</p>
+                        </div>
+                    </div>
+                    <div class="sidebar-feature">
+                        <i class="fas fa-project-diagram"></i>
+                        <div>
+                            <h3>Structured Organization</h3>
+                            <p>Visualize your academic journey with our intuitive knowledge hierarchy</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="testimonial">
+                    <div class="quote-mark">"</div>
+                    <p>SciWeb transformed my study habits and helped me achieve academic success beyond what I thought possible.</p>
+                    <div class="testimonial-author">
+                        <img src="{{ url_for('static', filename='images/testimonial-avatar.png') }}" alt="Student">
+                        <div>
+                            <h4>Alex Chen</h4>
+                            <p>High School Senior, MIT-bound</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Animated Background -->
+    <div class="animated-bg"></div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/onboarding.js') }}"></script>
+</body>
+</html> 

@@ -345,6 +345,75 @@ document.addEventListener('DOMContentLoaded', function() {
       controls.appendChild(scheduleBtn);
     }
     
+    // Open button (only for class nodes)
+    if (type === 'class') {
+      const openBtn = document.createElement('div');
+      openBtn.className = 'node-control';
+      openBtn.innerHTML = '➡️';
+      openBtn.title = 'Open Class Page';
+      openBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        // Encode the title for the URL
+        const encodedClassName = encodeURIComponent(title);
+        window.location.href = `/class/${encodedClassName}`;
+      });
+      controls.appendChild(openBtn);
+      
+      // Also make the entire node clickable to open the class page
+      node.style.cursor = 'pointer';
+      node.addEventListener('dblclick', function(e) {
+        if (!isDragging && !isConnecting) {
+          // Encode the title for the URL
+          const encodedClassName = encodeURIComponent(title);
+          window.location.href = `/class/${encodedClassName}`;
+        }
+      });
+    }
+
+    // Open button (only for motivator nodes)
+    if (type === 'motivator') {
+      const openBtn = document.createElement('div');
+      openBtn.className = 'node-control';
+      openBtn.innerHTML = '🌟';
+      openBtn.title = 'Open Envision Page';
+      openBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        // Use node ID as motivator ID for the URL
+        window.location.href = `/envision/${node.dataset.id}`;
+      });
+      controls.appendChild(openBtn);
+      
+      // Also make the entire node clickable to open the envision page
+      node.style.cursor = 'pointer';
+      node.addEventListener('dblclick', function(e) {
+        if (!isDragging && !isConnecting) {
+          window.location.href = `/envision/${node.dataset.id}`;
+        }
+      });
+    }
+    
+    // Open button (only for project nodes)
+    if (type === 'project') {
+      const openBtn = document.createElement('div');
+      openBtn.className = 'node-control';
+      openBtn.innerHTML = '📊';
+      openBtn.title = 'Open Collaboration Page';
+      openBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        // Use node ID as project ID for the URL
+        window.location.href = `/collab/${node.dataset.id}`;
+      });
+      controls.appendChild(openBtn);
+      
+      // Also make the entire node clickable to open the collab page
+      node.style.cursor = 'pointer';
+      node.addEventListener('dblclick', function(e) {
+        if (!isDragging && !isConnecting) {
+          window.location.href = `/collab/${node.dataset.id}`;
+        }
+      });
+    }
+    
     node.appendChild(controls);
     
     // Add node to the DOM
@@ -614,7 +683,10 @@ document.addEventListener('DOMContentLoaded', function() {
   
   document.querySelector('.btn-class').addEventListener('click', function() {
     const center = getViewCenter();
-    createNode('class', 'Class', center.x, center.y);
+    const className = prompt('Enter class name (e.g., "AP Biology", "Math 101"):');
+    if (className) {
+      createNode('class', className, center.x, center.y);
+    }
   });
   
   document.querySelector('.btn-assignment').addEventListener('click', function() {

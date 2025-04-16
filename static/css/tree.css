@@ -107,6 +107,37 @@
 .node-motivator {
   background: var(--node-motivator);
   animation: pulse 3s infinite alternate;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.node-motivator::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 20px 20px 0;
+  border-color: transparent rgba(255, 255, 255, 0.3) transparent transparent;
+  transition: all 0.3s ease;
+}
+
+.node-motivator:hover::after {
+  border-width: 0 30px 30px 0;
+  border-color: transparent rgba(255, 255, 255, 0.5) transparent transparent;
+}
+
+.node-motivator:hover {
+  transform: scale(1.05);
+  box-shadow: 0 15px 30px rgba(255, 26, 117, 0.3);
+  z-index: 10;
+}
+
+.dark-mode .node-motivator:hover {
+  box-shadow: 0 15px 30px rgba(255, 26, 117, 0.4);
 }
 
 .node-task {
@@ -120,6 +151,26 @@
 
 .node-class {
   background: var(--node-class);
+  position: relative;
+  overflow: hidden;
+}
+
+.node-class::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  background-color: rgba(255, 255, 255, 0.2);
+  clip-path: polygon(100% 0, 0 100%, 100% 100%);
+  transition: all 0.3s ease;
+}
+
+.node-class:hover::after {
+  width: 25px;
+  height: 25px;
+  background-color: rgba(255, 255, 255, 0.4);
 }
 
 .node-assignment {

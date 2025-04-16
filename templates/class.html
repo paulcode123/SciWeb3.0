@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SciWeb 3.0 - Class Page</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/class.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="logo">
+            <div class="logo-text">SciWeb</div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/tree">Tree</a></li>
+            <li><a href="#">Schedule</a></li>
+            <li><a href="#">Login</a></li>
+        </ul>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
+    </nav>
+
+    <!-- Class Header -->
+    <section class="class-header">
+        <div class="class-info">
+            <h1 class="class-title">{{ class_name }}</h1>
+            <p class="class-subtitle">{{ class_description }}</p>
+        </div>
+        <div class="class-actions">
+            <button class="btn btn-primary"><i class="fas fa-edit"></i> Edit</button>
+            <button class="btn btn-secondary"><i class="fas fa-share"></i> Share</button>
+        </div>
+    </section>
+
+    <!-- Class Dashboard -->
+    <main class="class-dashboard">
+        <!-- Left Column -->
+        <div class="dashboard-column left-column">
+            <!-- Users in Class Section -->
+            <section class="dashboard-card users-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-users"></i> Class Members</h2>
+                </div>
+                <div class="card-content">
+                    <div class="online-users">
+                        <h3>Online Now (3)</h3>
+                        <ul class="user-list">
+                            <li class="user online">
+                                <div class="user-avatar">JS</div>
+                                <span class="user-name">Jane Smith</span>
+                                <span class="user-status"></span>
+                            </li>
+                            <li class="user online">
+                                <div class="user-avatar">JD</div>
+                                <span class="user-name">John Doe</span>
+                                <span class="user-status"></span>
+                            </li>
+                            <li class="user online">
+                                <div class="user-avatar">AW</div>
+                                <span class="user-name">Alice Wang</span>
+                                <span class="user-status"></span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="all-users">
+                        <h3>All Members (12)</h3>
+                        <ul class="user-list">
+                            <li class="user">
+                                <div class="user-avatar">JS</div>
+                                <span class="user-name">Jane Smith</span>
+                            </li>
+                            <li class="user">
+                                <div class="user-avatar">JD</div>
+                                <span class="user-name">John Doe</span>
+                            </li>
+                            <!-- More users would be listed here -->
+                            <li class="user">
+                                <div class="user-avatar">AW</div>
+                                <span class="user-name">Alice Wang</span>
+                            </li>
+                        </ul>
+                        <button class="btn btn-text">View All Members</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Chats/Channels Section -->
+            <section class="dashboard-card chats-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-comments"></i> Chats & Channels</h2>
+                    <button class="btn-icon"><i class="fas fa-plus"></i></button>
+                </div>
+                <div class="card-content">
+                    <div class="channels-list-container">
+                        <ul class="channel-list">
+                            <li class="channel active" data-channel="general">
+                                <i class="fas fa-hashtag"></i>
+                                <span>general</span>
+                                <span class="unread-count">3</span>
+                            </li>
+                            <li class="channel" data-channel="homework-help">
+                                <i class="fas fa-hashtag"></i>
+                                <span>homework-help</span>
+                            </li>
+                            <li class="channel" data-channel="lecture-notes">
+                                <i class="fas fa-hashtag"></i>
+                                <span>lecture-notes</span>
+                            </li>
+                            <li class="channel" data-channel="study-group">
+                                <i class="fas fa-hashtag"></i>
+                                <span>study-group</span>
+                            </li>
+                        </ul>
+                        <button class="btn btn-text">Create New Channel</button>
+                    </div>
+                    
+                    <!-- Chat Display Area -->
+                    <div class="chat-display">
+                        <!-- Channel Header -->
+                        <div class="chat-header">
+                            <h3><i class="fas fa-hashtag"></i> <span class="current-channel">general</span></h3>
+                            <div class="chat-actions">
+                                <button class="btn-icon"><i class="fas fa-users"></i></button>
+                                <button class="btn-icon"><i class="fas fa-cog"></i></button>
+                            </div>
+                        </div>
+                        
+                        <!-- Messages Area -->
+                        <div class="messages-container">
+                            <!-- General Channel Messages -->
+                            <div class="channel-messages" data-channel="general">
+                                <div class="message-group">
+                                    <div class="message-avatar">JS</div>
+                                    <div class="message-content">
+                                        <div class="message-header">
+                                            <span class="message-author">Jane Smith</span>
+                                            <span class="message-time">10:45 AM</span>
+                                        </div>
+                                        <div class="message-text">
+                                            Hey everyone! Don't forget we have a midterm review session next week.
+                                        </div>
+                                        <div class="message-reactions">
+                                            <span class="reaction"><i class="fas fa-thumbs-up"></i> 5</span>
+                                            <span class="reaction"><i class="fas fa-heart"></i> 2</span>
+                                            <button class="btn-text btn-small">Add Reaction</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="message-group">
+                                    <div class="message-avatar">JD</div>
+                                    <div class="message-content">
+                                        <div class="message-header">
+                                            <span class="message-author">John Doe</span>
+                                            <span class="message-time">10:52 AM</span>
+                                        </div>
+                                        <div class="message-text">
+                                            Thanks for the reminder! Will the professor be posting study guides beforehand?
+                                        </div>
+                                        <div class="message-reactions">
+                                            <span class="reaction"><i class="fas fa-thumbs-up"></i> 2</span>
+                                            <button class="btn-text btn-small">Add Reaction</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="message-group">
+                                    <div class="message-avatar">AW</div>
+                                    <div class="message-content">
+                                        <div class="message-header">
+                                            <span class="message-author">Alice Wang</span>
+                                            <span class="message-time">11:03 AM</span>
+                                        </div>
+                                        <div class="message-text">
+                                            I created a summary of chapters 5-7 if anyone wants to use it for studying.
+                                        </div>
+                                        <div class="message-files">
+                                            <a href="#" class="message-file"><i class="fas fa-file-pdf"></i> Chapter_5-7_Summary.pdf</a>
+                                        </div>
+                                        <div class="message-reactions">
+                                            <span class="reaction"><i class="fas fa-thumbs-up"></i> 8</span>
+                                            <span class="reaction"><i class="fas fa-star"></i> 6</span>
+                                            <span class="reaction"><i class="fas fa-heart"></i> 4</span>
+                                            <button class="btn-text btn-small">Add Reaction</button>
+                                        </div>
+                                        
+                                        <!-- Replies -->
+                                        <div class="message-replies">
+                                            <div class="reply">
+                                                <div class="reply-avatar">JS</div>
+                                                <div class="reply-content">
+                                                    <div class="reply-header">
+                                                        <span class="reply-author">Jane Smith</span>
+                                                        <span class="reply-time">11:10 AM</span>
+                                                    </div>
+                                                    <div class="reply-text">
+                                                        This is amazing, thank you Alice!
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="reply">
+                                                <div class="reply-avatar">JD</div>
+                                                <div class="reply-content">
+                                                    <div class="reply-header">
+                                                        <span class="reply-author">John Doe</span>
+                                                        <span class="reply-time">11:15 AM</span>
+                                                    </div>
+                                                    <div class="reply-text">
+                                                        You're a lifesaver!
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <button class="btn-text show-reply-form">Reply to this thread</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Homework Help Channel Messages -->
+                            <div class="channel-messages" data-channel="homework-help" style="display: none;">
+                                <div class="message-group">
+                                    <div class="message-avatar">JD</div>
+                                    <div class="message-content">
+                                        <div class="message-header">
+                                            <span class="message-author">John Doe</span>
+                                            <span class="message-time">Yesterday, 8:30 PM</span>
+                                        </div>
+                                        <div class="message-text">
+                                            I'm stuck on question 3 of the problem set. Anyone have tips on how to approach it?
+                                        </div>
+                                        <div class="message-reactions">
+                                            <span class="reaction"><i class="fas fa-question"></i> 2</span>
+                                            <button class="btn-text btn-small">Add Reaction</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="message-group">
+                                    <div class="message-avatar">AW</div>
+                                    <div class="message-content">
+                                        <div class="message-header">
+                                            <span class="message-author">Alice Wang</span>
+                                            <span class="message-time">Yesterday, 9:15 PM</span>
+                                        </div>
+                                        <div class="message-text">
+                                            Try using the formula we learned in lecture 5. I think you need to apply the second derivative.
+                                        </div>
+                                        <div class="message-reactions">
+                                            <span class="reaction"><i class="fas fa-thumbs-up"></i> 3</span>
+                                            <span class="reaction"><i class="fas fa-lightbulb"></i> 2</span>
+                                            <button class="btn-text btn-small">Add Reaction</button>
+                                        </div>
+                                        
+                                        <!-- Replies -->
+                                        <div class="message-replies">
+                                            <div class="reply">
+                                                <div class="reply-avatar">JD</div>
+                                                <div class="reply-content">
+                                                    <div class="reply-header">
+                                                        <span class="reply-author">John Doe</span>
+                                                        <span class="reply-time">Yesterday, 9:32 PM</span>
+                                                    </div>
+                                                    <div class="reply-text">
+                                                        Got it! That worked. Thanks Alice!
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <button class="btn-text show-reply-form">Reply to this thread</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Lecture Notes Channel Messages -->
+                            <div class="channel-messages" data-channel="lecture-notes" style="display: none;">
+                                <div class="message-group">
+                                    <div class="message-avatar">PJ</div>
+                                    <div class="message-content">
+                                        <div class="message-header">
+                                            <span class="message-author">Prof. Johnson</span>
+                                            <span class="message-time">Monday, 2:15 PM</span>
+                                        </div>
+                                        <div class="message-text">
+                                            Here are the slides from today's lecture. We covered sections 5.1-5.3 in the textbook.
+                                        </div>
+                                        <div class="message-files">
+                                            <a href="#" class="message-file"><i class="fas fa-file-powerpoint"></i> Lecture_15_Slides.pptx</a>
+                                            <a href="#" class="message-file"><i class="fas fa-file-pdf"></i> Chapter5_Notes.pdf</a>
+                                        </div>
+                                        <div class="message-reactions">
+                                            <span class="reaction"><i class="fas fa-thumbs-up"></i> 12</span>
+                                            <span class="reaction"><i class="fas fa-heart"></i> 5</span>
+                                            <button class="btn-text btn-small">Add Reaction</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Study Group Channel Messages -->
+                            <div class="channel-messages" data-channel="study-group" style="display: none;">
+                                <div class="message-group">
+                                    <div class="message-avatar">JS</div>
+                                    <div class="message-content">
+                                        <div class="message-header">
+                                            <span class="message-author">Jane Smith</span>
+                                            <span class="message-time">Tuesday, 3:45 PM</span>
+                                        </div>
+                                        <div class="message-text">
+                                            Who's joining the study session at the library this Friday? I've reserved a group room on the 2nd floor.
+                                        </div>
+                                        <div class="message-reactions">
+                                            <span class="reaction"><i class="fas fa-check"></i> 7</span>
+                                            <span class="reaction"><i class="fas fa-calendar-check"></i> 5</span>
+                                            <button class="btn-text btn-small">Add Reaction</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="message-group">
+                                    <div class="message-avatar">AW</div>
+                                    <div class="message-content">
+                                        <div class="message-header">
+                                            <span class="message-author">Alice Wang</span>
+                                            <span class="message-time">Tuesday, 4:12 PM</span>
+                                        </div>
+                                        <div class="message-text">
+                                            I'll be there! I'm bringing my notes from the last few lectures.
+                                        </div>
+                                        <div class="message-reactions">
+                                            <span class="reaction"><i class="fas fa-thumbs-up"></i> 3</span>
+                                            <button class="btn-text btn-small">Add Reaction</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="message-group">
+                                    <div class="message-avatar">JD</div>
+                                    <div class="message-content">
+                                        <div class="message-header">
+                                            <span class="message-author">John Doe</span>
+                                            <span class="message-time">Tuesday, 5:03 PM</span>
+                                        </div>
+                                        <div class="message-text">
+                                            I can make it too. Should we focus on reviewing the material or working on problem sets?
+                                        </div>
+                                        <div class="message-reactions">
+                                            <span class="reaction"><i class="fas fa-thumbs-up"></i> 2</span>
+                                            <button class="btn-text btn-small">Add Reaction</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Message Input Area -->
+                        <div class="message-input-area">
+                            <textarea placeholder="Type a message here..." rows="1" class="message-input"></textarea>
+                            <div class="message-actions">
+                                <button class="btn-icon attachment-btn" title="Attach file"><i class="fas fa-paperclip"></i></button>
+                                <button class="btn-primary send-message-btn"><i class="fas fa-paper-plane"></i><span>Send</span></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Middle Column -->
+        <div class="dashboard-column middle-column">
+            <!-- Upcoming Events/Study Sessions -->
+            <section class="dashboard-card events-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-calendar-alt"></i> Upcoming Events</h2>
+                    <button class="btn-icon"><i class="fas fa-plus"></i></button>
+                </div>
+                <div class="card-content">
+                    <div class="event">
+                        <div class="event-date">
+                            <span class="day">15</span>
+                            <span class="month">May</span>
+                        </div>
+                        <div class="event-details">
+                            <h3>Midterm Review Session</h3>
+                            <p><i class="fas fa-clock"></i> 4:00 PM - 6:00 PM</p>
+                            <p><i class="fas fa-map-marker-alt"></i> Room 301</p>
+                            <p><i class="fas fa-user"></i> Hosted by: Prof. Johnson</p>
+                        </div>
+                        <div class="event-actions">
+                            <button class="btn btn-small">RSVP</button>
+                        </div>
+                    </div>
+
+                    <div class="event">
+                        <div class="event-date">
+                            <span class="day">18</span>
+                            <span class="month">May</span>
+                        </div>
+                        <div class="event-details">
+                            <h3>Group Study Session</h3>
+                            <p><i class="fas fa-clock"></i> 2:00 PM - 4:00 PM</p>
+                            <p><i class="fas fa-map-marker-alt"></i> Library, Floor 2</p>
+                            <p><i class="fas fa-user"></i> Hosted by: Jane Smith</p>
+                        </div>
+                        <div class="event-actions">
+                            <button class="btn btn-small">RSVP</button>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-text">View All Events</button>
+                </div>
+            </section>
+
+            <!-- Study Guides Section -->
+            <section class="dashboard-card guides-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-book"></i> Study Guides</h2>
+                    <button class="btn-icon"><i class="fas fa-plus"></i></button>
+                </div>
+                <div class="card-content">
+                    <div class="guide-list">
+                        <div class="guide">
+                            <div class="guide-icon"><i class="fas fa-file-pdf"></i></div>
+                            <div class="guide-details">
+                                <h3>Midterm Study Guide</h3>
+                                <p>Created by Prof. Johnson · May 10, 2024</p>
+                            </div>
+                            <div class="guide-actions">
+                                <button class="btn-icon"><i class="fas fa-download"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="guide">
+                            <div class="guide-icon"><i class="fas fa-file-alt"></i></div>
+                            <div class="guide-details">
+                                <h3>Chapter 5-7 Summary</h3>
+                                <p>Created by Alice Wang · May 5, 2024</p>
+                            </div>
+                            <div class="guide-actions">
+                                <button class="btn-icon"><i class="fas fa-download"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="guide">
+                            <div class="guide-icon"><i class="fas fa-file-powerpoint"></i></div>
+                            <div class="guide-details">
+                                <h3>Key Concepts Presentation</h3>
+                                <p>Created by John Doe · April 28, 2024</p>
+                            </div>
+                            <div class="guide-actions">
+                                <button class="btn-icon"><i class="fas fa-download"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-text">View All Study Guides</button>
+                </div>
+            </section>
+        </div>
+
+        <!-- Right Column -->
+        <div class="dashboard-column right-column">
+            <!-- Upcoming Assignments Section -->
+            <section class="dashboard-card assignments-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-tasks"></i> Upcoming Assignments</h2>
+                </div>
+                <div class="card-content">
+                    <div class="assignment urgent">
+                        <div class="assignment-status urgent"></div>
+                        <div class="assignment-details">
+                            <h3>Problem Set 5</h3>
+                            <p><i class="fas fa-calendar"></i> Due: May 16, 2024</p>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 25%"></div>
+                            </div>
+                            <p class="progress-text">25% Complete</p>
+                        </div>
+                    </div>
+
+                    <div class="assignment upcoming">
+                        <div class="assignment-status upcoming"></div>
+                        <div class="assignment-details">
+                            <h3>Research Paper</h3>
+                            <p><i class="fas fa-calendar"></i> Due: May 25, 2024</p>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 50%"></div>
+                            </div>
+                            <p class="progress-text">50% Complete</p>
+                        </div>
+                    </div>
+
+                    <div class="assignment upcoming">
+                        <div class="assignment-status upcoming"></div>
+                        <div class="assignment-details">
+                            <h3>Midterm Exam</h3>
+                            <p><i class="fas fa-calendar"></i> Date: May 20, 2024</p>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 70%"></div>
+                            </div>
+                            <p class="progress-text">70% Ready</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Grade & Recent Scores Section -->
+            <section class="dashboard-card grades-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-chart-line"></i> Grades & Scores</h2>
+                </div>
+                <div class="card-content">
+                    <div class="overall-grade">
+                        <div class="grade-circle">
+                            <span class="grade-value">A-</span>
+                            <span class="grade-percentage">91%</span>
+                        </div>
+                        <p class="grade-label">Current Grade</p>
+                    </div>
+
+                    <div class="recent-scores">
+                        <h3>Recent Scores</h3>
+                        <ul class="score-list">
+                            <li class="score">
+                                <span class="score-title">Quiz 3</span>
+                                <span class="score-value">88%</span>
+                            </li>
+                            <li class="score">
+                                <span class="score-title">Problem Set 4</span>
+                                <span class="score-value">95%</span>
+                            </li>
+                            <li class="score">
+                                <span class="score-title">Lab Report 2</span>
+                                <span class="score-value">92%</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="time-distribution">
+                        <h3>Time Distribution</h3>
+                        <div class="chart-container">
+                            <canvas id="timeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Learning Resources Section -->
+    <section class="resources-section">
+        <h2 class="section-title">Learning Resources</h2>
+        
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="worksheets">Worksheets</button>
+            <button class="tab-btn" data-tab="practice">Practice Problems</button>
+            <button class="tab-btn" data-tab="tests">Practice Tests</button>
+        </div>
+        
+        <div class="tab-content">
+            <div class="tab-pane active" id="worksheets">
+                <div class="resource-grid">
+                    <div class="resource-card">
+                        <div class="resource-icon"><i class="fas fa-file-alt"></i></div>
+                        <div class="resource-details">
+                            <h3>Worksheet 1: Basic Concepts</h3>
+                            <p>10 problems · Difficulty: Easy</p>
+                        </div>
+                        <div class="resource-actions">
+                            <button class="btn btn-small">Start</button>
+                            <button class="btn-icon"><i class="fas fa-download"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div class="resource-card">
+                        <div class="resource-icon"><i class="fas fa-file-alt"></i></div>
+                        <div class="resource-details">
+                            <h3>Worksheet 2: Advanced Applications</h3>
+                            <p>8 problems · Difficulty: Medium</p>
+                        </div>
+                        <div class="resource-actions">
+                            <button class="btn btn-small">Start</button>
+                            <button class="btn-icon"><i class="fas fa-download"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div class="resource-card">
+                        <div class="resource-icon"><i class="fas fa-file-alt"></i></div>
+                        <div class="resource-details">
+                            <h3>Worksheet 3: Critical Analysis</h3>
+                            <p>5 problems · Difficulty: Hard</p>
+                        </div>
+                        <div class="resource-actions">
+                            <button class="btn btn-small">Start</button>
+                            <button class="btn-icon"><i class="fas fa-download"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-pane" id="practice">
+                <div class="resource-grid">
+                    <div class="resource-card">
+                        <div class="resource-icon"><i class="fas fa-puzzle-piece"></i></div>
+                        <div class="resource-details">
+                            <h3>Problem Set A: Fundamentals</h3>
+                            <p>15 problems · Difficulty: Mixed</p>
+                        </div>
+                        <div class="resource-actions">
+                            <button class="btn btn-small">Start</button>
+                            <button class="btn-icon"><i class="fas fa-download"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div class="resource-card">
+                        <div class="resource-icon"><i class="fas fa-puzzle-piece"></i></div>
+                        <div class="resource-details">
+                            <h3>Problem Set B: Chapter Review</h3>
+                            <p>12 problems · Difficulty: Mixed</p>
+                        </div>
+                        <div class="resource-actions">
+                            <button class="btn btn-small">Start</button>
+                            <button class="btn-icon"><i class="fas fa-download"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-pane" id="tests">
+                <div class="resource-grid">
+                    <div class="resource-card">
+                        <div class="resource-icon"><i class="fas fa-file-signature"></i></div>
+                        <div class="resource-details">
+                            <h3>Practice Midterm</h3>
+                            <p>Time: 90 minutes · 30 questions</p>
+                        </div>
+                        <div class="resource-actions">
+                            <button class="btn btn-small">Start</button>
+                            <button class="btn-icon"><i class="fas fa-download"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div class="resource-card">
+                        <div class="resource-icon"><i class="fas fa-file-signature"></i></div>
+                        <div class="resource-details">
+                            <h3>Practice Final</h3>
+                            <p>Time: 180 minutes · 50 questions</p>
+                        </div>
+                        <div class="resource-actions">
+                            <button class="btn btn-small">Start</button>
+                            <button class="btn-icon"><i class="fas fa-download"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-info">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="footer-logo">
+                <p>Building the future of education together.</p>
+            </div>
+            <div class="footer-links">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/tree">Tree</a></li>
+                    <li><a href="#">Schedule</a></li>
+                    <li><a href="#">Login</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h3>Features</h3>
+                <ul>
+                    <li><a href="#">Study Tools</a></li>
+                    <li><a href="#">Grade Analysis</a></li>
+                    <li><a href="#">AI Counselors</a></li>
+                    <li><a href="#">Community</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h3>Connect</h3>
+                <ul>
+                    <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
+                    <li><a href="#"><i class="fab fa-github"></i> GitHub</a></li>
+                    <li><a href="#"><i class="fab fa-discord"></i> Discord</a></li>
+                    <li><a href="#"><i class="fas fa-envelope"></i> Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 SciWeb. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/class.js') }}"></script>
+</body>
+</html> 

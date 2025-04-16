@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verified - SciWeb 3.0</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .verification-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .verification-card {
+            background-color: var(--bg-light);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            margin-top: -60px;
+            animation: fadeInUp 0.8s ease;
+        }
+        
+        .dark-mode .verification-card {
+            background-color: var(--bg-dark);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .success-icon {
+            font-size: 6rem;
+            color: #4CAF50;
+            margin-bottom: 20px;
+            animation: bounceIn 0.8s ease;
+        }
+        
+        .verification-title {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--text-dark);
+        }
+        
+        .dark-mode .verification-title {
+            color: var(--text-light);
+        }
+        
+        .verification-message {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            color: var(--secondary);
+            line-height: 1.6;
+        }
+        
+        .dark-mode .verification-message {
+            color: var(--text-light);
+            opacity: 0.9;
+        }
+        
+        .redirect-text {
+            font-size: 0.9rem;
+            margin-top: 20px;
+            color: var(--secondary);
+        }
+        
+        .dark-mode .redirect-text {
+            color: var(--text-light);
+            opacity: 0.7;
+        }
+        
+        .loading-spinner {
+            margin-top: 15px;
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 26, 117, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="verification-container">
+        <div class="verification-card">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h1 class="verification-title">Email Verified!</h1>
+            <p class="verification-message">Congratulations! Your email has been successfully verified. You're now ready to continue setting up your SciWeb experience.</p>
+            <a href="/onboarding/usertype" class="btn btn-primary">Continue to Onboarding</a>
+            <p class="redirect-text">You will be automatically redirected in <span id="countdown">5</span> seconds...</p>
+            <div class="loading-spinner"></div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for dark mode preference
+            const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+            if (savedDarkMode) {
+                document.body.classList.add('dark-mode');
+            }
+            
+            // Countdown and redirect
+            let seconds = 5;
+            const countdownElement = document.getElementById('countdown');
+            
+            const interval = setInterval(function() {
+                seconds--;
+                countdownElement.textContent = seconds;
+                
+                if (seconds <= 0) {
+                    clearInterval(interval);
+                    window.location.href = '/onboarding/usertype';
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html> 

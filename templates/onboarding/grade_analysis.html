@@ -1,0 +1,234 @@
+{% extends 'onboarding/base.html' %}
+
+{% block title %}Grade Analysis Setup - SciWeb{% endblock %}
+
+{% block header_title %}Customize Your Grade Analysis{% endblock %}
+{% block header_subtitle %}Select which statistics and visualizations you want to track{% endblock %}
+
+{% block onboarding_content %}
+<div class="onboarding-step">
+    <div class="grade-analysis-setup">
+        <div class="imported-message">
+            <i class="fas fa-chart-line"></i>
+            <div class="message-content">
+                <h3>Grade Data Imported from Jupiter</h3>
+                <p>We've analyzed your grade data. Select which statistics and visualizations you want to include in your personalized Grade Analysis dashboard.</p>
+            </div>
+        </div>
+        
+        <form id="grade-analysis-form" method="post" class="onboarding-form">
+            <div class="analytics-selection">
+                <div class="analytics-section">
+                    <h3 class="section-title">Course Analytics</h3>
+                    
+                    <div class="analytics-items">
+                        <!-- GPA Trend -->
+                        <div class="analytics-item selected" data-type="gpa-trend">
+                            <div class="analytics-preview">
+                                <img src="{{ url_for('static', filename='images/analytics/gpa-trend.png') }}" alt="GPA Trend Chart">
+                            </div>
+                            <div class="analytics-details">
+                                <div class="analytics-header">
+                                    <h4>GPA Trend</h4>
+                                    <div class="analytics-controls">
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="gpa-trend" name="analytics[]" value="gpa-trend" class="toggle-input" checked>
+                                            <label for="gpa-trend" class="toggle-label"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="analytics-description">Track how your overall GPA changes over time and across grading periods.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Subject Performance -->
+                        <div class="analytics-item selected" data-type="subject-performance">
+                            <div class="analytics-preview">
+                                <img src="{{ url_for('static', filename='images/analytics/subject-performance.png') }}" alt="Subject Performance Chart">
+                            </div>
+                            <div class="analytics-details">
+                                <div class="analytics-header">
+                                    <h4>Subject Performance</h4>
+                                    <div class="analytics-controls">
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="subject-performance" name="analytics[]" value="subject-performance" class="toggle-input" checked>
+                                            <label for="subject-performance" class="toggle-label"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="analytics-description">Compare your performance across different subject areas to identify strengths and areas for improvement.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Grade Distribution -->
+                        <div class="analytics-item selected" data-type="grade-distribution">
+                            <div class="analytics-preview">
+                                <img src="{{ url_for('static', filename='images/analytics/grade-distribution.png') }}" alt="Grade Distribution Chart">
+                            </div>
+                            <div class="analytics-details">
+                                <div class="analytics-header">
+                                    <h4>Grade Distribution</h4>
+                                    <div class="analytics-controls">
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="grade-distribution" name="analytics[]" value="grade-distribution" class="toggle-input" checked>
+                                            <label for="grade-distribution" class="toggle-label"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="analytics-description">View the distribution of your grades across all courses to understand your overall academic performance.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="analytics-section">
+                    <h3 class="section-title">Assignment Analytics</h3>
+                    
+                    <div class="analytics-items">
+                        <!-- Assignment Performance -->
+                        <div class="analytics-item selected" data-type="assignment-performance">
+                            <div class="analytics-preview">
+                                <img src="{{ url_for('static', filename='images/analytics/assignment-performance.png') }}" alt="Assignment Performance Chart">
+                            </div>
+                            <div class="analytics-details">
+                                <div class="analytics-header">
+                                    <h4>Assignment Performance</h4>
+                                    <div class="analytics-controls">
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="assignment-performance" name="analytics[]" value="assignment-performance" class="toggle-input" checked>
+                                            <label for="assignment-performance" class="toggle-label"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="analytics-description">Compare performance across different types of assignments (tests, quizzes, projects, homework) to identify patterns.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Test Score Analysis -->
+                        <div class="analytics-item selected" data-type="test-score-analysis">
+                            <div class="analytics-preview">
+                                <img src="{{ url_for('static', filename='images/analytics/test-score-analysis.png') }}" alt="Test Score Analysis Chart">
+                            </div>
+                            <div class="analytics-details">
+                                <div class="analytics-header">
+                                    <h4>Test Score Analysis</h4>
+                                    <div class="analytics-controls">
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="test-score-analysis" name="analytics[]" value="test-score-analysis" class="toggle-input" checked>
+                                            <label for="test-score-analysis" class="toggle-label"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="analytics-description">Deep dive into your test performance with detailed score breakdowns and trend analysis.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="analytics-section">
+                    <h3 class="section-title">Predictive Analytics</h3>
+                    
+                    <div class="analytics-items">
+                        <!-- Grade Prediction -->
+                        <div class="analytics-item" data-type="grade-prediction">
+                            <div class="analytics-preview">
+                                <img src="{{ url_for('static', filename='images/analytics/grade-prediction.png') }}" alt="Grade Prediction Chart">
+                            </div>
+                            <div class="analytics-details">
+                                <div class="analytics-header">
+                                    <h4>Grade Prediction</h4>
+                                    <div class="analytics-controls">
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="grade-prediction" name="analytics[]" value="grade-prediction" class="toggle-input">
+                                            <label for="grade-prediction" class="toggle-label"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="analytics-description">AI-powered predictions of your final grades based on current performance and historical patterns.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Improvement Opportunities -->
+                        <div class="analytics-item" data-type="improvement-opportunities">
+                            <div class="analytics-preview">
+                                <img src="{{ url_for('static', filename='images/analytics/improvement-opportunities.png') }}" alt="Improvement Opportunities Chart">
+                            </div>
+                            <div class="analytics-details">
+                                <div class="analytics-header">
+                                    <h4>Improvement Opportunities</h4>
+                                    <div class="analytics-controls">
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="improvement-opportunities" name="analytics[]" value="improvement-opportunities" class="toggle-input">
+                                            <label for="improvement-opportunities" class="toggle-label"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="analytics-description">Identification of specific areas where focused effort could most improve your overall performance.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="notes-section">
+                <div class="note-message">
+                    <i class="fas fa-info-circle"></i>
+                    <p>You can customize your Grade Analysis dashboard at any time from your Profile Settings.</p>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn-secondary back-btn">Back</button>
+                <button type="submit" class="btn-primary continue-btn">Continue <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Onboarding Progress -->
+    <div class="onboarding-progress">
+        <div class="progress-step completed">1</div>
+        <div class="progress-step completed">2</div>
+        <div class="progress-step completed">3</div>
+        <div class="progress-step completed">4</div>
+        <div class="progress-step active">5</div>
+        <div class="progress-step">6</div>
+        <div class="progress-step">7</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block helper_message %}
+Personalized grade analytics will help you identify trends in your academic performance and focus your study efforts where they'll have the most impact.
+{% endblock %}
+
+{% block sidebar_title %}Data-Driven Learning{% endblock %}
+
+{% block sidebar_content %}
+<div class="integration-info">
+    <h3>Why Analyze Grades?</h3>
+    <p>SciWeb's Grade Analysis tools help you:</p>
+    <ul class="feature-list">
+        <li><i class="fas fa-bullseye"></i> Identify strengths and weaknesses</li>
+        <li><i class="fas fa-chart-line"></i> Track your progress over time</li>
+        <li><i class="fas fa-lightbulb"></i> Get personalized study recommendations</li>
+        <li><i class="fas fa-graduation-cap"></i> Understand what impacts your performance</li>
+    </ul>
+</div>
+
+<div class="analytics-tips">
+    <h3>Making the Most of Your Data</h3>
+    <p>Students who regularly review their performance analytics typically see a 15-20% improvement in their grades over time. The key is using insights to guide concrete actions.</p>
+</div>
+
+<div class="testimonial">
+    <div class="quote-mark">"</div>
+    <p>The grade prediction feature helped me identify exactly which assignments I needed to focus on to boost my final GPA.</p>
+    <div class="testimonial-author">
+        <img src="{{ url_for('static', filename='images/testimonial-avatar4.png') }}" alt="Student">
+        <div>
+            <h4>David Kim</h4>
+            <p>High School Senior</p>
+        </div>
+    </div>
+</div>
+{% endblock %} 
