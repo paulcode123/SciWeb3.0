@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Envision Your Success - SciWeb 3.0</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/envision.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="logo">
+            <div class="logo-text">SciWeb</div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/tree">Tree</a></li>
+            <li><a href="#">Schedule</a></li>
+            <li><a href="#">Login</a></li>
+        </ul>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
+    </nav>
+
+    <!-- Envision Hero Section -->
+    <section class="envision-hero">
+        <div class="envision-hero-content">
+            <h1 class="envision-title">{{ title }}</h1>
+            <p class="envision-description">{{ description }}</p>
+            <div class="envision-tags">
+                {% for tag in tags %}
+                <span class="envision-tag">{{ tag }}</span>
+                {% endfor %}
+            </div>
+            <div class="envision-deadline">
+                <i class="fas fa-calendar-alt"></i> Target: {{ deadline }}
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Envision Content -->
+    <div class="envision-container">
+        <!-- Sidebar with guidance -->
+        <aside class="envision-sidebar">
+            <div class="sidebar-section">
+                <h3><i class="fas fa-compass"></i> Vision Guide</h3>
+                <p>Use this space to develop a clear, compelling vision of your success.</p>
+                <ul class="sidebar-tips">
+                    <li>Be specific about what success looks like</li>
+                    <li>Connect your goal to your core values</li>
+                    <li>Visualize the journey, not just the destination</li>
+                    <li>Identify potential obstacles and how you'll overcome them</li>
+                </ul>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3><i class="fas fa-chart-line"></i> Progress Tracker</h3>
+                <div class="progress-container">
+                    <div class="progress-bar" id="visionProgress" style="width: 25%;">25%</div>
+                </div>
+                <p class="progress-label">Vision Board Completion</p>
+                <button class="btn btn-primary update-progress">Update Progress</button>
+            </div>
+
+            <div class="sidebar-section">
+                <h3><i class="fas fa-quote-left"></i> Inspiration</h3>
+                <div class="inspiration-quote">
+                    "The future belongs to those who believe in the beauty of their dreams."
+                    <span class="quote-author">— Eleanor Roosevelt</span>
+                </div>
+                <button class="btn btn-secondary refresh-quote">New Quote</button>
+            </div>
+        </aside>
+
+        <!-- Main content area with vision board -->
+        <main class="envision-main">
+            <!-- Vision Board Section -->
+            <section class="vision-board">
+                <h2>Your Vision Board</h2>
+                <p class="section-intro">Visualize your success by adding images, videos, and key milestones that represent your goal.</p>
+                
+                <div class="vision-board-grid" id="visionBoardGrid">
+                    <!-- Default vision board items -->
+                    <div class="vision-item vision-item-add" id="addMediaItem">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Media</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Why This Matters Section -->
+            <section class="why-section">
+                <h2>Why This Matters to You</h2>
+                <p class="section-intro">Reconnect with your deeper motivation every time you work toward this goal.</p>
+                
+                <div class="reasons-container">
+                    <div class="reason-card">
+                        <h3>Personal Values</h3>
+                        <textarea class="reason-textarea" placeholder="How does this goal align with your core values?"></textarea>
+                    </div>
+                    
+                    <div class="reason-card">
+                        <h3>Impact on Others</h3>
+                        <textarea class="reason-textarea" placeholder="How will achieving this goal positively impact others?"></textarea>
+                    </div>
+                    
+                    <div class="reason-card">
+                        <h3>Growth &amp; Learning</h3>
+                        <textarea class="reason-textarea" placeholder="What will you learn or how will you grow through this journey?"></textarea>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Path to Success Section -->
+            <section class="path-section">
+                <h2>Your Path to Success</h2>
+                <p class="section-intro">Map out the key milestones that will lead you to your goal.</p>
+                
+                <div class="milestones-container">
+                    <div class="milestone">
+                        <div class="milestone-marker">1</div>
+                        <div class="milestone-content">
+                            <input type="text" class="milestone-title" placeholder="Milestone Title">
+                            <textarea class="milestone-description" placeholder="Describe this milestone and why it matters"></textarea>
+                            <div class="milestone-date">
+                                <label>Target Date:</label>
+                                <input type="date" class="milestone-date-input">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="add-milestone" id="addMilestone">
+                        <i class="fas fa-plus-circle"></i> Add Milestone
+                    </button>
+                </div>
+            </section>
+
+            <!-- Affirmations Section -->
+            <section class="affirmations-section">
+                <h2>Affirmations &amp; Reminders</h2>
+                <p class="section-intro">Create powerful statements to reinforce your commitment and belief in your ability to succeed.</p>
+                
+                <div class="affirmations-container">
+                    <div class="affirmation-card" contenteditable="true">
+                        I am fully capable of achieving this goal.
+                    </div>
+                    <div class="affirmation-card" contenteditable="true">
+                        I overcome challenges with resilience and creativity.
+                    </div>
+                    <div class="affirmation-card affirmation-card-add" id="addAffirmation">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Affirmation</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Support Network Section -->
+            <section class="support-section">
+                <h2>Your Support Network</h2>
+                <p class="section-intro">Identify people who can help you achieve this goal and how they can support you.</p>
+                
+                <div class="supporters-container">
+                    <div class="supporter-card">
+                        <div class="supporter-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="supporter-info">
+                            <input type="text" class="supporter-name" placeholder="Name">
+                            <input type="text" class="supporter-role" placeholder="Relationship/Role">
+                            <textarea class="supporter-help" placeholder="How can they help you?"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="supporter-card supporter-card-add" id="addSupporter">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Supporter</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Export Options -->
+    <section class="export-section">
+        <div class="export-container">
+            <h2>Save Your Vision</h2>
+            <p>Export your vision board to keep it with you or share with others.</p>
+            <div class="export-buttons">
+                <button class="btn btn-primary">
+                    <i class="fas fa-download"></i> Download PDF
+                </button>
+                <button class="btn btn-secondary">
+                    <i class="fas fa-share-alt"></i> Share
+                </button>
+                <button class="btn btn-secondary">
+                    <i class="fas fa-mobile-alt"></i> Mobile Wallpaper
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Motivational Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-info">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="footer-logo">
+                <p>"Visualize your highest self, and start showing up as them."</p>
+            </div>
+            <div class="footer-links">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/tree">Tree</a></li>
+                    <li><a href="#">Schedule</a></li>
+                    <li><a href="#">Login</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h3>Features</h3>
+                <ul>
+                    <li><a href="#">Study Tools</a></li>
+                    <li><a href="#">Grade Analysis</a></li>
+                    <li><a href="#">AI Counselors</a></li>
+                    <li><a href="#">Community</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h3>Connect</h3>
+                <ul>
+                    <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
+                    <li><a href="#"><i class="fab fa-github"></i> GitHub</a></li>
+                    <li><a href="#"><i class="fab fa-discord"></i> Discord</a></li>
+                    <li><a href="#"><i class="fas fa-envelope"></i> Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 SciWeb. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Modal for adding media to vision board -->
+    <div class="modal" id="mediaModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Add to Your Vision Board</h2>
+            
+            <div class="modal-tabs">
+                <button class="modal-tab active" data-tab="upload">Upload</button>
+                <button class="modal-tab" data-tab="url">URL</button>
+                <button class="modal-tab" data-tab="text">Text</button>
+            </div>
+            
+            <div class="tab-content active" id="uploadTab">
+                <form class="upload-form">
+                    <div class="file-drop-area">
+                        <span class="file-message">Drag & drop files here or click to browse</span>
+                        <input class="file-input" type="file" accept="image/*,video/*">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add to Vision Board</button>
+                </form>
+            </div>
+            
+            <div class="tab-content" id="urlTab">
+                <form class="url-form">
+                    <div class="form-group">
+                        <label>Image or Video URL</label>
+                        <input type="url" placeholder="https://example.com/image.jpg">
+                    </div>
+                    <div class="form-group">
+                        <label>Caption (optional)</label>
+                        <input type="text" placeholder="A brief description">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add to Vision Board</button>
+                </form>
+            </div>
+            
+            <div class="tab-content" id="textTab">
+                <form class="text-form">
+                    <div class="form-group">
+                        <label>Inspirational Quote or Text</label>
+                        <textarea placeholder="Enter your inspirational text here"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Background Color</label>
+                        <input type="color" value="#ff1a75">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add to Vision Board</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/envision.js') }}"></script>
+</body>
+</html> 

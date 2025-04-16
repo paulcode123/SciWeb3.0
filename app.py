@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, request
 
 app = Flask(__name__)
 
@@ -9,6 +9,179 @@ def home():
 @app.route('/tree')
 def tree():
     return render_template('tree.html')
+
+@app.route('/envision/<motivator_id>')
+def envision(motivator_id):
+    # In a real application, you would fetch motivator data from a database
+    # For now, we'll use mock data based on the motivator_id
+    
+    # This is a simple dictionary to simulate different motivator data
+    motivator_samples = {
+        "1": {
+            'title': 'Medical School Acceptance',
+            'description': 'Becoming a doctor to help others and make a difference in healthcare',
+            'deadline': 'Fall 2025',
+            'tags': ['Academic', 'Career', 'Healthcare']
+        },
+        "2": {
+            'title': 'Math Competition Winner',
+            'description': 'Winning the regional mathematics olympiad',
+            'deadline': 'Spring 2025',
+            'tags': ['Academic', 'Competition', 'Mathematics']
+        },
+        "3": {
+            'title': 'Computer Science Internship',
+            'description': 'Securing an internship at a top tech company',
+            'deadline': 'Summer 2025',
+            'tags': ['Career', 'Technology', 'Professional Development']
+        }
+    }
+    
+    # Default data for any motivator
+    default_data = {
+        'title': 'New Goal',
+        'description': 'Your path to success',
+        'deadline': 'Ongoing',
+        'tags': ['Personal Growth']
+    }
+    
+    # Get motivator data if it exists in our samples, otherwise use default
+    motivator_data = motivator_samples.get(motivator_id, default_data)
+    
+    return render_template('envision.html', motivator_id=motivator_id, **motivator_data)
+
+@app.route('/class/<class_id>')
+def class_page(class_id):
+    # In a real application, you would fetch class data from a database
+    # For now, we'll use mock data based on the class_id which could be a node ID or name
+    
+    # This is a simple dictionary to simulate different class data based on ID
+    class_data_samples = {
+        "1": {
+            'class_name': 'AP Biology',
+            'class_description': 'Advanced Placement Biology - Mrs. Johnson, Period 3'
+        },
+        "2": {
+            'class_name': 'AP Chemistry',
+            'class_description': 'Advanced Placement Chemistry - Mr. Stevens, Period 5'
+        },
+        "3": {
+            'class_name': 'World History',
+            'class_description': 'World History - Ms. Garcia, Period 2'
+        }
+    }
+    
+    # Default data for any class
+    default_data = {
+        'class_name': class_id,
+        'class_description': f'Class Information for {class_id}'
+    }
+    
+    # Get class data if it exists in our samples, otherwise use a default
+    class_data = class_data_samples.get(class_id, default_data)
+    
+    return render_template('class.html', **class_data)
+
+@app.route('/collab')
+def collab():
+    return render_template('collab.html')
+
+@app.route('/collab/<project_id>')
+def project_collab(project_id):
+    # In a real application, you would fetch project data from a database
+    # For now, we'll use mock data based on the project_id
+    
+    # This is a simple dictionary to simulate different project data
+    project_samples = {
+        "1": {
+            'title': 'Research Paper on Climate Change',
+            'description': 'Collaborative research project on the effects of climate change on local ecosystems',
+            'due_date': '2024-06-15',
+            'status': 'in-progress',
+            'progress': 45
+        },
+        "2": {
+            'title': 'Science Fair Project',
+            'description': 'Group project for the annual science fair competition',
+            'due_date': '2024-05-30',
+            'status': 'planning',
+            'progress': 20
+        },
+        "3": {
+            'title': 'History Documentary',
+            'description': 'Creating a documentary on local historical events',
+            'due_date': '2024-07-10',
+            'status': 'in-progress',
+            'progress': 35
+        }
+    }
+    
+    # Default data for any project
+    default_data = {
+        'title': 'New Project',
+        'description': 'Collaborative project',
+        'due_date': '2024-06-30',
+        'status': 'planning',
+        'progress': 0
+    }
+    
+    # Get project data if it exists in our samples, otherwise use default
+    project_data = project_samples.get(project_id, default_data)
+    
+    return render_template('collab.html', project_id=project_id, **project_data)
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    # This will display the signup form initially and process form submission
+    return render_template('signup.html')
+
+@app.route('/onboarding/<step>', methods=['GET', 'POST'])
+def onboarding(step):
+    # Step can be one of: 'usertype', 'services', 'schedule', 'classes', 'motivations', 'counselors'
+    step_templates = {
+        'usertype': 'onboarding/usertype.html',
+        'services': 'onboarding/services.html',
+        'jupiter': 'onboarding/jupiter.html',
+        'classes': 'onboarding/classes.html',
+        'grade_analysis': 'onboarding/grade_analysis.html',
+        'schedule': 'onboarding/schedule.html',
+        'motivations': 'onboarding/motivations.html',
+        'counselors': 'onboarding/counselors.html',
+        'complete': 'onboarding/complete.html'
+    }
+    
+    # Define the next step in the onboarding flow
+    next_steps = {
+        'usertype': 'services',
+        'services': 'jupiter',
+        'jupiter': 'classes',
+        'classes': 'grade_analysis',
+        'grade_analysis': 'schedule',
+        'schedule': 'motivations',
+        'motivations': 'counselors',
+        'counselors': 'complete'
+    }
+    
+    if step not in step_templates:
+        return redirect('/onboarding/usertype')
+    
+    # Handle form submissions for each step
+    if request.method == 'POST':
+        # Process form data here if needed
+        # For now, just redirect to the next step
+        if step in next_steps:
+            return redirect(f'/onboarding/{next_steps[step]}')
+        elif step == 'complete':
+            return redirect('/tree')  # After completion, go to Tree/MyWeb
+    
+    # For GET requests, just render the template
+    return render_template(step_templates[step])
+
+@app.route('/verify-email/<token>')
+def verify_email(token):
+    # In a real app, this would verify the token and mark the email as verified
+    # For now, we'll just redirect to the first onboarding step
+    return render_template('email_verified.html')
 
 if __name__ == '__main__':
     app.run(debug=True) 

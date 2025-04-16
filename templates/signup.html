@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join SciWeb 3.0 - Sign Up</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/signup.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="logo">
+            <div class="logo-text">SciWeb</div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/tree">Tree</a></li>
+            <li><a href="#">Schedule</a></li>
+            <li><a href="#" class="active">Sign Up</a></li>
+        </ul>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
+    </nav>
+
+    <!-- Signup Section -->
+    <section class="signup-container">
+        <div class="signup-card">
+            <div class="signup-header">
+                <h1>Join SciWeb 3.0</h1>
+                <p>Begin your journey to academic excellence</p>
+            </div>
+            
+            <form id="signup-form" method="post" action="/signup" class="signup-form">
+                <div class="progress-bar">
+                    <div class="progress-step active" id="account-step">1</div>
+                    <div class="progress-line"></div>
+                    <div class="progress-step" id="verification-step">2</div>
+                </div>
+                
+                <div class="form-section active" id="account-section">
+                    <div class="form-group">
+                        <label for="first-name">First Name</label>
+                        <input type="text" id="first-name" name="first_name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="last-name">Last Name</label>
+                        <input type="text" id="last-name" name="last_name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="username">Username (optional)</label>
+                        <input type="text" id="username" name="username">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="password-input">
+                            <input type="password" id="password" name="password" required>
+                            <button type="button" class="toggle-password">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="grade">Grade</label>
+                        <select id="grade" name="grade" required>
+                            <option value="" disabled selected>Select your grade</option>
+                            <option value="6">6th Grade</option>
+                            <option value="7">7th Grade</option>
+                            <option value="8">8th Grade</option>
+                            <option value="9">9th Grade (Freshman)</option>
+                            <option value="10">10th Grade (Sophomore)</option>
+                            <option value="11">11th Grade (Junior)</option>
+                            <option value="12">12th Grade (Senior)</option>
+                            <option value="college">College</option>
+                            <option value="graduate">Graduate School</option>
+                            <option value="professional">Professional</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" id="next-btn" class="btn btn-primary">Next</button>
+                    </div>
+                </div>
+                
+                <div class="form-section" id="verification-section">
+                    <div class="verification-message">
+                        <i class="fa fa-envelope-circle-check"></i>
+                        <h2>Check Your Email</h2>
+                        <p>We've sent a verification code to your email address.</p>
+                    </div>
+                    
+                    <div class="form-group verification-code">
+                        <label for="verification-code">Enter Verification Code</label>
+                        <div class="code-inputs">
+                            <input type="text" maxlength="1" class="code-input" data-index="0">
+                            <input type="text" maxlength="1" class="code-input" data-index="1">
+                            <input type="text" maxlength="1" class="code-input" data-index="2">
+                            <input type="text" maxlength="1" class="code-input" data-index="3">
+                            <input type="text" maxlength="1" class="code-input" data-index="4">
+                            <input type="text" maxlength="1" class="code-input" data-index="5">
+                            <input type="hidden" id="verification-code" name="verification_code">
+                        </div>
+                    </div>
+                    
+                    <div class="verification-actions">
+                        <p>Didn't receive a code? <a href="#" id="resend-code">Resend</a></p>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" id="back-btn" class="btn btn-secondary">Back</button>
+                        <button type="submit" id="verify-btn" class="btn btn-primary">Verify & Continue</button>
+                    </div>
+                </div>
+            </form>
+            
+            <div class="signup-footer">
+                <p>Already have an account? <a href="#">Log In</a></p>
+            </div>
+        </div>
+        
+        <div class="signup-features">
+            <div class="feature">
+                <i class="fas fa-brain"></i>
+                <h3>Personalized Learning</h3>
+                <p>AI-powered guidance tailored to your unique academic journey</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-users"></i>
+                <h3>Community Powered</h3>
+                <p>Connect with peers and enhance your academic experience</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-chart-line"></i>
+                <h3>Visualize Progress</h3>
+                <p>Track your growth and achievements in real-time</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Floating Particles Animation -->
+    <div class="particles-container"></div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-info">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="footer-logo">
+                <p>Building the future of education together.</p>
+            </div>
+            <div class="footer-links">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/tree">Tree</a></li>
+                    <li><a href="#">Schedule</a></li>
+                    <li><a href="#">Login</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h3>Features</h3>
+                <ul>
+                    <li><a href="#">Study Tools</a></li>
+                    <li><a href="#">Grade Analysis</a></li>
+                    <li><a href="#">AI Counselors</a></li>
+                    <li><a href="#">Community</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h3>Connect</h3>
+                <ul>
+                    <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
+                    <li><a href="#"><i class="fab fa-github"></i> GitHub</a></li>
+                    <li><a href="#"><i class="fab fa-discord"></i> Discord</a></li>
+                    <li><a href="#"><i class="fas fa-envelope"></i> Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 SciWeb. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/signup.js') }}"></script>
+</body>
+</html> 

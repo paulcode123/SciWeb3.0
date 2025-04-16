@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SciWeb 3.0 - Project Collaboration</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/collab.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="logo">
+            <div class="logo-text">SciWeb</div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/tree">Tree</a></li>
+            <li><a href="#">Schedule</a></li>
+            <li><a href="#">Login</a></li>
+        </ul>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
+    </nav>
+
+    <!-- Project Header -->
+    <section class="project-header">
+        <div class="project-header-content">
+            <div class="project-title-container">
+                <h1 id="project-title" class="project-title" contenteditable="true">{{ title }}</h1>
+                <button class="btn-edit-title"><i class="fas fa-pen"></i></button>
+            </div>
+            <div class="project-meta">
+                <div class="project-due-date">
+                    <i class="far fa-calendar-alt"></i>
+                    <span>Due: </span>
+                    <input type="date" id="project-due-date" class="due-date-input" value="{{ due_date }}">
+                </div>
+                <div class="project-status">
+                    <select id="project-status" class="status-select">
+                        <option value="planning" {% if status == 'planning' %}selected{% endif %}>Planning</option>
+                        <option value="in-progress" {% if status == 'in-progress' %}selected{% endif %}>In Progress</option>
+                        <option value="review" {% if status == 'review' %}selected{% endif %}>Review</option>
+                        <option value="completed" {% if status == 'completed' %}selected{% endif %}>Completed</option>
+                    </select>
+                </div>
+            </div>
+            <div class="project-actions">
+                <button class="btn btn-primary"><i class="fas fa-save"></i> Save Project</button>
+                <button class="btn btn-secondary" id="share-project-btn"><i class="fas fa-share-alt"></i> Share</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="collab-container">
+        <!-- Left Sidebar - Project Navigation -->
+        <aside class="collab-sidebar">
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Navigation</h3>
+                <ul class="sidebar-nav">
+                    <li class="active"><a href="#overview"><i class="fas fa-home"></i> Overview</a></li>
+                    <li><a href="#tasks"><i class="fas fa-tasks"></i> Tasks</a></li>
+                    <li><a href="#whiteboard"><i class="fas fa-chalkboard"></i> Whiteboard</a></li>
+                    <li><a href="#files"><i class="fas fa-file-alt"></i> Files</a></li>
+                    <li><a href="#chat"><i class="fas fa-comments"></i> Chat</a></li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Team Members</h3>
+                <div class="team-members-list">
+                    <div class="team-member">
+                        <div class="member-avatar">
+                            <img src="{{ url_for('static', filename='images/avatar1.png') }}" alt="Team Member">
+                            <span class="online-status online"></span>
+                        </div>
+                        <div class="member-info">
+                            <p class="member-name">John Doe</p>
+                            <p class="member-role">Project Lead</p>
+                        </div>
+                    </div>
+                    <div class="team-member">
+                        <div class="member-avatar">
+                            <img src="{{ url_for('static', filename='images/avatar2.png') }}" alt="Team Member">
+                            <span class="online-status offline"></span>
+                        </div>
+                        <div class="member-info">
+                            <p class="member-name">Jane Smith</p>
+                            <p class="member-role">Researcher</p>
+                        </div>
+                    </div>
+                    <div class="team-member">
+                        <div class="member-avatar">
+                            <img src="{{ url_for('static', filename='images/avatar3.png') }}" alt="Team Member">
+                            <span class="online-status online"></span>
+                        </div>
+                        <div class="member-info">
+                            <p class="member-name">Alex Johnson</p>
+                            <p class="member-role">Designer</p>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-small" id="add-member-btn"><i class="fas fa-plus"></i> Add Member</button>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Project Nodes</h3>
+                <div class="project-nodes">
+                    <div class="node-item">
+                        <i class="fas fa-lightbulb"></i>
+                        <span>Research Idea</span>
+                    </div>
+                    <div class="node-item">
+                        <i class="fas fa-clipboard-list"></i>
+                        <span>Literature Review</span>
+                    </div>
+                    <div class="node-item">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Data Analysis</span>
+                    </div>
+                </div>
+                <button class="btn btn-small"><i class="fas fa-plus"></i> Add Node</button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="collab-content">
+            <!-- Tab content -->
+            <div id="overview" class="tab-content active">
+                <div class="content-header">
+                    <h2>Project Overview</h2>
+                </div>
+                <div class="overview-cards">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Project Description</h3>
+                            <button class="btn-edit"><i class="fas fa-pen"></i></button>
+                        </div>
+                        <div class="card-body">
+                            <div id="project-description" class="project-description" contenteditable="true">
+                                <p>{{ description }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Progress</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="progress-container">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: {{ progress }}%;"></div>
+                                </div>
+                                <div class="progress-text">{{ progress }}% Complete</div>
+                            </div>
+                            <div class="progress-stats">
+                                <div class="stat">
+                                    <span class="stat-number">12</span>
+                                    <span class="stat-label">Total Tasks</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number">5</span>
+                                    <span class="stat-label">Completed</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number">7</span>
+                                    <span class="stat-label">Remaining</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Recent Activity</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="activity-feed">
+                                <div class="activity-item">
+                                    <div class="activity-icon"><i class="fas fa-file-alt"></i></div>
+                                    <div class="activity-content">
+                                        <p class="activity-text"><strong>John Doe</strong> uploaded a new file: <a href="#">research_notes.pdf</a></p>
+                                        <p class="activity-time">2 hours ago</p>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon"><i class="fas fa-tasks"></i></div>
+                                    <div class="activity-content">
+                                        <p class="activity-text"><strong>Jane Smith</strong> completed task: <span>Literature Review</span></p>
+                                        <p class="activity-time">Yesterday</p>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon"><i class="fas fa-user-plus"></i></div>
+                                    <div class="activity-content">
+                                        <p class="activity-text"><strong>Alex Johnson</strong> joined the project</p>
+                                        <p class="activity-time">2 days ago</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tasks" class="tab-content">
+                <div class="content-header">
+                    <h2>Task Board</h2>
+                    <button class="btn btn-primary" id="add-task-btn"><i class="fas fa-plus"></i> Add Task</button>
+                </div>
+                <div class="task-board">
+                    <div class="task-column">
+                        <div class="column-header">
+                            <h3>To Do</h3>
+                            <span class="task-count">4</span>
+                        </div>
+                        <div class="task-list" id="todo-tasks">
+                            <div class="task-card" draggable="true">
+                                <div class="task-priority high"></div>
+                                <h4>Research methodology</h4>
+                                <p>Identify appropriate research methods for our project</p>
+                                <div class="task-meta">
+                                    <span><i class="far fa-calendar-alt"></i> May 15</span>
+                                    <span><i class="far fa-user"></i> John</span>
+                                </div>
+                            </div>
+                            <div class="task-card" draggable="true">
+                                <div class="task-priority medium"></div>
+                                <h4>Create presentation</h4>
+                                <p>Prepare slides for the initial project presentation</p>
+                                <div class="task-meta">
+                                    <span><i class="far fa-calendar-alt"></i> May 18</span>
+                                    <span><i class="far fa-user"></i> Jane</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="task-column">
+                        <div class="column-header">
+                            <h3>In Progress</h3>
+                            <span class="task-count">3</span>
+                        </div>
+                        <div class="task-list" id="progress-tasks">
+                            <div class="task-card" draggable="true">
+                                <div class="task-priority high"></div>
+                                <h4>Literature review</h4>
+                                <p>Collect and analyze related research papers</p>
+                                <div class="task-meta">
+                                    <span><i class="far fa-calendar-alt"></i> May 10</span>
+                                    <span><i class="far fa-user"></i> Alex</span>
+                                </div>
+                            </div>
+                            <div class="task-card" draggable="true">
+                                <div class="task-priority low"></div>
+                                <h4>Design survey</h4>
+                                <p>Create participant survey questions</p>
+                                <div class="task-meta">
+                                    <span><i class="far fa-calendar-alt"></i> May 12</span>
+                                    <span><i class="far fa-user"></i> John</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="task-column">
+                        <div class="column-header">
+                            <h3>Completed</h3>
+                            <span class="task-count">5</span>
+                        </div>
+                        <div class="task-list" id="completed-tasks">
+                            <div class="task-card" draggable="true">
+                                <div class="task-priority medium"></div>
+                                <h4>Project proposal</h4>
+                                <p>Draft initial project proposal document</p>
+                                <div class="task-meta">
+                                    <span><i class="far fa-calendar-alt"></i> May 5</span>
+                                    <span><i class="far fa-user"></i> Jane</span>
+                                </div>
+                            </div>
+                            <div class="task-card" draggable="true">
+                                <div class="task-priority high"></div>
+                                <h4>Team formation</h4>
+                                <p>Identify and recruit team members</p>
+                                <div class="task-meta">
+                                    <span><i class="far fa-calendar-alt"></i> May 3</span>
+                                    <span><i class="far fa-user"></i> John</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="whiteboard" class="tab-content">
+                <div class="content-header">
+                    <h2>Collaborative Whiteboard</h2>
+                    <div class="whiteboard-tools">
+                        <button class="tool-btn" data-tool="pen"><i class="fas fa-pen"></i></button>
+                        <button class="tool-btn" data-tool="eraser"><i class="fas fa-eraser"></i></button>
+                        <button class="tool-btn" data-tool="text"><i class="fas fa-font"></i></button>
+                        <button class="tool-btn" data-tool="shape"><i class="fas fa-shapes"></i></button>
+                        <button class="tool-btn" data-tool="image"><i class="fas fa-image"></i></button>
+                        <div class="color-picker">
+                            <input type="color" id="colorPicker" value="#000000">
+                        </div>
+                        <button class="btn btn-small" id="clear-whiteboard"><i class="fas fa-trash"></i> Clear</button>
+                        <button class="btn btn-small" id="save-whiteboard"><i class="fas fa-save"></i> Save</button>
+                    </div>
+                </div>
+                <div class="whiteboard-container">
+                    <canvas id="whiteboard-canvas" class="whiteboard"></canvas>
+                </div>
+            </div>
+
+            <div id="files" class="tab-content">
+                <div class="content-header">
+                    <h2>Project Files</h2>
+                    <button class="btn btn-primary" id="upload-file-btn"><i class="fas fa-upload"></i> Upload File</button>
+                </div>
+                <div class="files-container">
+                    <div class="files-filter">
+                        <div class="search-container">
+                            <input type="text" placeholder="Search files..." class="search-input">
+                            <button class="search-btn"><i class="fas fa-search"></i></button>
+                        </div>
+                        <div class="filter-buttons">
+                            <button class="filter-btn active" data-filter="all">All</button>
+                            <button class="filter-btn" data-filter="documents">Documents</button>
+                            <button class="filter-btn" data-filter="images">Images</button>
+                            <button class="filter-btn" data-filter="other">Other</button>
+                        </div>
+                    </div>
+                    <div class="files-list">
+                        <div class="file-item" data-type="document">
+                            <div class="file-icon"><i class="fas fa-file-pdf"></i></div>
+                            <div class="file-info">
+                                <h4>research_proposal.pdf</h4>
+                                <p>Added by John • May 5, 2024</p>
+                            </div>
+                            <div class="file-actions">
+                                <button class="file-action-btn"><i class="fas fa-download"></i></button>
+                                <button class="file-action-btn"><i class="fas fa-share-alt"></i></button>
+                                <button class="file-action-btn"><i class="fas fa-ellipsis-v"></i></button>
+                            </div>
+                        </div>
+                        <div class="file-item" data-type="document">
+                            <div class="file-icon"><i class="fas fa-file-word"></i></div>
+                            <div class="file-info">
+                                <h4>literature_review.docx</h4>
+                                <p>Added by Jane • May 8, 2024</p>
+                            </div>
+                            <div class="file-actions">
+                                <button class="file-action-btn"><i class="fas fa-download"></i></button>
+                                <button class="file-action-btn"><i class="fas fa-share-alt"></i></button>
+                                <button class="file-action-btn"><i class="fas fa-ellipsis-v"></i></button>
+                            </div>
+                        </div>
+                        <div class="file-item" data-type="image">
+                            <div class="file-icon"><i class="fas fa-file-image"></i></div>
+                            <div class="file-info">
+                                <h4>concept_diagram.png</h4>
+                                <p>Added by Alex • May 9, 2024</p>
+                            </div>
+                            <div class="file-actions">
+                                <button class="file-action-btn"><i class="fas fa-download"></i></button>
+                                <button class="file-action-btn"><i class="fas fa-share-alt"></i></button>
+                                <button class="file-action-btn"><i class="fas fa-ellipsis-v"></i></button>
+                            </div>
+                        </div>
+                        <div class="file-item" data-type="other">
+                            <div class="file-icon"><i class="fas fa-file-excel"></i></div>
+                            <div class="file-info">
+                                <h4>data_analysis.xlsx</h4>
+                                <p>Added by John • May 10, 2024</p>
+                            </div>
+                            <div class="file-actions">
+                                <button class="file-action-btn"><i class="fas fa-download"></i></button>
+                                <button class="file-action-btn"><i class="fas fa-share-alt"></i></button>
+                                <button class="file-action-btn"><i class="fas fa-ellipsis-v"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="chat" class="tab-content">
+                <div class="content-header">
+                    <h2>Team Chat</h2>
+                </div>
+                <div class="chat-container">
+                    <div class="chat-sidebar">
+                        <div class="chat-channels">
+                            <h3>Channels</h3>
+                            <ul class="channel-list">
+                                <li class="active"># general</li>
+                                <li># research</li>
+                                <li># design</li>
+                                <li># development</li>
+                            </ul>
+                            <button class="btn btn-small"><i class="fas fa-plus"></i> Add Channel</button>
+                        </div>
+                        <div class="direct-messages">
+                            <h3>Direct Messages</h3>
+                            <ul class="dm-list">
+                                <li><span class="online-status online"></span> John Doe</li>
+                                <li><span class="online-status offline"></span> Jane Smith</li>
+                                <li><span class="online-status online"></span> Alex Johnson</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="chat-main">
+                        <div class="chat-messages" id="chat-messages">
+                            <div class="chat-day-divider">
+                                <span>Today</span>
+                            </div>
+                            <div class="message">
+                                <div class="message-avatar">
+                                    <img src="{{ url_for('static', filename='images/avatar1.png') }}" alt="John Doe">
+                                </div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author">John Doe</span>
+                                        <span class="message-time">10:30 AM</span>
+                                    </div>
+                                    <div class="message-text">
+                                        <p>Hey team! I've uploaded the latest research findings. Please take a look when you get a chance.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="message">
+                                <div class="message-avatar">
+                                    <img src="{{ url_for('static', filename='images/avatar2.png') }}" alt="Jane Smith">
+                                </div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author">Jane Smith</span>
+                                        <span class="message-time">11:15 AM</span>
+                                    </div>
+                                    <div class="message-text">
+                                        <p>Thanks John! I'll review it this afternoon. Has anyone started on the literature review section yet?</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="message">
+                                <div class="message-avatar">
+                                    <img src="{{ url_for('static', filename='images/avatar3.png') }}" alt="Alex Johnson">
+                                </div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author">Alex Johnson</span>
+                                        <span class="message-time">11:42 AM</span>
+                                    </div>
+                                    <div class="message-text">
+                                        <p>I'm working on the literature review now. Should have a draft ready by tomorrow.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-input">
+                            <div class="message-compose">
+                                <button class="attachment-btn"><i class="fas fa-paperclip"></i></button>
+                                <input type="text" placeholder="Type your message..." class="message-input">
+                                <button class="emoji-btn"><i class="far fa-smile"></i></button>
+                                <button class="send-btn"><i class="fas fa-paper-plane"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar - Project Details -->
+        <aside class="collab-sidebar right-sidebar">
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Project Timeline</h3>
+                <div class="timeline-container">
+                    <div class="timeline-item completed">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h4>Project Kickoff</h4>
+                            <p>May 1, 2024</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item completed">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h4>Research Phase</h4>
+                            <p>May 5-15, 2024</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item current">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h4>Design Phase</h4>
+                            <p>May 16-30, 2024</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h4>Development</h4>
+                            <p>June 1-20, 2024</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h4>Project Completion</h4>
+                            <p>June 30, 2024</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Project Resources</h3>
+                <div class="resource-links">
+                    <a href="#" class="resource-link"><i class="fas fa-link"></i> Research Database</a>
+                    <a href="#" class="resource-link"><i class="fas fa-link"></i> Style Guide</a>
+                    <a href="#" class="resource-link"><i class="fas fa-link"></i> Useful Articles</a>
+                    <a href="#" class="resource-link"><i class="fas fa-link"></i> Reference Materials</a>
+                </div>
+                <button class="btn btn-small"><i class="fas fa-plus"></i> Add Resource</button>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Upcoming Deadlines</h3>
+                <div class="deadlines">
+                    <div class="deadline-item urgent">
+                        <div class="deadline-date">May 15</div>
+                        <div class="deadline-info">
+                            <h4>Research Methodology</h4>
+                            <p>Assigned to: John Doe</p>
+                        </div>
+                    </div>
+                    <div class="deadline-item">
+                        <div class="deadline-date">May 18</div>
+                        <div class="deadline-info">
+                            <h4>Project Presentation</h4>
+                            <p>Assigned to: Team</p>
+                        </div>
+                    </div>
+                    <div class="deadline-item">
+                        <div class="deadline-date">May 25</div>
+                        <div class="deadline-info">
+                            <h4>Design Draft</h4>
+                            <p>Assigned to: Alex Johnson</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Modals -->
+    <div class="modal" id="add-member-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Team Member</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="member-email">Email Address</label>
+                    <input type="email" id="member-email" placeholder="Enter email address">
+                </div>
+                <div class="form-group">
+                    <label for="member-role">Role</label>
+                    <select id="member-role">
+                        <option value="contributor">Contributor</option>
+                        <option value="editor">Editor</option>
+                        <option value="viewer">Viewer</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="member-message">Invitation Message (Optional)</label>
+                    <textarea id="member-message" placeholder="Add a personalized message..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary close-modal">Cancel</button>
+                <button class="btn btn-primary">Send Invitation</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="add-task-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Task</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="task-title">Task Title</label>
+                    <input type="text" id="task-title" placeholder="Enter task title">
+                </div>
+                <div class="form-group">
+                    <label for="task-description">Description</label>
+                    <textarea id="task-description" placeholder="Enter task description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="task-assignee">Assignee</label>
+                    <select id="task-assignee">
+                        <option value="john">John Doe</option>
+                        <option value="jane">Jane Smith</option>
+                        <option value="alex">Alex Johnson</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="task-due-date">Due Date</label>
+                    <input type="date" id="task-due-date">
+                </div>
+                <div class="form-group">
+                    <label for="task-priority">Priority</label>
+                    <select id="task-priority">
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary close-modal">Cancel</button>
+                <button class="btn btn-primary">Create Task</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="share-project-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Share Project</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="share-link">Project Link</label>
+                    <div class="copy-link-container">
+                        <input type="text" id="share-link" value="https://sciweb.com/project/{% if project_id %}{{ project_id }}{% else %}12345{% endif %}" readonly>
+                        <button class="copy-link-btn"><i class="fas fa-copy"></i></button>
+                    </div>
+                </div>
+                <div class="sharing-options">
+                    <h4>Sharing Options</h4>
+                    <div class="share-option">
+                        <input type="radio" id="share-edit" name="share-permission" value="edit">
+                        <label for="share-edit">Can edit</label>
+                    </div>
+                    <div class="share-option">
+                        <input type="radio" id="share-comment" name="share-permission" value="comment" checked>
+                        <label for="share-comment">Can comment</label>
+                    </div>
+                    <div class="share-option">
+                        <input type="radio" id="share-view" name="share-permission" value="view">
+                        <label for="share-view">Can view</label>
+                    </div>
+                </div>
+                <div class="share-via">
+                    <h4>Share via</h4>
+                    <div class="share-buttons">
+                        <button class="share-btn email"><i class="fas fa-envelope"></i> Email</button>
+                        <button class="share-btn slack"><i class="fab fa-slack"></i> Slack</button>
+                        <button class="share-btn teams"><i class="fas fa-users"></i> Teams</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary close-modal">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-info">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="footer-logo">
+                <p>Building the future of education together.</p>
+            </div>
+            <div class="footer-links">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/tree">Tree</a></li>
+                    <li><a href="#">Schedule</a></li>
+                    <li><a href="#">Login</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h3>Features</h3>
+                <ul>
+                    <li><a href="#">Study Tools</a></li>
+                    <li><a href="#">Grade Analysis</a></li>
+                    <li><a href="#">AI Counselors</a></li>
+                    <li><a href="#">Community</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h3>Connect</h3>
+                <ul>
+                    <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
+                    <li><a href="#"><i class="fab fa-github"></i> GitHub</a></li>
+                    <li><a href="#"><i class="fab fa-discord"></i> Discord</a></li>
+                    <li><a href="#"><i class="fas fa-envelope"></i> Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 SciWeb. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/collab.js') }}"></script>
+</body>
+</html> 
