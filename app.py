@@ -10,5 +10,9 @@ def home():
 def tree():
     return render_template('tree.html')
 
+@app.route('/counselor')
+def counselor():
+    return render_template('counselor.html')
+
 if __name__ == '__main__':
     app.run(debug=True) 
