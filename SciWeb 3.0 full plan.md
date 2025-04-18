@@ -63,8 +63,9 @@ Which SciWeb services do you wish to use(organizational Tree, Study system, Soci
 Initial Jupiter Pull(indicate that no grades/login info is ever saved)
 Show classes that it found(with current members listed) with a Join button on each
 Show a whole bunch of stats and graphs of the user's grades and scores, and allow them to select the ones they want on their grade analysis page and shuffle them around
+Let the user select a name and avatar for their 3 counselors, and one by one set up a short conversation with each of them where the counselor introduces themself and its capabilities and explains how to use it, and the user specifies what personality they want for each of them, and how they want to use it
 Prompt the user for what motivates them(in school, in life, etc.) and say that SciWeb will have them expand on these and build a personalized plan towards achieving them.
-Let the user select avatar, name, and personality for their 3 counselors, and explain how to use them
+
 
 MindWeb:
 

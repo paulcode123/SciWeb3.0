@@ -1,6 +1,9 @@
 from flask import Flask, render_template, redirect, request
+from ai_routes import ai_bp
 
 app = Flask(__name__)
+# Register the AI Blueprint
+app.register_blueprint(ai_bp, url_prefix='/ai')
 
 @app.route('/')
 def home():
@@ -260,10 +263,9 @@ def onboarding(step):
         'services': 'jupiter',
         'jupiter': 'classes',
         'classes': 'grade_analysis',
-        'grade_analysis': 'schedule',
-        'schedule': 'motivations',
-        'motivations': 'counselors',
-        'counselors': 'complete'
+        'grade_analysis': 'counselors',
+        'counselors': 'motivations',
+        'motivations': 'complete'
     }
     
     if step not in step_templates:
@@ -286,6 +288,46 @@ def verify_email(token):
     # In a real app, this would verify the token and mark the email as verified
     # For now, we'll just redirect to the first onboarding step
     return render_template('email_verified.html')
+
+@app.route('/mindweb/<test_id>')
+def mindweb(test_id):
+    # In a real application, you would fetch test data from a database
+    # For now, we'll use mock data based on the test_id
+    
+    # This is a simple dictionary to simulate different test data
+    test_samples = {
+        "1": {
+            'title': 'AP Calculus Midterm',
+            'subject': 'Mathematics',
+            'topics': ['Limits', 'Derivatives', 'Integrals', 'Applications'],
+            'study_goal': 'Master calculus concepts for the AP exam'
+        },
+        "2": {
+            'title': 'Biology Final',
+            'subject': 'Biology',
+            'topics': ['Cell Structure', 'Genetics', 'Evolution', 'Ecology'],
+            'study_goal': 'Understand key biological processes and their relationships'
+        },
+        "3": {
+            'title': 'History Midterm',
+            'subject': 'History',
+            'topics': ['Ancient Civilizations', 'Middle Ages', 'Renaissance', 'Modern Era'],
+            'study_goal': 'Connect historical events and understand their significance'
+        }
+    }
+    
+    # Default data for any test
+    default_data = {
+        'title': 'Test Study Guide',
+        'subject': 'General',
+        'topics': ['Topic 1', 'Topic 2', 'Topic 3'],
+        'study_goal': 'Understand key concepts and their relationships'
+    }
+    
+    # Get test data if it exists in our samples, otherwise use default
+    test_data = test_samples.get(test_id, default_data)
+    
+    return render_template('mindweb.html', test_id=test_id, **test_data)
 
 if __name__ == '__main__':
     app.run(debug=True) 

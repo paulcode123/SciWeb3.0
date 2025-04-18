@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}MindWeb - {{ title }}{% endblock %}
+
+{% block head %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mindweb.css') }}">
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card mb-3">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">{{ title }}</h5>
+                        <span class="small text-light ms-3">Subject: {{ subject }}</span>
+                        <span class="small text-light ms-3">Goal: {{ study_goal }}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <button id="add-concept-btn" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-plus-circle"></i> Add Concept
+                            </button>
+                            <button id="add-relationship-btn" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-project-diagram"></i> Add Relationship
+                            </button>
+                            <button id="delete-selected-btn" class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-trash"></i> Delete Selected
+                            </button>
+                            <button id="layout-btn" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-magic"></i> Auto-arrange
+                            </button>
+                            <button id="save-mindweb-btn" class="btn btn-success btn-sm">
+                                <i class="fas fa-save"></i> Save MindWeb
+                            </button>
+                            <div class="ms-auto btn-group" role="group">
+                                <button id="zoom-in-btn" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-search-plus"></i>
+                                </button>
+                                <button id="zoom-out-btn" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-search-minus"></i>
+                                </button>
+                                <button id="reset-view-btn" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-home"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card mind-map-container mb-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h4 class="mb-0">Concept Map</h4>
+                            </div>
+                            <div class="card-body">
+                                <div id="mindweb-container"></div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0">AI Guide</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="ai-assistant-container">
+                                    <div class="ai-messages" id="ai-messages">
+                                        <div class="ai-message">
+                                            <p>Hello! I'm your AI study guide. Start creating your concept map by adding concepts and relationships, and I'll help you improve your understanding.</p>
+                                        </div>
+                                    </div>
+                                    <div class="ai-input">
+                                        <input type="text" id="ai-query" class="form-control" placeholder="Ask me anything...">
+                                        <button id="ask-ai-btn" class="btn btn-info">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Node Edit Modal -->
+    <div class="modal fade" id="node-edit-modal" tabindex="-1" aria-labelledby="nodeEditModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="nodeEditModalLabel">Edit Concept</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="node-edit-form">
+                        <input type="hidden" id="node-id">
+                        <div class="mb-3">
+                            <label for="node-name" class="form-label">Concept Name</label>
+                            <input type="text" class="form-control" id="node-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="node-description" class="form-label">Description</label>
+                            <textarea class="form-control" id="node-description" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="node-color" class="form-label">Color</label>
+                            <select class="form-select" id="node-color">
+                                <option value="#4285F4">Blue</option>
+                                <option value="#EA4335">Red</option>
+                                <option value="#FBBC05">Yellow</option>
+                                <option value="#34A853">Green</option>
+                                <option value="#FF9900">Orange</option>
+                                <option value="#9C27B0">Purple</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="save-node-btn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Edge Edit Modal -->
+    <div class="modal fade" id="edge-edit-modal" tabindex="-1" aria-labelledby="edgeEditModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="edgeEditModalLabel">Edit Relationship</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="edge-edit-form">
+                        <input type="hidden" id="edge-id">
+                        <div class="mb-3">
+                            <label for="edge-label" class="form-label">Relationship Label</label>
+                            <input type="text" class="form-control" id="edge-label" placeholder="e.g., causes, influences, requires">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edge-line-style" class="form-label">Line Style</label>
+                            <select class="form-select" id="edge-line-style">
+                                <option value="solid">Solid</option>
+                                <option value="dotted">Dotted</option>
+                                <option value="dashed">Dashed</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edge-color" class="form-label">Color</label>
+                            <select class="form-select" id="edge-color">
+                                <option value="#4285F4">Blue</option>
+                                <option value="#EA4335">Red</option>
+                                <option value="#34A853">Green</option>
+                                <option value="#9C27B0">Purple</option>
+                                <option value="#FF9900">Orange</option>
+                                <option value="#000000">Black</option>
+                            </select>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="edge-arrow">
+                            <label class="form-check-label" for="edge-arrow">Directional (show arrow)</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="save-edge-btn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.23.0/cytoscape.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cytoscape-edgehandles@4.0.1/cytoscape-edgehandles.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cytoscape-edge-editing@2.0.0/cytoscape-edge-editing.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cytoscape-popper@2.0.0/cytoscape-popper.min.js"></script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/mindweb.js') }}"></script>
+{% endblock %} 

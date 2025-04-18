@@ -149,8 +149,8 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Simulate API call to Jupiter
             setTimeout(function() {
-                // Redirect to next step after successful connection
-                window.location.href = '/onboarding/classes';
+                // Redirect to grade_analysis step after successful connection
+                window.location.href = '/onboarding/grade_analysis';
             }, 1500);
             
             return false;
@@ -184,14 +184,99 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Show confirming modal or just redirect
                 if (confirm('Are you sure you want to skip connecting your Jupiter account? You can always do this later.')) {
-                    window.location.href = '/onboarding/classes';
+                    window.location.href = '/onboarding/grade_analysis';
                 }
             });
         }
     }
     
-    // Add more onboarding-specific functionality here
-    // This will be expanded as more onboarding steps are created
+    // Dashboard page functionality on Grade Analysis page
+    const dashboardContainer = document.querySelector('.jupiter-dashboard');
+    if (dashboardContainer) {
+        // Initialize sortable charts
+        initDashboard();
+        
+        // Initialize charts
+        createCharts();
+        
+        // Handle chart controls
+        setupChartControls();
+        
+        // Handle modal
+        setupAddChartModal();
+        
+        // Skip button functionality for dashboard
+        const skipBtn = document.querySelector('.jupiter-dashboard .skip-btn');
+        if (skipBtn) {
+            skipBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Show confirming modal or just redirect
+                if (confirm('Are you sure you want to skip customizing your dashboard? You can always do this later.')) {
+                    window.location.href = '/onboarding/classes';
+                }
+            });
+        }
+        
+        // Continue button
+        const proceedBtn = document.getElementById('proceed-btn');
+        if (proceedBtn) {
+            proceedBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Save dashboard layout
+                saveDashboardLayout();
+                
+                // Redirect to next step
+                window.location.href = '/onboarding/classes';
+            });
+        }
+        
+        // Back button functionality
+        const backBtn = document.querySelector('.back-btn');
+        if (backBtn) {
+            backBtn.addEventListener('click', function() {
+                window.location.href = '/onboarding/jupiter';
+            });
+        }
+    }
+    
+    // Grade Analysis form functionality (if the old form still exists)
+    const gradeAnalysisForm = document.getElementById('grade-analysis-form');
+    const analyticsItems = document.querySelectorAll('.analytics-item');
+    const toggleInputs = document.querySelectorAll('.toggle-input');
+    
+    if (gradeAnalysisForm) {
+        // Toggle analytics selection
+        toggleInputs.forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                const analyticsItem = this.closest('.analytics-item');
+                
+                if (this.checked) {
+                    analyticsItem.classList.add('selected');
+                } else {
+                    analyticsItem.classList.remove('selected');
+                }
+            });
+        });
+        
+        // Click on analytics item toggles the checkbox
+        analyticsItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                // Don't trigger if they clicked directly on the toggle
+                if (e.target.closest('.toggle-switch')) {
+                    return;
+                }
+                
+                const toggle = this.querySelector('.toggle-input');
+                toggle.checked = !toggle.checked;
+                
+                // Trigger the change event to update classes
+                const changeEvent = new Event('change');
+                toggle.dispatchEvent(changeEvent);
+            });
+        });
+    }
     
     // Classes page functionality
     const classesForm = document.getElementById('classes-form');
@@ -349,252 +434,711 @@ document.addEventListener('DOMContentLoaded', function() {
         const backBtn = document.querySelector('.back-btn');
         if (backBtn) {
             backBtn.addEventListener('click', function() {
-                window.location.href = '/onboarding/jupiter';
+                window.location.href = '/onboarding/grade_analysis';
             });
         }
     }
     
-    // Grade Analysis page functionality
-    const gradeAnalysisForm = document.getElementById('grade-analysis-form');
-    const analyticsItems = document.querySelectorAll('.analytics-item');
-    const toggleInputs = document.querySelectorAll('.toggle-input');
-    
-    if (gradeAnalysisForm) {
-        // Toggle analytics selection
-        toggleInputs.forEach(toggle => {
-            toggle.addEventListener('change', function() {
-                const analyticsItem = this.closest('.analytics-item');
+    // Counselors page functionality
+    const counselorsContainer = document.querySelector('.counselors-container');
+    if (counselorsContainer) {
+        // Handle avatar selection
+        const avatarOptions = document.querySelectorAll('.avatar-option input[type="radio"]');
+        avatarOptions.forEach(radio => {
+            radio.addEventListener('change', function() {
+                // Get all radio inputs in this group
+                const name = this.getAttribute('name');
+                const groupRadios = document.querySelectorAll(`input[name="${name}"]`);
                 
-                if (this.checked) {
-                    analyticsItem.classList.add('selected');
-                } else {
-                    analyticsItem.classList.remove('selected');
-                }
+                // Update selected state
+                groupRadios.forEach(groupRadio => {
+                    const avatarImg = groupRadio.nextElementSibling;
+                    if (groupRadio.checked) {
+                        avatarImg.style.borderColor = 'var(--primary)';
+                    } else {
+                        avatarImg.style.borderColor = 'transparent';
+                    }
+                });
             });
         });
         
-        // Click on analytics item toggles the checkbox
-        analyticsItems.forEach(item => {
-            item.addEventListener('click', function(e) {
-                // Don't trigger if they clicked directly on the toggle
-                if (e.target.closest('.toggle-switch')) {
-                    return;
-                }
-                
-                const toggle = this.querySelector('.toggle-input');
-                toggle.checked = !toggle.checked;
-                
-                // Trigger the change event to update classes
-                const changeEvent = new Event('change');
-                toggle.dispatchEvent(changeEvent);
-            });
-        });
-        
-        // Form submission
-        gradeAnalysisForm.addEventListener('submit', function(e) {
-            // Ensure at least one analytics option is selected
-            let hasSelection = false;
-            toggleInputs.forEach(toggle => {
-                if (toggle.checked) {
-                    hasSelection = true;
-                }
-            });
-            
-            if (!hasSelection) {
-                e.preventDefault();
-                showError('Please select at least one analytics option to continue');
-                return false;
+        // Initialize with pre-selected avatars
+        avatarOptions.forEach(radio => {
+            if (radio.checked) {
+                const avatarImg = radio.nextElementSibling;
+                avatarImg.style.borderColor = 'var(--primary)';
             }
-            
-            // Continue with form submission
-            return true;
         });
         
-        // Back button functionality
-        const backBtn = document.querySelector('.back-btn');
-        if (backBtn) {
-            backBtn.addEventListener('click', function() {
-                window.location.href = '/onboarding/classes';
+        // Add hover effects for counselor cards
+        const counselorCards = document.querySelectorAll('.counselor-card');
+        counselorCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.1)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = 'none';
+            });
+        });
+        
+        // Form validation
+        const counselorsForm = document.querySelector('.onboarding-form');
+        if (counselorsForm) {
+            counselorsForm.addEventListener('submit', function(e) {
+                let valid = true;
+                
+                // Validate counselor names
+                const counselorNames = document.querySelectorAll('.counselor-name input');
+                counselorNames.forEach(input => {
+                    if (!input.value.trim()) {
+                        input.style.borderColor = 'red';
+                        valid = false;
+                    } else {
+                        input.style.borderColor = '';
+                    }
+                });
+                
+                if (!valid) {
+                    e.preventDefault();
+                    // Scroll to first error
+                    const firstError = document.querySelector('.counselor-name input[style*="border-color: red"]');
+                    if (firstError) {
+                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
             });
         }
     }
     
     // Helper functions
     function showError(message) {
-        // Remove any existing error messages
-        const existingError = document.querySelector('.error-message');
-        if (existingError) {
-            existingError.remove();
+        // Create error notification if it doesn't exist
+        let errorNotification = document.querySelector('.error-notification');
+        
+        if (!errorNotification) {
+            errorNotification = document.createElement('div');
+            errorNotification.className = 'error-notification';
+            document.body.appendChild(errorNotification);
         }
         
-        // Create and add error message
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'error-message';
-        errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+        // Show error message
+        errorNotification.textContent = message;
+        errorNotification.classList.add('show');
         
-        // Find where to insert the error
-        const formActions = document.querySelector('.form-actions');
-        if (formActions) {
-            formActions.insertAdjacentElement('beforebegin', errorDiv);
-            
-            // Scroll to error if needed
-            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        
-        // Auto-remove after delay
+        // Hide after 3 seconds
         setTimeout(() => {
-            errorDiv.classList.add('fade-out');
-            setTimeout(() => {
-                errorDiv.remove();
-            }, 500);
-        }, 5000);
+            errorNotification.classList.remove('show');
+        }, 3000);
     }
     
     function toggleTheme() {
-        const body = document.body;
-        body.classList.toggle('dark-mode');
+        document.body.classList.toggle('dark-theme');
         
-        // Update icon
-        const themeIcon = themeToggle.textContent;
-        themeToggle.textContent = themeIcon === '🌙' ? '☀️' : '🌙';
+        // Update theme in localStorage
+        const isDarkTheme = document.body.classList.contains('dark-theme');
+        localStorage.setItem('darkTheme', isDarkTheme);
         
-        // Save preference to localStorage
-        const isDarkMode = body.classList.contains('dark-mode');
-        localStorage.setItem('darkMode', isDarkMode);
-    }
-    
-    // Check saved theme preference
-    const savedDarkMode = localStorage.getItem('darkMode') === 'true';
-    if (savedDarkMode) {
-        document.body.classList.add('dark-mode');
+        // Update toggle icon
+        const themeToggle = document.getElementById('theme-toggle');
         if (themeToggle) {
-            themeToggle.textContent = '☀️';
+            const icon = themeToggle.querySelector('i');
+            if (isDarkTheme) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
         }
     }
     
-    // Animated background with moving gradients
     function initAnimatedBackground() {
-        const background = document.querySelector('.animated-bg');
-        if (!background) return;
+        const container = document.querySelector('.animated-background');
+        if (!container) return;
         
-        // Create animated elements
-        const gradientCount = 3;
-        for (let i = 0; i < gradientCount; i++) {
-            const gradient = document.createElement('div');
-            gradient.className = 'gradient-orb';
+        // Create floating shapes
+        for (let i = 0; i < 15; i++) {
+            const shape = document.createElement('div');
+            shape.className = 'floating-shape';
             
-            // Set random properties
-            const size = Math.random() * 300 + 200;
+            // Randomize shape properties
+            const size = Math.random() * 30 + 10;
             const posX = Math.random() * 100;
             const posY = Math.random() * 100;
-            const opacity = Math.random() * 0.2 + 0.05;
-            const animDuration = Math.random() * 80 + 40;
+            const duration = Math.random() * 15 + 15;
+            const delay = Math.random() * 5;
             
-            // Apply styles
-            gradient.style.width = `${size}px`;
-            gradient.style.height = `${size}px`;
-            gradient.style.left = `${posX}%`;
-            gradient.style.top = `${posY}%`;
-            gradient.style.opacity = opacity;
-            gradient.style.background = `radial-gradient(circle, rgba(255,26,117,${opacity}) 0%, rgba(255,26,117,0) 70%)`;
-            gradient.style.animation = `float ${animDuration}s linear infinite`;
-            gradient.style.animationDelay = `-${Math.random() * animDuration}s`;
+            // Set shape styles
+            shape.style.width = `${size}px`;
+            shape.style.height = `${size}px`;
+            shape.style.left = `${posX}%`;
+            shape.style.top = `${posY}%`;
+            shape.style.animationDuration = `${duration}s`;
+            shape.style.animationDelay = `${delay}s`;
             
-            background.appendChild(gradient);
+            // Random shape type
+            const shapeType = Math.floor(Math.random() * 3);
+            if (shapeType === 0) {
+                shape.style.borderRadius = '50%';
+            } else if (shapeType === 1) {
+                shape.style.borderRadius = '30%';
+            }
+            
+            // Random color
+            const colors = ['#4a6cf7', '#6c57d5', '#8c50c2', '#ff6b6b', '#ff9a8b'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            shape.style.backgroundColor = color;
+            
+            // Add shape to container
+            container.appendChild(shape);
         }
-        
-        // Add animated gradient style
-        const styleSheet = document.createElement('style');
-        styleSheet.type = 'text/css';
-        styleSheet.innerText = `
-            .gradient-orb {
-                position: absolute;
-                border-radius: 50%;
-                filter: blur(80px);
-                pointer-events: none;
-            }
-            
-            @keyframes float {
-                0% {
-                    transform: translate(0, 0) rotate(0deg);
-                }
-                25% {
-                    transform: translate(10%, 10%) rotate(90deg);
-                }
-                50% {
-                    transform: translate(5%, -5%) rotate(180deg);
-                }
-                75% {
-                    transform: translate(-10%, 5%) rotate(270deg);
-                }
-                100% {
-                    transform: translate(0, 0) rotate(360deg);
-                }
-            }
-        `;
-        document.head.appendChild(styleSheet);
     }
     
-    // Add subtle animations to page elements
+    // Add scroll animations
     function addScrollAnimations() {
-        const elements = document.querySelectorAll('.onboarding-card, .sidebar-content, .onboarding-helper');
+        const elements = document.querySelectorAll('.fade-in, .slide-in');
         
         elements.forEach(element => {
-            // Add initial invisible class
-            element.classList.add('animate-on-scroll');
+            // Start hidden
+            element.style.opacity = '0';
             
-            // Check if element is in viewport
-            checkIfInView(element);
-        });
-        
-        // Check on scroll
-        window.addEventListener('scroll', () => {
-            elements.forEach(element => {
-                checkIfInView(element);
+            // Add visibility check on scroll
+            window.addEventListener('scroll', function() {
+                if (checkIfInView(element)) {
+                    element.classList.add('show');
+                }
             });
+            
+            // Check initial visibility
+            if (checkIfInView(element)) {
+                element.classList.add('show');
+            }
         });
     }
     
     function checkIfInView(element) {
-        const elementTop = element.getBoundingClientRect().top;
-        const elementBottom = element.getBoundingClientRect().bottom;
-        const isVisible = elementTop < window.innerHeight && elementBottom > 0;
-        
-        if (isVisible) {
-            element.classList.add('visible');
-        }
+        const rect = element.getBoundingClientRect();
+        return (
+            rect.top <= (window.innerHeight || document.documentElement.clientHeight) &&
+            rect.bottom >= 0
+        );
     }
     
     function applyCheckboxEffect(checkbox) {
-        // Find the parent service option
-        const serviceOption = checkbox.closest('.service-option');
+        const parentOption = checkbox.closest('.service-option');
         
-        // Apply visual effect if it's a checkbox change
         if (checkbox.checked) {
-            serviceOption.style.borderColor = 'var(--primary)';
-            serviceOption.style.boxShadow = '0 5px 20px rgba(255, 26, 117, 0.15)';
-            serviceOption.style.transform = 'translateY(-2px)';
+            parentOption.classList.add('selected');
         } else {
-            serviceOption.style.borderColor = '';
-            serviceOption.style.boxShadow = '';
-            serviceOption.style.transform = '';
+            parentOption.classList.remove('selected');
         }
-        
-        // Add animation effect
-        serviceOption.style.animation = 'none';
-        setTimeout(() => {
-            serviceOption.style.animation = checkbox.checked ? 'pulse 0.5s ease' : '';
-        }, 10);
     }
     
-    // Helper functions for class setup
     function getRandomColor() {
-        const colors = [
-            '#4CAF50', '#2196F3', '#9C27B0', '#FF9800', 
-            '#F44336', '#009688', '#673AB7', '#3F51B5',
-            '#E91E63', '#FFC107', '#795548', '#607D8B'
-        ];
-        return colors[Math.floor(Math.random() * colors.length)];
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+    
+    function initDashboard() {
+        // Initialize Sortable for drag-and-drop functionality
+        const sortableContainer = document.getElementById('sortable-charts');
+        if (sortableContainer) {
+            new Sortable(sortableContainer, {
+                animation: 150,
+                handle: '.chart-header', // Drag by the header only
+                ghostClass: 'chart-ghost', // Class for the drop placeholder
+                onEnd: function(evt) {
+                    // Save the new order to localStorage
+                    saveDashboardLayout();
+                }
+            });
+        }
+    }
+    
+    function createCharts() {
+        // Generate fake data for charts
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+        const subjects = ['Math', 'Science', 'English', 'History', 'Art'];
+        const grades = ['A', 'B', 'C', 'D', 'F'];
+        const assignmentTypes = ['Homework', 'Quiz', 'Test', 'Project', 'Participation'];
+        
+        // Create GPA Trend Chart
+        const gpaTrendCtx = document.getElementById('gpa-trend-chart');
+        if (gpaTrendCtx) {
+            const gpaTrendChart = new Chart(gpaTrendCtx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'GPA',
+                        data: [3.5, 3.2, 3.6, 3.8, 3.7, 3.9],
+                        borderColor: '#4a6cf7',
+                        backgroundColor: 'rgba(74, 108, 247, 0.2)',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: false
+                        },
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `GPA: ${context.raw}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 4.0,
+                            ticks: {
+                                stepSize: 0.5
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Create Subject Performance Chart
+        const subjectCtx = document.getElementById('subject-performance-chart');
+        if (subjectCtx) {
+            const subjectPerformanceChart = new Chart(subjectCtx, {
+                type: 'radar',
+                data: {
+                    labels: subjects,
+                    datasets: [{
+                        label: 'Current Grade',
+                        data: [90, 85, 78, 92, 88],
+                        borderColor: '#4a6cf7',
+                        backgroundColor: 'rgba(74, 108, 247, 0.2)',
+                        pointBackgroundColor: '#4a6cf7'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 100,
+                            ticks: {
+                                stepSize: 20
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Create Grade Distribution Chart
+        const gradeDistCtx = document.getElementById('grade-distribution-chart');
+        if (gradeDistCtx) {
+            const gradeDistChart = new Chart(gradeDistCtx, {
+                type: 'pie',
+                data: {
+                    labels: grades,
+                    datasets: [{
+                        data: [40, 30, 15, 10, 5],
+                        backgroundColor: [
+                            '#4CAF50', // A - Green
+                            '#2196F3', // B - Blue
+                            '#FFC107', // C - Yellow
+                            '#FF9800', // D - Orange
+                            '#F44336'  // F - Red
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.label}: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Create Assignment Performance Chart
+        const assignmentCtx = document.getElementById('assignment-performance-chart');
+        if (assignmentCtx) {
+            const assignmentChart = new Chart(assignmentCtx, {
+                type: 'bar',
+                data: {
+                    labels: assignmentTypes,
+                    datasets: [{
+                        label: 'Average Score (%)',
+                        data: [85, 78, 82, 91, 95],
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.7)', // Blue
+                            'rgba(255, 99, 132, 0.7)', // Red
+                            'rgba(255, 206, 86, 0.7)', // Yellow
+                            'rgba(75, 192, 192, 0.7)', // Green
+                            'rgba(153, 102, 255, 0.7)' // Purple
+                        ],
+                        borderColor: [
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+    }
+    
+    function setupChartControls() {
+        // Widget visibility toggle
+        const toggleButtons = document.querySelectorAll('.widget-toggle');
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const widget = this.closest('.chart-widget');
+                const chartBody = widget.querySelector('.chart-body');
+                
+                if (chartBody.style.display === 'none') {
+                    chartBody.style.display = 'block';
+                    this.querySelector('i').classList.remove('fa-eye-slash');
+                    this.querySelector('i').classList.add('fa-eye');
+                } else {
+                    chartBody.style.display = 'none';
+                    this.querySelector('i').classList.remove('fa-eye');
+                    this.querySelector('i').classList.add('fa-eye-slash');
+                }
+                
+                // Save state
+                saveDashboardLayout();
+            });
+        });
+        
+        // Widget resize
+        const resizeButtons = document.querySelectorAll('.widget-resize');
+        resizeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const widget = this.closest('.chart-widget');
+                
+                if (widget.classList.contains('chart-large')) {
+                    widget.classList.remove('chart-large');
+                    this.querySelector('i').classList.remove('fa-compress-alt');
+                    this.querySelector('i').classList.add('fa-expand-alt');
+                } else {
+                    widget.classList.add('chart-large');
+                    this.querySelector('i').classList.remove('fa-expand-alt');
+                    this.querySelector('i').classList.add('fa-compress-alt');
+                }
+                
+                // Trigger resize to redraw charts
+                window.dispatchEvent(new Event('resize'));
+                
+                // Save state
+                saveDashboardLayout();
+            });
+        });
+        
+        // Widget remove
+        const removeButtons = document.querySelectorAll('.widget-remove');
+        removeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const widget = this.closest('.chart-widget');
+                
+                if (confirm('Are you sure you want to remove this chart from your dashboard?')) {
+                    widget.remove();
+                    
+                    // Save state
+                    saveDashboardLayout();
+                }
+            });
+        });
+    }
+    
+    function setupAddChartModal() {
+        const addChartBtn = document.getElementById('add-chart-btn');
+        const addChartModal = document.getElementById('add-chart-modal');
+        const cancelBtn = document.getElementById('cancel-add-chart');
+        const confirmBtn = document.getElementById('confirm-add-chart');
+        const closeModal = document.querySelector('#add-chart-modal .close-modal');
+        const chartOptions = document.querySelectorAll('.chart-option');
+        
+        // Show modal
+        if (addChartBtn && addChartModal) {
+            addChartBtn.addEventListener('click', function() {
+                addChartModal.style.display = 'block';
+                document.body.classList.add('modal-open');
+            });
+        }
+        
+        // Hide modal
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function() {
+                addChartModal.style.display = 'none';
+                document.body.classList.remove('modal-open');
+                
+                // Deselect all options
+                chartOptions.forEach(option => {
+                    option.classList.remove('selected');
+                });
+            });
+        }
+        
+        if (closeModal) {
+            closeModal.addEventListener('click', function() {
+                addChartModal.style.display = 'none';
+                document.body.classList.remove('modal-open');
+                
+                // Deselect all options
+                chartOptions.forEach(option => {
+                    option.classList.remove('selected');
+                });
+            });
+        }
+        
+        // Select chart options
+        chartOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                this.classList.toggle('selected');
+            });
+        });
+        
+        // Add selected charts to dashboard
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', function() {
+                const selectedOptions = document.querySelectorAll('.chart-option.selected');
+                
+                if (selectedOptions.length === 0) {
+                    alert('Please select at least one chart to add');
+                    return;
+                }
+                
+                selectedOptions.forEach(option => {
+                    const chartId = option.dataset.chartId;
+                    addChart(chartId);
+                    option.classList.remove('selected');
+                });
+                
+                // Hide modal
+                addChartModal.style.display = 'none';
+                document.body.classList.remove('modal-open');
+                
+                // Save state
+                saveDashboardLayout();
+            });
+        }
+    }
+    
+    function addChart(chartId) {
+        const chartsContainer = document.getElementById('sortable-charts');
+        if (!chartsContainer) return;
+        
+        // Check if chart already exists
+        const existingChart = document.querySelector(`.chart-widget[data-chart-id="${chartId}"]`);
+        if (existingChart) {
+            alert('This chart is already on your dashboard');
+            return;
+        }
+        
+        // Chart configurations
+        const chartConfigs = {
+            'grade-prediction': {
+                title: 'Grade Prediction',
+                type: 'line',
+                data: {
+                    labels: ['Current', 'Midterm', 'Final'],
+                    datasets: [{
+                        label: 'Math',
+                        data: [87, 90, 92],
+                        borderColor: '#4a6cf7',
+                        backgroundColor: 'rgba(74, 108, 247, 0.2)',
+                        tension: 0.3
+                    }, {
+                        label: 'Science',
+                        data: [82, 85, 88],
+                        borderColor: '#4CAF50',
+                        backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                        tension: 0.3
+                    }]
+                }
+            },
+            'test-score-analysis': {
+                title: 'Test Score Analysis',
+                type: 'bar',
+                data: {
+                    labels: ['Test 1', 'Test 2', 'Test 3', 'Test 4'],
+                    datasets: [{
+                        label: 'Score',
+                        data: [78, 85, 82, 90],
+                        backgroundColor: 'rgba(74, 108, 247, 0.7)',
+                        borderColor: 'rgba(74, 108, 247, 1)',
+                        borderWidth: 1
+                    }]
+                }
+            },
+            'improvement-opportunities': {
+                title: 'Improvement Opportunities',
+                type: 'polarArea',
+                data: {
+                    labels: ['Homework Completion', 'Test Preparation', 'Class Participation', 'Project Quality', 'Study Time'],
+                    datasets: [{
+                        data: [70, 60, 85, 75, 50],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(153, 102, 255, 0.7)'
+                        ]
+                    }]
+                }
+            }
+        };
+        
+        // Create chart widget
+        const widget = document.createElement('div');
+        widget.className = 'chart-widget';
+        widget.dataset.chartId = chartId;
+        
+        const config = chartConfigs[chartId];
+        if (!config) return;
+        
+        widget.innerHTML = `
+            <div class="chart-header">
+                <h4>${config.title}</h4>
+                <div class="widget-controls">
+                    <button class="btn-icon widget-toggle"><i class="fas fa-eye"></i></button>
+                    <button class="btn-icon widget-resize"><i class="fas fa-expand-alt"></i></button>
+                    <button class="btn-icon widget-remove"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+            <div class="chart-body">
+                <canvas id="${chartId}-chart"></canvas>
+            </div>
+        `;
+        
+        // Add to container
+        chartsContainer.appendChild(widget);
+        
+        // Initialize chart
+        const chartCanvas = document.getElementById(`${chartId}-chart`);
+        if (chartCanvas) {
+            new Chart(chartCanvas, {
+                type: config.type,
+                data: config.data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Setup controls for the new widget
+        const toggleBtn = widget.querySelector('.widget-toggle');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function() {
+                const chartBody = widget.querySelector('.chart-body');
+                
+                if (chartBody.style.display === 'none') {
+                    chartBody.style.display = 'block';
+                    this.querySelector('i').classList.remove('fa-eye-slash');
+                    this.querySelector('i').classList.add('fa-eye');
+                } else {
+                    chartBody.style.display = 'none';
+                    this.querySelector('i').classList.remove('fa-eye');
+                    this.querySelector('i').classList.add('fa-eye-slash');
+                }
+                
+                // Save state
+                saveDashboardLayout();
+            });
+        }
+        
+        const resizeBtn = widget.querySelector('.widget-resize');
+        if (resizeBtn) {
+            resizeBtn.addEventListener('click', function() {
+                if (widget.classList.contains('chart-large')) {
+                    widget.classList.remove('chart-large');
+                    this.querySelector('i').classList.remove('fa-compress-alt');
+                    this.querySelector('i').classList.add('fa-expand-alt');
+                } else {
+                    widget.classList.add('chart-large');
+                    this.querySelector('i').classList.remove('fa-expand-alt');
+                    this.querySelector('i').classList.add('fa-compress-alt');
+                }
+                
+                // Trigger resize to redraw charts
+                window.dispatchEvent(new Event('resize'));
+                
+                // Save state
+                saveDashboardLayout();
+            });
+        }
+        
+        const removeBtn = widget.querySelector('.widget-remove');
+        if (removeBtn) {
+            removeBtn.addEventListener('click', function() {
+                if (confirm('Are you sure you want to remove this chart from your dashboard?')) {
+                    widget.remove();
+                    
+                    // Save state
+                    saveDashboardLayout();
+                }
+            });
+        }
+    }
+    
+    function saveDashboardLayout() {
+        const widgets = document.querySelectorAll('.chart-widget');
+        const layout = [];
+        
+        widgets.forEach(widget => {
+            layout.push({
+                id: widget.dataset.chartId,
+                visible: widget.querySelector('.chart-body').style.display !== 'none',
+                large: widget.classList.contains('chart-large')
+            });
+        });
+        
+        // In a real app, this would be saved to a database
+        // For now, we'll just save to localStorage
+        localStorage.setItem('dashboardLayout', JSON.stringify(layout));
     }
     
     // Initialize animations

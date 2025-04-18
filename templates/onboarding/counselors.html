@@ -1,0 +1,201 @@
+{% extends "onboarding/base.html" %}
+
+{% block title %}SciWeb 3.0 - Choose Your Counselors{% endblock %}
+
+{% block header_title %}Choose Your Counselors{% endblock %}
+{% block header_subtitle %}Customize your three AI counselors to help you succeed{% endblock %}
+
+{% block onboarding_content %}
+<form action="{{ url_for('onboarding', step='counselors') }}" method="post" class="onboarding-form">
+    <div class="counselors-container">
+        <!-- Admissions Officer Counselor -->
+        <div class="counselor-card">
+            <h3>Admissions Officer</h3>
+            <p>Provides high-level feedback on your academic profile, transcript, and extracurriculars.</p>
+            
+            <div class="avatar-selection">
+                <h4>Select an Avatar</h4>
+                <div class="avatar-options">
+                    <label class="avatar-option">
+                        <input type="radio" name="admissions_avatar" value="avatar1" checked>
+                        <img src="{{ url_for('static', filename='images/counselors/admissions1.png') }}" alt="Avatar 1">
+                    </label>
+                    <label class="avatar-option">
+                        <input type="radio" name="admissions_avatar" value="avatar2">
+                        <img src="{{ url_for('static', filename='images/counselors/admissions2.png') }}" alt="Avatar 2">
+                    </label>
+                    <label class="avatar-option">
+                        <input type="radio" name="admissions_avatar" value="avatar3">
+                        <img src="{{ url_for('static', filename='images/counselors/admissions3.png') }}" alt="Avatar 3">
+                    </label>
+                </div>
+            </div>
+            
+            <div class="counselor-name">
+                <label for="admissions_name">Name Your Counselor</label>
+                <input type="text" id="admissions_name" name="admissions_name" placeholder="e.g., Dr. Taylor" required>
+            </div>
+            
+            <div class="counselor-personality">
+                <label for="admissions_personality">Personality Style</label>
+                <select id="admissions_personality" name="admissions_personality" required>
+                    <option value="supportive">Supportive & Encouraging</option>
+                    <option value="analytical">Analytical & Direct</option>
+                    <option value="challenging">Challenging & Motivating</option>
+                    <option value="calm">Calm & Methodical</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Strategic Coordinator Counselor -->
+        <div class="counselor-card">
+            <h3>Strategic Coordinator</h3>
+            <p>Helps you manage your academic plan, opportunities, and weekly progress.</p>
+            
+            <div class="avatar-selection">
+                <h4>Select an Avatar</h4>
+                <div class="avatar-options">
+                    <label class="avatar-option">
+                        <input type="radio" name="strategic_avatar" value="avatar1" checked>
+                        <img src="{{ url_for('static', filename='images/counselors/strategic1.png') }}" alt="Avatar 1">
+                    </label>
+                    <label class="avatar-option">
+                        <input type="radio" name="strategic_avatar" value="avatar2">
+                        <img src="{{ url_for('static', filename='images/counselors/strategic2.png') }}" alt="Avatar 2">
+                    </label>
+                    <label class="avatar-option">
+                        <input type="radio" name="strategic_avatar" value="avatar3">
+                        <img src="{{ url_for('static', filename='images/counselors/strategic3.png') }}" alt="Avatar 3">
+                    </label>
+                </div>
+            </div>
+            
+            <div class="counselor-name">
+                <label for="strategic_name">Name Your Counselor</label>
+                <input type="text" id="strategic_name" name="strategic_name" placeholder="e.g., Ms. Rivera" required>
+            </div>
+            
+            <div class="counselor-personality">
+                <label for="strategic_personality">Personality Style</label>
+                <select id="strategic_personality" name="strategic_personality" required>
+                    <option value="organized">Organized & Structured</option>
+                    <option value="creative">Creative & Innovative</option>
+                    <option value="detailed">Detail-Oriented & Thorough</option>
+                    <option value="balanced">Balanced & Adaptable</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Daily Assistant Counselor -->
+        <div class="counselor-card">
+            <h3>Daily Assistant</h3>
+            <p>Your day-to-day guide for using SciWeb, completing tasks, and managing your workload.</p>
+            
+            <div class="avatar-selection">
+                <h4>Select an Avatar</h4>
+                <div class="avatar-options">
+                    <label class="avatar-option">
+                        <input type="radio" name="assistant_avatar" value="avatar1" checked>
+                        <img src="{{ url_for('static', filename='images/counselors/assistant1.png') }}" alt="Avatar 1">
+                    </label>
+                    <label class="avatar-option">
+                        <input type="radio" name="assistant_avatar" value="avatar2">
+                        <img src="{{ url_for('static', filename='images/counselors/assistant2.png') }}" alt="Avatar 2">
+                    </label>
+                    <label class="avatar-option">
+                        <input type="radio" name="assistant_avatar" value="avatar3">
+                        <img src="{{ url_for('static', filename='images/counselors/assistant3.png') }}" alt="Avatar 3">
+                    </label>
+                </div>
+            </div>
+            
+            <div class="counselor-name">
+                <label for="assistant_name">Name Your Counselor</label>
+                <input type="text" id="assistant_name" name="assistant_name" placeholder="e.g., Alex" required>
+            </div>
+            
+            <div class="counselor-personality">
+                <label for="assistant_personality">Personality Style</label>
+                <select id="assistant_personality" name="assistant_personality" required>
+                    <option value="friendly">Friendly & Approachable</option>
+                    <option value="efficient">Efficient & Practical</option>
+                    <option value="enthusiastic">Enthusiastic & Energetic</option>
+                    <option value="gentle">Gentle & Patient</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <div class="usage-preferences">
+        <h3>How You'll Use Your Counselors</h3>
+        <div class="preference-options">
+            <label class="preference-option">
+                <input type="checkbox" name="usage_preferences" value="regular_check_ins" checked>
+                <span>Regular check-ins for progress updates</span>
+            </label>
+            <label class="preference-option">
+                <input type="checkbox" name="usage_preferences" value="academic_planning">
+                <span>Academic planning and goal setting</span>
+            </label>
+            <label class="preference-option">
+                <input type="checkbox" name="usage_preferences" value="daily_organization">
+                <span>Daily task organization and reminders</span>
+            </label>
+            <label class="preference-option">
+                <input type="checkbox" name="usage_preferences" value="extracurricular_advice">
+                <span>Extracurricular and opportunity advice</span>
+            </label>
+            <label class="preference-option">
+                <input type="checkbox" name="usage_preferences" value="study_strategies">
+                <span>Study strategies and learning techniques</span>
+            </label>
+        </div>
+    </div>
+    
+    <div class="form-actions">
+        <button type="submit" class="primary-button">Continue</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block helper_message %}
+Your counselors will help you throughout your academic journey. Choose personalities and avatars that resonate with you!
+{% endblock %}
+
+{% block sidebar_title %}Meet Your AI Team{% endblock %}
+
+{% block sidebar_content %}
+<div class="integration-info">
+    <h3>Your Personal Support System</h3>
+    <p>SciWeb's three AI counselors work together to support every aspect of your academic life, from daily tasks to long-term goals.</p>
+    
+    <div class="counselor-roles">
+        <div class="role-item">
+            <h4><i class="fas fa-user-graduate"></i> Admissions Officer</h4>
+            <p>Reviews your academic profile every 2-3 months with a college admissions perspective.</p>
+        </div>
+        
+        <div class="role-item">
+            <h4><i class="fas fa-chess-queen"></i> Strategic Coordinator</h4>
+            <p>Works with you weekly to manage your academic plan, tasks, and opportunities.</p>
+        </div>
+        
+        <div class="role-item">
+            <h4><i class="fas fa-hands-helping"></i> Daily Assistant</h4>
+            <p>Available anytime to help with homework, studying, and using SciWeb effectively.</p>
+        </div>
+    </div>
+</div>
+
+<div class="testimonial">
+    <div class="quote-mark">"</div>
+    <p>My counselors keep me on track and motivated. It feels like having a personal support team that knows exactly what I need.</p>
+    <div class="testimonial-author">
+        <img src="{{ url_for('static', filename='images/testimonial-avatar2.png') }}" alt="Student">
+        <div>
+            <h4>Jamie Chen</h4>
+            <p>High School Senior</p>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,15 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SciWeb 3.0 - Counselor</title>
+{% extends "base.html" %}
+
+{% block title %}SciWeb 3.0 - Counselor{% endblock %}
+
+{% block head %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/counselor.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
     <!-- Background Pattern and Stars -->
     <div class="bg-pattern"></div>
     <div class="stars">
@@ -19,34 +19,14 @@
         <div class="shooting-star"></div>
         <div class="shooting-star"></div>
     </div>
-
-    <header>
-        <nav class="navbar">
-            <div class="logo-container">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="logo">
-                <div class="logo-text">SciWeb</div>
-            </div>
-            <ul class="nav-links">
-                <li><a href="/">Home</a></li>
-                <li><a href="/tree">Tree</a></li>
-                <li><a href="/schedule">Schedule</a></li>
-                <li><a href="/counselor" class="active">Counselor</a></li>
-                <li><a href="/signup">Sign Up</a></li>
-            </ul>
-            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
-        </nav>
-    </header>
-
     <main>
         <!-- Main Title -->
         <h1 class="main-title">Counselor</h1>
-        
         <div class="counselor-container">
             <div class="page-header">
                 <h1>AI Counselors</h1>
                 <p class="counselor-intro">Choose your advisor based on your current needs and academic goals</p>
             </div>
-            
             <div class="counselor-cards">
                 <div class="counselor-card" id="admissions-officer">
                     <div class="avatar">
@@ -65,7 +45,6 @@
                     </div>
                     <button class="btn" id="start-admissions">Start Session</button>
                 </div>
-
                 <div class="counselor-card" id="strategic-coordinator">
                     <div class="avatar">
                         <img src="{{ url_for('static', filename='images/strategic-coordinator.png') }}" alt="Strategic Coordinator Avatar" onerror="this.src='{{ url_for('static', filename='images/default-avatar-2.png') }}'">
@@ -83,7 +62,6 @@
                     </div>
                     <button class="btn" id="start-coordinator">Start Session</button>
                 </div>
-
                 <div class="counselor-card" id="assistant">
                     <div class="avatar">
                         <img src="{{ url_for('static', filename='images/assistant.png') }}" alt="Assistant Avatar" onerror="this.src='{{ url_for('static', filename='images/default-avatar-3.png') }}'">
@@ -102,7 +80,6 @@
                     <button class="btn" id="start-assistant">Start Session</button>
                 </div>
             </div>
-
             <div class="chat-container hidden" id="chat-window">
                 <div class="chat-header">
                     <div class="chat-avatar">
@@ -120,7 +97,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Floating Assistant Button (visible on all pages) -->
         <div class="floating-assistant">
             <div class="assistant-icon" id="toggle-assistant">
@@ -128,11 +104,8 @@
             </div>
         </div>
     </main>
+{% endblock %}
 
-    <footer>
-        <p>&copy; 2023 SciWeb 3.0. All rights reserved.</p>
-    </footer>
-
+{% block scripts %}
     <script src="{{ url_for('static', filename='js/counselor.js') }}"></script>
-</body>
-</html> 
+{% endblock %} 

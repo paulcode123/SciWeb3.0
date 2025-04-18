@@ -134,6 +134,10 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 1.5rem;
   color: var(--text-dark);
   transition: color var(--transition-speed), transform 0.3s;
+  position: relative;
+  z-index: 1001;
+  padding: 8px;
+  outline: none;
 }
 
 .dark-mode .theme-toggle {

@@ -1,33 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SciWeb 3.0 - Project Collaboration</title>
+{% extends "base.html" %}
+
+{% block title %}SciWeb 3.0 - Project Collaboration{% endblock %}
+
+{% block head %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/collab.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="logo-container">
-            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="logo">
-            <div class="logo-text">SciWeb</div>
-        </div>
-        <ul class="nav-links">
-            <li><a href="/">Home</a></li>
-            <li><a href="/tree">Tree</a></li>
-            <li><a href="/schedule">Schedule</a></li>
-            <li><a href="/counselor">Counselor</a></li>
-            <li><a href="#">Login</a></li>
-        </ul>
-        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
-    </nav>
+{% endblock %}
 
+{% block content %}
     <!-- Project Header -->
     <section class="project-header">
         <div class="project-header-content">
@@ -56,7 +40,6 @@
             </div>
         </div>
     </section>
-
     <!-- Main Content -->
     <main class="collab-container">
         <!-- Left Sidebar - Project Navigation -->
@@ -71,7 +54,6 @@
                     <li><a href="#chat"><i class="fas fa-comments"></i> Chat</a></li>
                 </ul>
             </div>
-
             <div class="sidebar-section">
                 <h3 class="sidebar-title">Team Members</h3>
                 <div class="team-members-list">
@@ -108,7 +90,6 @@
                 </div>
                 <button class="btn btn-small" id="add-member-btn"><i class="fas fa-plus"></i> Add Member</button>
             </div>
-
             <div class="sidebar-section">
                 <h3 class="sidebar-title">Project Nodes</h3>
                 <div class="project-nodes">
@@ -128,7 +109,6 @@
                 <button class="btn btn-small"><i class="fas fa-plus"></i> Add Node</button>
             </div>
         </aside>
-
         <!-- Main Content Area -->
         <div class="collab-content">
             <!-- Tab content -->
@@ -148,7 +128,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="card">
                         <div class="card-header">
                             <h3>Progress</h3>
@@ -176,7 +155,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="card">
                         <div class="card-header">
                             <h3>Recent Activity</h3>
@@ -209,7 +187,6 @@
                     </div>
                 </div>
             </div>
-
             <div id="tasks" class="tab-content">
                 <div class="content-header">
                     <h2>Task Board</h2>
@@ -296,7 +273,6 @@
                     </div>
                 </div>
             </div>
-
             <div id="whiteboard" class="tab-content">
                 <div class="content-header">
                     <h2>Collaborative Whiteboard</h2>
@@ -317,7 +293,6 @@
                     <canvas id="whiteboard-canvas" class="whiteboard"></canvas>
                 </div>
             </div>
-
             <div id="files" class="tab-content">
                 <div class="content-header">
                     <h2>Project Files</h2>
@@ -388,7 +363,6 @@
                     </div>
                 </div>
             </div>
-
             <div id="chat" class="tab-content">
                 <div class="content-header">
                     <h2>Team Chat</h2>
@@ -474,7 +448,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Right Sidebar - Project Details -->
         <aside class="collab-sidebar right-sidebar">
             <div class="sidebar-section">
@@ -517,7 +490,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="sidebar-section">
                 <h3 class="sidebar-title">Project Resources</h3>
                 <div class="resource-links">
@@ -528,7 +500,6 @@
                 </div>
                 <button class="btn btn-small"><i class="fas fa-plus"></i> Add Resource</button>
             </div>
-
             <div class="sidebar-section">
                 <h3 class="sidebar-title">Upcoming Deadlines</h3>
                 <div class="deadlines">
@@ -557,168 +528,9 @@
             </div>
         </aside>
     </main>
+{% endblock %}
 
-    <!-- Modals -->
-    <div class="modal" id="add-member-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Add Team Member</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="member-email">Email Address</label>
-                    <input type="email" id="member-email" placeholder="Enter email address">
-                </div>
-                <div class="form-group">
-                    <label for="member-role">Role</label>
-                    <select id="member-role">
-                        <option value="contributor">Contributor</option>
-                        <option value="editor">Editor</option>
-                        <option value="viewer">Viewer</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="member-message">Invitation Message (Optional)</label>
-                    <textarea id="member-message" placeholder="Add a personalized message..."></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary close-modal">Cancel</button>
-                <button class="btn btn-primary">Send Invitation</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal" id="add-task-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Add New Task</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="task-title">Task Title</label>
-                    <input type="text" id="task-title" placeholder="Enter task title">
-                </div>
-                <div class="form-group">
-                    <label for="task-description">Description</label>
-                    <textarea id="task-description" placeholder="Enter task description"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="task-assignee">Assignee</label>
-                    <select id="task-assignee">
-                        <option value="john">John Doe</option>
-                        <option value="jane">Jane Smith</option>
-                        <option value="alex">Alex Johnson</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="task-due-date">Due Date</label>
-                    <input type="date" id="task-due-date">
-                </div>
-                <div class="form-group">
-                    <label for="task-priority">Priority</label>
-                    <select id="task-priority">
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
-                    </select>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary close-modal">Cancel</button>
-                <button class="btn btn-primary">Create Task</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal" id="share-project-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Share Project</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="share-link">Project Link</label>
-                    <div class="copy-link-container">
-                        <input type="text" id="share-link" value="https://sciweb.com/project/{% if project_id %}{{ project_id }}{% else %}12345{% endif %}" readonly>
-                        <button class="copy-link-btn"><i class="fas fa-copy"></i></button>
-                    </div>
-                </div>
-                <div class="sharing-options">
-                    <h4>Sharing Options</h4>
-                    <div class="share-option">
-                        <input type="radio" id="share-edit" name="share-permission" value="edit">
-                        <label for="share-edit">Can edit</label>
-                    </div>
-                    <div class="share-option">
-                        <input type="radio" id="share-comment" name="share-permission" value="comment" checked>
-                        <label for="share-comment">Can comment</label>
-                    </div>
-                    <div class="share-option">
-                        <input type="radio" id="share-view" name="share-permission" value="view">
-                        <label for="share-view">Can view</label>
-                    </div>
-                </div>
-                <div class="share-via">
-                    <h4>Share via</h4>
-                    <div class="share-buttons">
-                        <button class="share-btn email"><i class="fas fa-envelope"></i> Email</button>
-                        <button class="share-btn slack"><i class="fab fa-slack"></i> Slack</button>
-                        <button class="share-btn teams"><i class="fas fa-users"></i> Teams</button>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary close-modal">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-info">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="footer-logo">
-                <p>Building the future of education together.</p>
-            </div>
-            <div class="footer-links">
-                <h3>Quick Links</h3>
-                <ul>
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/tree">Tree</a></li>
-                    <li><a href="/schedule">Schedule</a></li>
-                    <li><a href="/counselor">Counselor</a></li>
-                    <li><a href="#">Login</a></li>
-                </ul>
-            </div>
-            <div class="footer-links">
-                <h3>Features</h3>
-                <ul>
-                    <li><a href="#">Study Tools</a></li>
-                    <li><a href="#">Grade Analysis</a></li>
-                    <li><a href="#">AI Counselors</a></li>
-                    <li><a href="#">Community</a></li>
-                </ul>
-            </div>
-            <div class="footer-links">
-                <h3>Connect</h3>
-                <ul>
-                    <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
-                    <li><a href="#"><i class="fab fa-github"></i> GitHub</a></li>
-                    <li><a href="#"><i class="fab fa-discord"></i> Discord</a></li>
-                    <li><a href="#"><i class="fas fa-envelope"></i> Contact Us</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2025 SciWeb. All rights reserved.</p>
-        </div>
-    </footer>
-
+{% block scripts %}
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/collab.js') }}"></script>
-</body>
-</html> 
+{% endblock %} 

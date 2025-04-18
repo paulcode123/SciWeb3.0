@@ -2,35 +2,53 @@
 document.addEventListener('DOMContentLoaded', () => {
   // Dark mode toggle
   const themeToggle = document.getElementById('theme-toggle');
-  const body = document.body;
+  console.log("Theme toggle element:", themeToggle);
   
-  // Check for saved theme preference or use device preference
-  const savedTheme = localStorage.getItem('theme');
-  if (savedTheme === 'dark') {
-    body.classList.add('dark-mode');
-    themeToggle.innerHTML = '☀️';
-  } else if (savedTheme === 'light') {
-    body.classList.remove('dark-mode');
-    themeToggle.innerHTML = '🌙';
-  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    body.classList.add('dark-mode');
-    themeToggle.innerHTML = '☀️';
-  } else {
-    themeToggle.innerHTML = '🌙';
-  }
-  
-  // Toggle theme on button click
-  themeToggle.addEventListener('click', () => {
-    body.classList.toggle('dark-mode');
+  // Only proceed if theme toggle exists
+  if (themeToggle) {
+    const body = document.body;
+    console.log("Initial body classes:", body.classList);
     
-    if (body.classList.contains('dark-mode')) {
+    // Check for saved theme preference or use device preference
+    const savedTheme = localStorage.getItem('theme');
+    console.log("Saved theme from localStorage:", savedTheme);
+    
+    if (savedTheme === 'dark') {
+      body.classList.add('dark-mode');
       themeToggle.innerHTML = '☀️';
-      localStorage.setItem('theme', 'dark');
+      console.log("Applied dark theme from localStorage");
+    } else if (savedTheme === 'light') {
+      body.classList.remove('dark-mode');
+      themeToggle.innerHTML = '🌙';
+      console.log("Applied light theme from localStorage");
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      body.classList.add('dark-mode');
+      themeToggle.innerHTML = '☀️';
+      console.log("Applied dark theme from system preference");
     } else {
       themeToggle.innerHTML = '🌙';
-      localStorage.setItem('theme', 'light');
+      console.log("Default to light theme");
     }
-  });
+    
+    // Toggle theme on button click
+    themeToggle.addEventListener('click', (e) => {
+      console.log("Theme toggle clicked!", e);
+      body.classList.toggle('dark-mode');
+      console.log("Body classes after toggle:", body.classList);
+      
+      if (body.classList.contains('dark-mode')) {
+        themeToggle.innerHTML = '☀️';
+        localStorage.setItem('theme', 'dark');
+        console.log("Switched to dark theme");
+      } else {
+        themeToggle.innerHTML = '🌙';
+        localStorage.setItem('theme', 'light');
+        console.log("Switched to light theme");
+      }
+    });
+  } else {
+    console.error("Theme toggle element not found!");
+  }
   
   // Create particles for hero section
   const particles = document.querySelector('.particles');
