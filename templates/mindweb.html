@@ -10,6 +10,98 @@
 {% endblock %}
 
 {% block content %}
+    <!-- Starter Config Modal -->
+    <div class="modal fade" id="starter-config-modal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="starterConfigModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="starterConfigModalLabel">Configure Your Learning Experience</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <h6 class="mb-2">Learning Goals</h6>
+                            <textarea id="learning-goals" class="form-control" rows="2">{{ study_goal }}</textarea>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h6 class="mb-2">AI Guide Style</h6>
+                                <select id="ai-style" class="form-select">
+                                    <option value="socratic">Socratic (asks questions to guide discovery)</option>
+                                    <option value="informative">Informative (provides direct explanations)</option>
+                                    <option value="challenging">Challenging (tests your knowledge)</option>
+                                    <option value="supportive">Supportive (offers encouragement)</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <h6 class="mb-2">Learning Approach</h6>
+                                <select id="learning-approach" class="form-select">
+                                    <option value="constructivist">Constructivist (build your own understanding)</option>
+                                    <option value="guided">Guided Instruction (step by step guidance)</option>
+                                    <option value="exploratory">Exploratory (discover connections)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h6 class="mb-2">Difficulty Level</h6>
+                                <select id="difficulty-level" class="form-select">
+                                    <option value="beginner">Beginner</option>
+                                    <option value="intermediate" selected>Intermediate</option>
+                                    <option value="advanced">Advanced</option>
+                                    <option value="expert">Expert</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <h6 class="mb-2">Focus Areas (select multiple)</h6>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="focus-concepts" checked>
+                                    <label class="form-check-label" for="focus-concepts">Core Concepts</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="focus-relationships">
+                                    <label class="form-check-label" for="focus-relationships">Relationships Between Concepts</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="focus-applications">
+                                    <label class="form-check-label" for="focus-applications">Real-world Applications</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="focus-misconceptions">
+                                    <label class="form-check-label" for="focus-misconceptions">Common Misconceptions</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="enable-ai-suggestions" checked>
+                                <label class="form-check-label" for="enable-ai-suggestions">Enable AI-suggested concepts</label>
+                            </div>
+                            <div id="ai-suggestions-options" class="mt-2 p-3 border rounded">
+                                <p class="text-muted mb-2 small">When enabled, the AI will suggest relevant concepts that you can drag onto your mindmap.</p>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="suggestion-frequency" id="suggestion-auto" value="auto" checked>
+                                    <label class="form-check-label" for="suggestion-auto">Suggest automatically</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="suggestion-frequency" id="suggestion-manual" value="manual">
+                                    <label class="form-check-label" for="suggestion-manual">Only when requested</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="start-mindweb-btn">Start MindWeb</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container-fluid py-4">
         <div class="row justify-content-center">
             <div class="col-lg-10">
@@ -17,10 +109,10 @@
                     <div class="card-header bg-primary text-white">
                         <h5 class="mb-0">{{ title }}</h5>
                         <span class="small text-light ms-3">Subject: {{ subject }}</span>
-                        <span class="small text-light ms-3">Goal: {{ study_goal }}</span>
+                        <span class="small text-light ms-3" id="study-goal-display">Goal: {{ study_goal }}</span>
                     </div>
                     <div class="card-body">
-                        <div class="d-flex flex-wrap gap-2 mb-3">
+                        <div class="d-flex flex-wrap gap-2 mb-3" id="mindweb-toolbar">
                             <button id="add-concept-btn" class="btn btn-outline-primary btn-sm">
                                 <i class="fas fa-plus-circle"></i> Add Concept
                             </button>
@@ -30,11 +122,11 @@
                             <button id="delete-selected-btn" class="btn btn-outline-danger btn-sm">
                                 <i class="fas fa-trash"></i> Delete Selected
                             </button>
-                            <button id="layout-btn" class="btn btn-outline-secondary btn-sm">
-                                <i class="fas fa-magic"></i> Auto-arrange
-                            </button>
                             <button id="save-mindweb-btn" class="btn btn-success btn-sm">
                                 <i class="fas fa-save"></i> Save MindWeb
+                            </button>
+                            <button id="settings-btn" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-cog"></i> Settings
                             </button>
                             <div class="ms-auto btn-group" role="group">
                                 <button id="zoom-in-btn" class="btn btn-sm btn-outline-secondary">
@@ -54,6 +146,17 @@
                             </div>
                             <div class="card-body">
                                 <div id="mindweb-container"></div>
+                                <!-- AI Suggestions Panel -->
+                                <div id="ai-suggestions-panel" class="card position-absolute end-0 top-0 m-3" style="width: 250px; display: none; z-index: 1000;">
+                                    <div class="card-header bg-info text-white py-2">
+                                        <h6 class="mb-0">AI Suggested Concepts</h6>
+                                    </div>
+                                    <div class="card-body p-2">
+                                        <div id="suggested-concepts-list" class="list-group small">
+                                            <!-- Suggestions will be added here -->
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="card">
@@ -73,6 +176,24 @@
                                             <i class="fas fa-paper-plane"></i>
                                         </button>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header bg-secondary text-white">
+                                <h5 class="mb-0">Tools</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button class="btn btn-outline-primary">
+                                        <i class="fas fa-book"></i> Generate Study Guide from Web
+                                    </button>
+                                    <button class="btn btn-outline-primary">
+                                        <i class="fas fa-map"></i> Map Problem/Idea onto Web
+                                    </button>
+                                    <button class="btn btn-outline-primary">
+                                        <i class="fas fa-share-alt"></i> Share Web
+                                    </button>
                                 </div>
                             </div>
                         </div>

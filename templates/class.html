@@ -1,33 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SciWeb 3.0 - Class Page</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/class.css') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="logo-container">
-            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="logo">
-            <div class="logo-text">SciWeb</div>
-        </div>
-        <ul class="nav-links">
-            <li><a href="/">Home</a></li>
-            <li><a href="/tree">Tree</a></li>
-            <li><a href="/schedule">Schedule</a></li>
-            <li><a href="/counselor">Counselor</a></li>
-            <li><a href="/signup">Sign Up</a></li>
-        </ul>
-        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
-    </nav>
+{% extends "base.html" %}
 
+{% block title %}SciWeb 3.0 - Class Page{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/class.css') }}">
+{% endblock %}
+
+{% block content %}
     <!-- Class Header -->
     <section class="class-header">
         <div class="class-info">
@@ -413,53 +392,24 @@
                             <button class="btn btn-small">RSVP</button>
                         </div>
                     </div>
-
-                    <button class="btn btn-text">View All Events</button>
-                </div>
-            </section>
-
-            <!-- Study Guides Section -->
-            <section class="dashboard-card guides-card">
-                <div class="card-header">
-                    <h2><i class="fas fa-book"></i> Study Guides</h2>
-                    <button class="btn-icon"><i class="fas fa-plus"></i></button>
-                </div>
-                <div class="card-content">
-                    <div class="guide-list">
-                        <div class="guide">
-                            <div class="guide-icon"><i class="fas fa-file-pdf"></i></div>
-                            <div class="guide-details">
-                                <h3>Midterm Study Guide</h3>
-                                <p>Created by Prof. Johnson · May 10, 2024</p>
-                            </div>
-                            <div class="guide-actions">
-                                <button class="btn-icon"><i class="fas fa-download"></i></button>
-                            </div>
+                    
+                    <div class="event">
+                        <div class="event-date">
+                            <span class="day">22</span>
+                            <span class="month">May</span>
                         </div>
-
-                        <div class="guide">
-                            <div class="guide-icon"><i class="fas fa-file-alt"></i></div>
-                            <div class="guide-details">
-                                <h3>Chapter 5-7 Summary</h3>
-                                <p>Created by Alice Wang · May 5, 2024</p>
-                            </div>
-                            <div class="guide-actions">
-                                <button class="btn-icon"><i class="fas fa-download"></i></button>
-                            </div>
+                        <div class="event-details">
+                            <h3>Final Exam Preparation</h3>
+                            <p><i class="fas fa-clock"></i> 3:00 PM - 5:30 PM</p>
+                            <p><i class="fas fa-map-marker-alt"></i> Learning Center</p>
+                            <p><i class="fas fa-user"></i> Hosted by: Teaching Assistants</p>
                         </div>
-
-                        <div class="guide">
-                            <div class="guide-icon"><i class="fas fa-file-powerpoint"></i></div>
-                            <div class="guide-details">
-                                <h3>Key Concepts Presentation</h3>
-                                <p>Created by John Doe · April 28, 2024</p>
-                            </div>
-                            <div class="guide-actions">
-                                <button class="btn-icon"><i class="fas fa-download"></i></button>
-                            </div>
+                        <div class="event-actions">
+                            <button class="btn btn-small">RSVP</button>
                         </div>
                     </div>
-                    <button class="btn btn-text">View All Study Guides</button>
+
+                    <button class="btn btn-text">View All Events</button>
                 </div>
             </section>
         </div>
@@ -555,156 +505,370 @@
 
     <!-- Learning Resources Section -->
     <section class="resources-section">
-        <h2 class="section-title">Learning Resources</h2>
+        <h2 class="section-title">Course Units</h2>
         
-        <div class="tabs">
-            <button class="tab-btn active" data-tab="worksheets">Worksheets</button>
-            <button class="tab-btn" data-tab="practice">Practice Problems</button>
-            <button class="tab-btn" data-tab="tests">Practice Tests</button>
+        <!-- Units navigation -->
+        <div class="units-navigation">
+            <button class="unit-tab active" data-unit="unit1">Unit 1: Introduction</button>
+            <button class="unit-tab" data-unit="unit2">Unit 2: Fundamentals</button>
+            <button class="unit-tab" data-unit="unit3">Unit 3: Advanced Concepts</button>
+            <button class="unit-tab" data-unit="unit4">Unit 4: Applications</button>
+            <button class="unit-add-btn"><i class="fas fa-plus"></i> Add Unit</button>
         </div>
         
-        <div class="tab-content">
-            <div class="tab-pane active" id="worksheets">
-                <div class="resource-grid">
-                    <div class="resource-card">
-                        <div class="resource-icon"><i class="fas fa-file-alt"></i></div>
-                        <div class="resource-details">
-                            <h3>Worksheet 1: Basic Concepts</h3>
-                            <p>10 problems · Difficulty: Easy</p>
+        <!-- Units content -->
+        <div class="units-content">
+            <!-- Unit 1 -->
+            <div class="unit-content active" id="unit1">
+                <div class="unit-header">
+                    <h3 class="unit-title">Unit 1: Introduction to the Subject</h3>
+                    <p class="unit-description">This unit covers the basic principles and foundational concepts of the subject.</p>
+                </div>
+                
+                <div class="unit-tabs">
+                    <div class="tabs">
+                        <button class="tab-btn active" data-tab="unit1-worksheets">Worksheets</button>
+                        <button class="tab-btn" data-tab="unit1-guides">Study Guides</button>
+                        <button class="tab-btn" data-tab="unit1-mindwebs">Mind Webs</button>
+                        <button class="tab-btn" data-tab="unit1-practice">Practice Problems</button>
+                        <button class="tab-btn" data-tab="unit1-tests">Practice Tests</button>
+                    </div>
+                </div>
+
+                <div class="tab-content">
+                    <!-- Worksheets Tab -->
+                    <div class="tab-pane active" id="unit1-worksheets">
+                        <div class="upload-section">
+                            <button class="btn btn-primary upload-btn"><i class="fas fa-upload"></i> Upload Worksheet</button>
+                            <p class="upload-info">Upload worksheets to share with the class (.pdf, .docx, .xlsx)</p>
                         </div>
-                        <div class="resource-actions">
-                            <button class="btn btn-small">Start</button>
-                            <button class="btn-icon"><i class="fas fa-download"></i></button>
+                        <div class="resource-list">
+                            <div class="resource-item worksheet-item">
+                                <div class="resource-icon"><i class="fas fa-file-alt"></i></div>
+                                <div class="resource-details">
+                                    <h3 class="resource-title">Worksheet 1.1: Basic Concepts</h3>
+                                    <p class="resource-meta">10 problems · Uploaded by Prof. Johnson · May 10, 2024</p>
+                                </div>
+                                <div class="resource-actions">
+                                    <button class="btn btn-small">View</button>
+                                    <button class="btn-icon"><i class="fas fa-download"></i></button>
+                                </div>
+                            </div>
+                            
+                            <div class="resource-item worksheet-item">
+                                <div class="resource-icon"><i class="fas fa-file-alt"></i></div>
+                                <div class="resource-details">
+                                    <h3 class="resource-title">Worksheet 1.2: Terminology</h3>
+                                    <p class="resource-meta">8 problems · Uploaded by Alice Wang · May 5, 2024</p>
+                                </div>
+                                <div class="resource-actions">
+                                    <button class="btn btn-small">View</button>
+                                    <button class="btn-icon"><i class="fas fa-download"></i></button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="resource-card">
-                        <div class="resource-icon"><i class="fas fa-file-alt"></i></div>
-                        <div class="resource-details">
-                            <h3>Worksheet 2: Advanced Applications</h3>
-                            <p>8 problems · Difficulty: Medium</p>
+                    <!-- Study Guides Tab -->
+                    <div class="tab-pane" id="unit1-guides">
+                        <div class="upload-section">
+                            <button class="btn btn-primary upload-btn"><i class="fas fa-upload"></i> Upload Study Guide</button>
+                            <p class="upload-info">Upload study guides to share with the class (.pdf, .docx, .pptx)</p>
                         </div>
-                        <div class="resource-actions">
-                            <button class="btn btn-small">Start</button>
-                            <button class="btn-icon"><i class="fas fa-download"></i></button>
+                        <div class="resource-list">
+                            <div class="resource-item guide-item">
+                                <div class="resource-icon"><i class="fas fa-book"></i></div>
+                                <div class="resource-details">
+                                    <h3 class="resource-title">Unit 1 Complete Study Guide</h3>
+                                    <p class="resource-meta">Uploaded by Prof. Johnson · May 11, 2024</p>
+                                </div>
+                                <div class="resource-actions">
+                                    <button class="btn btn-small">View</button>
+                                    <button class="btn-icon"><i class="fas fa-download"></i></button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="resource-card">
-                        <div class="resource-icon"><i class="fas fa-file-alt"></i></div>
-                        <div class="resource-details">
-                            <h3>Worksheet 3: Critical Analysis</h3>
-                            <p>5 problems · Difficulty: Hard</p>
+                    <!-- Mind Webs Tab -->
+                    <div class="tab-pane" id="unit1-mindwebs">
+                        <div class="upload-section">
+                            <button class="btn btn-primary upload-btn"><i class="fas fa-link"></i> Attach Mind Web</button>
+                            <p class="upload-info">Link mind maps and concept webs from your account (.pdf, .png, .jpg, .mm)</p>
                         </div>
-                        <div class="resource-actions">
-                            <button class="btn btn-small">Start</button>
-                            <button class="btn-icon"><i class="fas fa-download"></i></button>
+                        <div class="resource-list">
+                            <div class="resource-item mindweb-item">
+                                <div class="resource-icon"><i class="fas fa-project-diagram"></i></div>
+                                <div class="resource-details">
+                                    <h3 class="resource-title">Key Concepts Mind Map</h3>
+                                    <p class="resource-meta">Uploaded by John Doe · May 8, 2024</p>
+                                </div>
+                                <div class="resource-actions">
+                                    <button class="btn btn-small">Open</button>
+                                    <button class="btn-icon"><i class="fas fa-clone"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Practice Problems Tab -->
+                    <div class="tab-pane" id="unit1-practice">
+                        <div class="problems-filter">
+                            <div class="filter-group">
+                                <label>Difficulty:</label>
+                                <select class="filter-select">
+                                    <option value="all">All</option>
+                                    <option value="basic">Basic</option>
+                                    <option value="intermediate">Intermediate</option>
+                                    <option value="advanced">Advanced</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>Type:</label>
+                                <select class="filter-select">
+                                    <option value="all">All</option>
+                                    <option value="conceptual">Conceptual</option>
+                                    <option value="computational">Computational</option>
+                                    <option value="application">Application</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="resource-list problems-list">
+                            <div class="problem-item">
+                                <div class="problem-header">
+                                    <div class="problem-meta">
+                                        <span class="problem-id">#P1025</span>
+                                        <span class="problem-difficulty basic">Basic</span>
+                                        <span class="problem-type">Conceptual</span>
+                                        <span class="problem-skill">Terminology</span>
+                                    </div>
+                                    <div class="problem-source">
+                                        <span>Source: Worksheet 1.1</span>
+                                    </div>
+                                    <div class="problem-actions">
+                                        <button class="btn-icon problem-more-btn"><i class="fas fa-ellipsis-v"></i>
+                                            <div class="problem-actions-dropdown">
+                                                <a href="#"><i class="fas fa-project-diagram"></i> Map to Mindweb</a>
+                                                <a href="#"><i class="fas fa-pencil-alt"></i> Solve</a>
+                                                <a href="#"><i class="fas fa-lightbulb"></i> Hint</a>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="problem-content">
+                                    <p>Define the term "scientific method" and explain its importance in research.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="problem-item">
+                                <div class="problem-header">
+                                    <div class="problem-meta">
+                                        <span class="problem-id">#P1026</span>
+                                        <span class="problem-difficulty intermediate">Intermediate</span>
+                                        <span class="problem-type">Computational</span>
+                                        <span class="problem-skill">Analysis</span>
+                                    </div>
+                                    <div class="problem-source">
+                                        <span>Source: Practice Test 1.1</span>
+                                    </div>
+                                    <div class="problem-actions">
+                                        <button class="btn-icon problem-more-btn"><i class="fas fa-ellipsis-v"></i>
+                                            <div class="problem-actions-dropdown">
+                                                <a href="#"><i class="fas fa-project-diagram"></i> Map to Mindweb</a>
+                                                <a href="#"><i class="fas fa-pencil-alt"></i> Solve</a>
+                                                <a href="#"><i class="fas fa-lightbulb"></i> Hint</a>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="problem-content">
+                                    <p>Given the data set below, calculate the mean, median, and standard deviation.</p>
+                                    <div class="problem-image">
+                                        <img src="{{ url_for('static', filename='images/sample_data.png') }}" alt="Sample data set">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="problem-item">
+                                <div class="problem-header">
+                                    <div class="problem-meta">
+                                        <span class="problem-id">#P1027</span>
+                                        <span class="problem-difficulty advanced">Advanced</span>
+                                        <span class="problem-type">Application</span>
+                                        <span class="problem-skill">Synthesis</span>
+                                    </div>
+                                    <div class="problem-source">
+                                        <span>Source: Midterm Exam 2023</span>
+                                    </div>
+                                    <div class="problem-actions">
+                                        <button class="btn-icon problem-more-btn"><i class="fas fa-ellipsis-v"></i>
+                                            <div class="problem-actions-dropdown">
+                                                <a href="#"><i class="fas fa-project-diagram"></i> Map to Mindweb</a>
+                                                <a href="#"><i class="fas fa-pencil-alt"></i> Solve</a>
+                                                <a href="#"><i class="fas fa-lightbulb"></i> Hint</a>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="problem-content">
+                                    <p>Design an experiment to test the effect of temperature on enzyme activity. Include your hypothesis, variables, control groups, and expected results.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Practice Tests Tab -->
+                    <div class="tab-pane" id="unit1-tests">
+                        <div class="upload-section">
+                            <button class="btn btn-primary upload-btn"><i class="fas fa-upload"></i> Upload Practice Test</button>
+                            <p class="upload-info">Upload practice tests to share with the class (.pdf, .docx)</p>
+                        </div>
+                        <div class="resource-list">
+                            <div class="resource-item test-item">
+                                <div class="resource-icon"><i class="fas fa-file-signature"></i></div>
+                                <div class="resource-details">
+                                    <h3 class="resource-title">Unit 1 Quiz Practice</h3>
+                                    <p class="resource-meta">10 questions · 30 minutes · Uploaded by Prof. Johnson · May 12, 2024</p>
+                                </div>
+                                <div class="resource-actions">
+                                    <button class="btn btn-small">Start</button>
+                                    <button class="btn-icon"><i class="fas fa-download"></i></button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <div class="tab-pane" id="practice">
-                <div class="resource-grid">
-                    <div class="resource-card">
-                        <div class="resource-icon"><i class="fas fa-puzzle-piece"></i></div>
-                        <div class="resource-details">
-                            <h3>Problem Set A: Fundamentals</h3>
-                            <p>15 problems · Difficulty: Mixed</p>
+            <!-- Unit 2 -->
+            <div class="unit-content" id="unit2">
+                <div class="unit-header">
+                    <h3 class="unit-title">Unit 2: Fundamentals</h3>
+                    <p class="unit-description">This unit explores the fundamental principles and theories of the subject.</p>
+                </div>
+                
+                <div class="unit-tabs">
+                    <div class="tabs">
+                        <button class="tab-btn active" data-tab="unit2-worksheets">Worksheets</button>
+                        <button class="tab-btn" data-tab="unit2-guides">Study Guides</button>
+                        <button class="tab-btn" data-tab="unit2-mindwebs">Mind Webs</button>
+                        <button class="tab-btn" data-tab="unit2-practice">Practice Problems</button>
+                        <button class="tab-btn" data-tab="unit2-tests">Practice Tests</button>
+                    </div>
+                </div>
+                
+                <div class="tab-content">
+                    <!-- Worksheets Tab -->
+                    <div class="tab-pane active" id="unit2-worksheets">
+                        <div class="upload-section">
+                            <button class="btn btn-primary upload-btn"><i class="fas fa-upload"></i> Upload Worksheet</button>
+                            <p class="upload-info">Upload worksheets to share with the class (.pdf, .docx, .xlsx)</p>
                         </div>
-                        <div class="resource-actions">
-                            <button class="btn btn-small">Start</button>
-                            <button class="btn-icon"><i class="fas fa-download"></i></button>
+                        <div class="resource-list">
+                            <div class="resource-item worksheet-item">
+                                <div class="resource-icon"><i class="fas fa-file-alt"></i></div>
+                                <div class="resource-details">
+                                    <h3 class="resource-title">Worksheet 2.1: Core Principles</h3>
+                                    <p class="resource-meta">12 problems · Uploaded by Prof. Johnson · May 20, 2024</p>
+                                </div>
+                                <div class="resource-actions">
+                                    <button class="btn btn-small">View</button>
+                                    <button class="btn-icon"><i class="fas fa-download"></i></button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="resource-card">
-                        <div class="resource-icon"><i class="fas fa-puzzle-piece"></i></div>
-                        <div class="resource-details">
-                            <h3>Problem Set B: Chapter Review</h3>
-                            <p>12 problems · Difficulty: Mixed</p>
+                    <!-- Other tabs would be filled with similar content -->
+                    <div class="tab-pane" id="unit2-guides">
+                        <div class="upload-section">
+                            <button class="btn btn-primary upload-btn"><i class="fas fa-upload"></i> Upload Study Guide</button>
+                            <p class="upload-info">Upload study guides to share with the class (.pdf, .docx, .pptx)</p>
                         </div>
-                        <div class="resource-actions">
-                            <button class="btn btn-small">Start</button>
-                            <button class="btn-icon"><i class="fas fa-download"></i></button>
+                        <div class="resource-list empty-grid">
+                            <div class="empty-state">
+                                <i class="fas fa-book-open"></i>
+                                <p>No study guides have been uploaded for this unit yet.</p>
+                                <p>Be the first to contribute!</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-pane" id="unit2-mindwebs">
+                        <div class="upload-section">
+                            <button class="btn btn-primary upload-btn"><i class="fas fa-upload"></i> Upload Mind Web</button>
+                            <p class="upload-info">Upload mind maps and concept webs (.pdf, .png, .jpg, .mm)</p>
+                        </div>
+                        <div class="resource-list empty-grid">
+                            <div class="empty-state">
+                                <i class="fas fa-project-diagram"></i>
+                                <p>No mind webs have been uploaded for this unit yet.</p>
+                                <p>Be the first to contribute!</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-pane" id="unit2-practice">
+                        <div class="upload-section">
+                            <button class="btn btn-primary upload-btn"><i class="fas fa-upload"></i> Upload Practice Problems</button>
+                            <p class="upload-info">Upload practice problems to share with the class (.pdf, .docx)</p>
+                        </div>
+                        <div class="resource-list empty-grid">
+                            <div class="empty-state">
+                                <i class="fas fa-puzzle-piece"></i>
+                                <p>No practice problems have been uploaded for this unit yet.</p>
+                                <p>Be the first to contribute!</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-pane" id="unit2-tests">
+                        <div class="upload-section">
+                            <button class="btn btn-primary upload-btn"><i class="fas fa-upload"></i> Upload Practice Test</button>
+                            <p class="upload-info">Upload practice tests to share with the class (.pdf, .docx)</p>
+                        </div>
+                        <div class="resource-list empty-grid">
+                            <div class="empty-state">
+                                <i class="fas fa-file-signature"></i>
+                                <p>No practice tests have been uploaded for this unit yet.</p>
+                                <p>Be the first to contribute!</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <div class="tab-pane" id="tests">
-                <div class="resource-grid">
-                    <div class="resource-card">
-                        <div class="resource-icon"><i class="fas fa-file-signature"></i></div>
-                        <div class="resource-details">
-                            <h3>Practice Midterm</h3>
-                            <p>Time: 90 minutes · 30 questions</p>
-                        </div>
-                        <div class="resource-actions">
-                            <button class="btn btn-small">Start</button>
-                            <button class="btn-icon"><i class="fas fa-download"></i></button>
-                        </div>
-                    </div>
-                    
-                    <div class="resource-card">
-                        <div class="resource-icon"><i class="fas fa-file-signature"></i></div>
-                        <div class="resource-details">
-                            <h3>Practice Final</h3>
-                            <p>Time: 180 minutes · 50 questions</p>
-                        </div>
-                        <div class="resource-actions">
-                            <button class="btn btn-small">Start</button>
-                            <button class="btn-icon"><i class="fas fa-download"></i></button>
-                        </div>
-                    </div>
+            <!-- Units 3 and 4 would follow the same pattern -->
+            <div class="unit-content" id="unit3">
+                <div class="unit-header">
+                    <h3 class="unit-title">Unit 3: Advanced Concepts</h3>
+                    <p class="unit-description">This unit delves into more advanced concepts and theoretical frameworks.</p>
+                </div>
+                
+                <div class="empty-state-large">
+                    <i class="fas fa-books"></i>
+                    <h3>This unit is coming soon!</h3>
+                    <p>The instructor has not yet released content for this unit.</p>
+                </div>
+            </div>
+            
+            <div class="unit-content" id="unit4">
+                <div class="unit-header">
+                    <h3 class="unit-title">Unit 4: Applications</h3>
+                    <p class="unit-description">This unit focuses on real-world applications and case studies.</p>
+                </div>
+                
+                <div class="empty-state-large">
+                    <i class="fas fa-books"></i>
+                    <h3>This unit is coming soon!</h3>
+                    <p>The instructor has not yet released content for this unit.</p>
                 </div>
             </div>
         </div>
     </section>
+{% endblock %}
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-info">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="footer-logo">
-                <p>Building the future of education together.</p>
-            </div>
-            <div class="footer-links">
-                <h3>Quick Links</h3>
-                <ul>
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/tree">Tree</a></li>
-                    <li><a href="/schedule">Schedule</a></li>
-                    <li><a href="/counselor">Counselor</a></li>
-                    <li><a href="/signup">Sign Up</a></li>
-                </ul>
-            </div>
-            <div class="footer-links">
-                <h3>Features</h3>
-                <ul>
-                    <li><a href="#">Study Tools</a></li>
-                    <li><a href="#">Grade Analysis</a></li>
-                    <li><a href="#">AI Counselors</a></li>
-                    <li><a href="#">Community</a></li>
-                </ul>
-            </div>
-            <div class="footer-links">
-                <h3>Connect</h3>
-                <ul>
-                    <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
-                    <li><a href="#"><i class="fab fa-github"></i> GitHub</a></li>
-                    <li><a href="#"><i class="fab fa-discord"></i> Discord</a></li>
-                    <li><a href="#"><i class="fas fa-envelope"></i> Contact Us</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2025 SciWeb. All rights reserved.</p>
-        </div>
-    </footer>
-
+{% block scripts %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/class.js') }}"></script>
-</body>
-</html> 
+{% endblock %} 

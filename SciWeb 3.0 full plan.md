@@ -46,11 +46,12 @@ Have option to show MindWeb under this node
 Collab(Through Project Node)
 Can add collaborators to the project, automatically shares all child nodes of the project node, add whiteboards, delegate tasks, etc.
 Write(through essay node)
-Lets user upload their essay, AI evaluates it, scores it on(creativity, argumentation, grammar, organization, evidence, analysis, general) each with their own standardized scoring rubric
+Lets user upload their essay, AI evaluates it, scores it on(creativity, argumentation, grammar, organization, evidence, analysis, general/rubric-specific) each with their own standardized scoring rubric
 AI provides feedback for each category
 Final essay draft scores are saved and compared to the grade that they actually received
 A multivariate linear regression is run on all essays, giving a predicted essay score for that teacher, and plots of means, distributions, coefficients, scores vs. individual metrics, etc.
 Peer review system
+can upload rubric and prompts, 
 Grade Analysis(linked in various places) 
 Revamped but otherwise similar
 

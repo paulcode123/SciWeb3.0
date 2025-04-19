@@ -299,6 +299,110 @@ body {
     target-arrow-color: #38bdf8 !important;
 }
 
+/* Starter Config Modal Styles */
+#starter-config-modal .modal-content {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(5px);
+}
+
+#starter-config-modal .modal-header {
+    background: linear-gradient(90deg, #4f46e5 0%, #06b6d4 100%) !important;
+    border-radius: 16px 16px 0 0;
+    padding: 1.5rem;
+}
+
+#starter-config-modal .modal-body {
+    padding: 1.8rem;
+}
+
+#starter-config-modal .form-select,
+#starter-config-modal .form-control {
+    border-radius: 12px;
+    border: 1.5px solid #cbd5e1;
+    padding: 0.7rem 1rem;
+    background-color: rgba(255, 255, 255, 0.9);
+    transition: all 0.2s;
+}
+
+#starter-config-modal .form-select:focus,
+#starter-config-modal .form-control:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+#starter-config-modal h6 {
+    color: #4f46e5;
+    font-weight: 600;
+}
+
+#starter-config-modal .form-check-input:checked {
+    background-color: #6366f1;
+    border-color: #6366f1;
+}
+
+#starter-config-modal .form-switch .form-check-input {
+    height: 1.5rem;
+    width: 3rem;
+}
+
+#start-mindweb-btn {
+    background: linear-gradient(90deg, #4f46e5 0%, #06b6d4 100%);
+    border: none;
+    padding: 0.8rem 2rem;
+    font-weight: 600;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+    transition: all 0.3s;
+}
+
+#start-mindweb-btn:hover {
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
+    transform: translateY(-2px);
+}
+
+/* AI Suggestions Panel Styles */
+#ai-suggestions-panel {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(5px);
+    border-radius: 14px;
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.15);
+    overflow: hidden;
+    max-height: 400px;
+    transition: all 0.3s;
+}
+
+#ai-suggestions-panel .card-header {
+    background: linear-gradient(90deg, #06b6d4 0%, #0ea5e9 100%) !important;
+    padding: 0.7rem 1rem;
+    border-radius: 14px 14px 0 0;
+}
+
+.ai-suggestion-item {
+    border-radius: 8px !important;
+    margin-bottom: 6px;
+    border: 1px solid #e0e7ff !important;
+    transition: all 0.2s;
+    cursor: grab;
+}
+
+.ai-suggestion-item:hover {
+    background-color: #f0f9ff !important;
+    border-color: #bfdbfe !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.1);
+}
+
+.ai-suggestion-item:active {
+    cursor: grabbing;
+    box-shadow: 0 2px 6px rgba(56, 189, 248, 0.15);
+}
+
+.ai-suggestion-item .badge {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+}
+
 /* Responsive adjustments */
 @media (max-width: 991px) {
     .sidebar {
@@ -327,6 +431,9 @@ body {
     #mindweb-container {
         min-height: 200px;
         border-radius: 8px;
+    }
+    #starter-config-modal .modal-body {
+        padding: 1rem;
     }
 }
 

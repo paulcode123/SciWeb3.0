@@ -24,30 +24,27 @@
             <button class="tool-button btn-challenge" data-tooltip="Add Challenge Node">
                 <i class="fas fa-mountain"></i>
             </button>
-            <button class="tool-button btn-class" data-tooltip="Add Class Node">
-                <i class="fas fa-chalkboard-teacher"></i>
-            </button>
-            <button class="tool-button btn-assignment" data-tooltip="Add Assignment Node">
-                <i class="fas fa-book"></i>
-            </button>
-            <button class="tool-button btn-test" data-tooltip="Add Test Node">
-                <i class="fas fa-clipboard-check"></i>
-            </button>
-            <button class="tool-button btn-project" data-tooltip="Add Project Node">
-                <i class="fas fa-project-diagram"></i>
-            </button>
-            <button class="tool-button btn-essay" data-tooltip="Add Essay Node">
-                <i class="fas fa-file-alt"></i>
-            </button>
+            <div class="school-menu">
+                <button class="tool-button btn-school" data-tooltip="School Items">
+                    <i class="fas fa-graduation-cap"></i>
+                </button>
+                <div class="school-submenu">
+                    <button class="submenu-button btn-assignment" data-type="assignment" data-tooltip="Assignment">
+                        <i class="fas fa-book"></i>
+                    </button>
+                    <button class="submenu-button btn-test" data-type="test" data-tooltip="Test">
+                        <i class="fas fa-clipboard-check"></i>
+                    </button>
+                    <button class="submenu-button btn-project" data-type="project" data-tooltip="Project">
+                        <i class="fas fa-project-diagram"></i>
+                    </button>
+                    <button class="submenu-button btn-essay" data-type="essay" data-tooltip="Essay">
+                        <i class="fas fa-file-alt"></i>
+                    </button>
+                </div>
+            </div>
             <button class="tool-button btn-image" data-tooltip="Add Image Node">
                 <i class="fas fa-image"></i>
-            </button>
-            <hr style="width: 80%; border-color: rgba(255, 255, 255, 0.1); margin: 5px 0;">
-            <button class="tool-button btn-clear" data-tooltip="Clear All Nodes">
-                <i class="fas fa-trash-alt"></i>
-            </button>
-            <button class="tool-button btn-save" data-tooltip="Reset View">
-                <i class="fas fa-home"></i>
             </button>
         </div>
         <!-- Status Message -->
@@ -107,6 +104,5 @@
 {% endblock %}
 
 {% block scripts %}
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/tree.js') }}"></script>
 {% endblock %} 

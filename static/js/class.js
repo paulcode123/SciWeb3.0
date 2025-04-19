@@ -6,16 +6,90 @@ document.addEventListener('DOMContentLoaded', function() {
 
     tabButtons.forEach(button => {
         button.addEventListener('click', function() {
-            // Remove active class from all buttons and panes
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            tabPanes.forEach(pane => pane.classList.remove('active'));
+            // Get the parent unit content to scope our tab selection
+            const parentUnit = this.closest('.unit-content');
+            if (!parentUnit) return;
+            
+            // Select only tabs and panes within this unit
+            const unitTabs = parentUnit.querySelectorAll('.tab-btn');
+            const unitPanes = parentUnit.querySelectorAll('.tab-pane');
+            
+            // Remove active class from all buttons and panes in this unit
+            unitTabs.forEach(btn => btn.classList.remove('active'));
+            unitPanes.forEach(pane => pane.classList.remove('active'));
             
             // Add active class to clicked button and corresponding pane
             this.classList.add('active');
             const tabId = this.getAttribute('data-tab');
-            document.getElementById(tabId).classList.add('active');
+            const targetPane = parentUnit.querySelector(`#${tabId}`);
+            if (targetPane) {
+                targetPane.classList.add('active');
+            }
         });
     });
+    
+    // Unit tabs switching functionality
+    const unitTabs = document.querySelectorAll('.unit-tab');
+    const unitContents = document.querySelectorAll('.unit-content');
+    
+    unitTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Remove active class from all unit tabs and contents
+            unitTabs.forEach(t => t.classList.remove('active'));
+            unitContents.forEach(c => c.classList.remove('active'));
+            
+            // Add active class to clicked tab and corresponding content
+            this.classList.add('active');
+            const unitId = this.getAttribute('data-unit');
+            document.getElementById(unitId).classList.add('active');
+        });
+    });
+    
+    // Add Unit button functionality
+    const addUnitBtn = document.querySelector('.unit-add-btn');
+    if (addUnitBtn) {
+        addUnitBtn.addEventListener('click', function() {
+            // In a real app, this would open a form to create a new unit
+            // For the demo, we'll show an alert
+            alert('In a real application, this would open a form to create a new unit.');
+        });
+    }
+    
+    // Upload/Attach button functionality
+    const uploadButtons = document.querySelectorAll('.upload-btn');
+    if (uploadButtons) {
+        uploadButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Check if this is a mindweb attach button
+                const isMindwebAttach = this.innerHTML.includes('Attach Mind Web');
+                
+                if (isMindwebAttach) {
+                    // For mindweb attachment, show a different message
+                    alert('In a real application, this would open a dialog to select from your existing mindwebs to attach.');
+                } else {
+                    // For regular uploads, use the file dialog
+                    const fileInput = document.createElement('input');
+                    fileInput.type = 'file';
+                    fileInput.accept = '.pdf,.docx,.pptx,.xlsx,.png,.jpg,.jpeg,.mm';
+                    fileInput.style.display = 'none';
+                    document.body.appendChild(fileInput);
+                    
+                    fileInput.addEventListener('change', function() {
+                        if (this.files && this.files[0]) {
+                            const fileName = this.files[0].name;
+                            alert(`File "${fileName}" would be uploaded in a real application.`);
+                            
+                            // Remove the file input after use
+                            document.body.removeChild(fileInput);
+                        }
+                    });
+                    
+                    // Trigger the file input click
+                    fileInput.click();
+                }
+            });
+        });
+    }
 
     // Initialize time distribution chart
     initTimeChart();
@@ -238,6 +312,62 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Problem more button functionality
+    const problemMoreBtns = document.querySelectorAll('.problem-more-btn');
+    
+    if (problemMoreBtns) {
+        problemMoreBtns.forEach(btn => {
+            // Handle dropdown menu display
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                
+                // Toggle dropdown visibility
+                const dropdown = this.querySelector('.problem-actions-dropdown');
+                if (dropdown) {
+                    // Close all other open dropdowns first
+                    document.querySelectorAll('.problem-actions-dropdown.show').forEach(d => {
+                        if (d !== dropdown) d.classList.remove('show');
+                    });
+                    
+                    // Toggle this dropdown
+                    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+                }
+            });
+            
+            // Handle dropdown menu item actions
+            const dropdownItems = btn.querySelectorAll('.problem-actions-dropdown a');
+            dropdownItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Get the text content to determine which action was clicked
+                    const actionText = this.textContent.trim();
+                    const problemItem = this.closest('.problem-item');
+                    const problemId = problemItem.querySelector('.problem-id').textContent.trim();
+                    
+                    if (actionText.includes('Map to Mindweb')) {
+                        alert(`In a real application, this would open a dialog to map problem ${problemId} to a mindweb.`);
+                    } else if (actionText.includes('Solve')) {
+                        alert(`In a real application, this would open a workspace to solve problem ${problemId}.`);
+                    } else if (actionText.includes('Hint')) {
+                        alert(`In a real application, this would display a hint for problem ${problemId}.`);
+                    }
+                    
+                    // Hide dropdown after action
+                    btn.querySelector('.problem-actions-dropdown').style.display = 'none';
+                });
+            });
+        });
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function() {
+            document.querySelectorAll('.problem-actions-dropdown').forEach(dropdown => {
+                dropdown.style.display = 'none';
+            });
+        });
+    }
+
     // Theme toggle initialization - moved inside DOMContentLoaded
     const themeToggle = document.getElementById('theme-toggle');
     if (themeToggle) {
@@ -297,6 +427,17 @@ document.addEventListener('DOMContentLoaded', function() {
                         background-color: #1a1a1a !important;
                         border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
                     }
+                    .problem-item {
+                        background-color: rgba(30, 33, 39, 0.7) !important;
+                        border-color: rgba(255, 255, 255, 0.1) !important;
+                    }
+                    .problem-actions-dropdown {
+                        background-color: #2d3748 !important;
+                        border-color: rgba(255, 255, 255, 0.1) !important;
+                    }
+                    .problem-actions-dropdown a {
+                        color: #e2e8f0 !important;
+                    }
                 `;
                 themeToggle.innerHTML = '☀️';
                 themeToggle.setAttribute('aria-label', 'Toggle Light Mode');
@@ -339,6 +480,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     .footer {
                         background-color: #f1f1f1 !important;
                         border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
+                    }
+                    .problem-item {
+                        background-color: #fff !important;
+                        border-color: rgba(0, 0, 0, 0.1) !important;
+                    }
+                    .problem-actions-dropdown {
+                        background-color: #fff !important;
+                        border-color: rgba(0, 0, 0, 0.1) !important;
+                    }
+                    .problem-actions-dropdown a {
+                        color: #333 !important;
                     }
                 `;
                 themeToggle.innerHTML = '🌙';

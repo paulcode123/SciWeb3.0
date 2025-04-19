@@ -444,10 +444,17 @@ document.addEventListener('DOMContentLoaded', function() {
       isDragging = true;
       draggedNode = node;
       
-      // Calculate the offset
+      // Suspend animations during dragging by adding a class
+      node.classList.add('dragging');
+      
+      // Calculate the offset in screen coordinates
       const rect = node.getBoundingClientRect();
       dragOffsetX = e.clientX - rect.left;
       dragOffsetY = e.clientY - rect.top;
+      
+      // Store current screen position to prevent jumping
+      node.dataset.dragStartLeft = rect.left;
+      node.dataset.dragStartTop = rect.top;
       
       // Bring to front
       node.style.zIndex = '100';
@@ -504,7 +511,13 @@ document.addEventListener('DOMContentLoaded', function() {
   // Handle mouse up (for dragging)
   document.addEventListener('mouseup', function(e) {
     if (isDragging && draggedNode) {
+      // Remove the dragging class to restore animations
+      draggedNode.classList.remove('dragging');
+      
+      // Reset z-index
       draggedNode.style.zIndex = '5';
+      
+      // Reset drag state
       draggedNode = null;
       isDragging = false;
     }
@@ -681,32 +694,33 @@ document.addEventListener('DOMContentLoaded', function() {
     createNode('challenge', 'Challenge', center.x, center.y);
   });
   
-  document.querySelector('.btn-class').addEventListener('click', function() {
-    const center = getViewCenter();
-    const className = prompt('Enter class name (e.g., "AP Biology", "Math 101"):');
-    if (className) {
-      createNode('class', className, center.x, center.y);
-    }
-  });
-  
-  document.querySelector('.btn-assignment').addEventListener('click', function() {
-    const center = getViewCenter();
-    createNode('assignment', 'Assignment', center.x, center.y);
-  });
-  
-  document.querySelector('.btn-test').addEventListener('click', function() {
-    const center = getViewCenter();
-    createNode('test', 'Test', center.x, center.y);
-  });
-  
-  document.querySelector('.btn-project').addEventListener('click', function() {
-    const center = getViewCenter();
-    createNode('project', 'Project', center.x, center.y);
-  });
-  
-  document.querySelector('.btn-essay').addEventListener('click', function() {
-    const center = getViewCenter();
-    createNode('essay', 'Essay', center.x, center.y);
+  // School submenu event listeners
+  document.querySelectorAll('.submenu-button').forEach(item => {
+    item.addEventListener('click', function(e) {
+      e.stopPropagation(); // Prevent bubbling to parent button
+      const nodeType = this.dataset.type;
+      const center = getViewCenter();
+      
+      let nodeTitle;
+      switch(nodeType) {
+        case 'assignment':
+          nodeTitle = 'Assignment';
+          break;
+        case 'test':
+          nodeTitle = 'Test';
+          break;
+        case 'project':
+          nodeTitle = 'Project';
+          break;
+        case 'essay':
+          nodeTitle = 'Essay';
+          break;
+        default:
+          nodeTitle = 'School Item';
+      }
+      
+      createNode(nodeType, nodeTitle, center.x, center.y);
+    });
   });
   
   // Open image upload form
@@ -742,31 +756,6 @@ document.addEventListener('DOMContentLoaded', function() {
       
       showMessage('Image added!');
     }
-  });
-  
-  // Clear all nodes
-  document.querySelector('.btn-clear').addEventListener('click', function() {
-    if (confirm('Are you sure you want to clear all nodes?')) {
-      nodes.forEach(node => {
-        node.element.remove();
-      });
-      
-      nodes = [];
-      edges = [];
-      drawEdges();
-      updateMiniMap();
-      
-      showMessage('All nodes cleared!');
-    }
-  });
-  
-  // Add reset view button functionality
-  document.querySelector('.btn-save').addEventListener('click', function() {
-    scale = 1;
-    offsetX = 0;
-    offsetY = 0;
-    updateNodePositions();
-    showMessage('View reset');
   });
   
   // --- AI Assistant Logic --- //
@@ -889,116 +878,4 @@ document.addEventListener('DOMContentLoaded', function() {
     
     addMessageToChat(response, 'ai');
   }
-  
-  // --- AI Function Implementations --- //
-  
-  async function aiAddNode(type, parentId, name, info) {
-    if (!nodeTypes.includes(type.toLowerCase())) {
-      return `Error: Invalid node type '${type}'. Valid types are: ${nodeTypes.join(', ')}`;
-    }
-    
-    const center = getViewCenter();
-    const newNode = createNode(type.toLowerCase(), name, center.x, center.y);
-    
-    // Simplified parent connection (if parentId is provided)
-    if (parentId) {
-        const parentNode = nodes.find(n => n.id === parentId);
-        if (parentNode) {
-            edges.push({ from: parentId, to: newNode.dataset.id });
-            drawEdges();
-            return `Node '${name}' (ID: ${newNode.dataset.id}) of type '${type}' created and linked to parent node ${parentId}.`;
-        } else {
-             return `Node '${name}' (ID: ${newNode.dataset.id}) created, but parent node ${parentId} not found.`;
-        }
-    } else {
-        return `Node '${name}' (ID: ${newNode.dataset.id}) of type '${type}' created successfully.`;
-    }
-  }
-  
-  async function aiGetNodeStructure() {
-    if (nodes.length === 0) {
-      return "The tree is currently empty.";
-    }
-    
-    let structure = "Current Tree Structure:\n";
-    nodes.forEach(node => {
-      structure += `- Node ${node.id}: Type=${node.type}, Title='${node.title}'\n`;
-    });
-    
-    if (edges.length > 0) {
-        structure += "\nConnections:\n";
-        edges.forEach(edge => {
-            structure += `- ${edge.from} -> ${edge.to}\n`;
-        });
-    } else {
-        structure += "\nNo connections yet.";
-    }
-    
-    return `<pre><code>${structure}</code></pre>`;
-  }
-  
-  async function aiNodeInfo(nodeId) {
-    const node = nodes.find(n => n.id === nodeId);
-    if (node) {
-        return `Node Info (ID: ${nodeId}):\nType: ${node.type}\nTitle: ${node.title}`;
-    } else {
-        return `Error: Node with ID ${nodeId} not found.`;
-    }
-  }
-  
-  async function aiEditNode(nodeId, newInfo) {
-    // Simplified: newInfo is just the new title
-    const node = nodes.find(n => n.id === nodeId);
-    if (node) {
-        const titleEl = node.element.querySelector('.node-title');
-        if (titleEl) {
-            titleEl.textContent = newInfo;
-            node.title = newInfo; // Update state
-            return `Node ${nodeId} title updated to '${newInfo}'.`;
-        } else {
-            return `Error: Could not find title element for Node ${nodeId}.`;
-        }
-    } else {
-        return `Error: Node with ID ${nodeId} not found.`;
-    }
-  }
-  
-  async function aiDeleteNode(nodeId) {
-    const node = nodes.find(n => n.id === nodeId);
-    if (node) {
-        deleteNode(nodeId); // Use existing function
-        return `Node ${nodeId} deleted successfully.`;
-    } else {
-        return `Error: Node with ID ${nodeId} not found.`;
-    }
-  }
-  
-  // --- End AI Assistant Logic --- //
-  
-  // Create some initial example nodes
-  setTimeout(() => {
-    const motivator = createNode('motivator', 'Graduate College', 0, -200);
-    const challenge = createNode('challenge', 'Final Exams', 150, 0);
-    const test = createNode('test', 'Calculus Test', -150, 200);
-    const project = createNode('project', 'Science Project', 250, 200);
-    
-    // Add some example edges
-    edges.push({ from: motivator.dataset.id, to: challenge.dataset.id });
-    edges.push({ from: challenge.dataset.id, to: test.dataset.id });
-    edges.push({ from: challenge.dataset.id, to: project.dataset.id });
-    
-    drawEdges();
-    updateMiniMap();
-  }, 500);
-  
-  // Initial message
-  showMessage('Welcome to the Tree Page! Add nodes by clicking the buttons on the left.');
-  
-  // Add navigation hints
-  setTimeout(() => {
-    showMessage('Tip: Use mouse wheel to zoom, middle-click or Alt+drag to pan');
-  }, 4000);
-  
-  // Initialize zoom display
-  updateZoomDisplay();
-}); 
+});
