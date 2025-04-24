@@ -20,58 +20,94 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-12 mb-3">
-                            <h6 class="mb-2">Learning Goals</h6>
-                            <textarea id="learning-goals" class="form-control" rows="2">{{ study_goal }}</textarea>
+                            <h6 class="mb-2">How would you like to start:</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="start-approach" id="start-scratch" value="scratch" checked>
+                                <label class="form-check-label" for="start-scratch">
+                                    From scratch, let's start laying the groundwork
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="start-approach" id="start-recall" value="recall">
+                                <label class="form-check-label" for="start-recall">
+                                    By recalling what I remember and creating those nodes
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="start-approach" id="start-guided" value="guided">
+                                <label class="form-check-label" for="start-guided">
+                                    Get me started but I'll pick up from there
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <h6 class="mb-2">How many unconnected nodes/segments can exist at a given time? (1-8)</h6>
+                            <p class="small text-muted mb-2">1 being everything I learn has to be directly related to something existing<br>
+                            8 being you can give me up to 8 seemingly unrelated ideas and notions and they will come together at the end</p>
+                            <div class="d-flex justify-content-between">
+                                <span>1</span>
+                                <span>2</span>
+                                <span>3</span>
+                                <span>4</span>
+                                <span>5</span>
+                                <span>6</span>
+                                <span>7</span>
+                                <span>8</span>
+                            </div>
+                            <input type="range" class="form-range" min="1" max="8" step="1" id="unconnected-nodes" value="4">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <h6 class="mb-2">How much information should I give:</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="information-level" id="info-none" value="none">
+                                <label class="form-check-label" for="info-none">
+                                    None: guide my thoughts and let me derive everything
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="information-level" id="info-bit" value="bit">
+                                <label class="form-check-label" for="info-bit">
+                                    A bit: give me hints here and there and when I ask for it but let me do the rest
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="information-level" id="info-some" value="some" checked>
+                                <label class="form-check-label" for="info-some">
+                                    Some: establish the fundamentals and guide me as I take it from there
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="information-level" id="info-alot" value="alot">
+                                <label class="form-check-label" for="info-alot">
+                                    A lot: Give me a wealth of information that I can select from
+                                </label>
+                            </div>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <h6 class="mb-2">AI Guide Style</h6>
-                                <select id="ai-style" class="form-select">
-                                    <option value="socratic">Socratic (asks questions to guide discovery)</option>
-                                    <option value="informative">Informative (provides direct explanations)</option>
-                                    <option value="challenging">Challenging (tests your knowledge)</option>
-                                    <option value="supportive">Supportive (offers encouragement)</option>
-                                </select>
+                        <div class="col-md-12">
+                            <h6 class="mb-2">How detailed do you want to make your map:</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="detail-level" id="detail-sparse" value="sparse">
+                                <label class="form-check-label" for="detail-sparse">
+                                    Very sparse (main ideas only)
+                                </label>
                             </div>
-                            <div class="mb-3">
-                                <h6 class="mb-2">Learning Approach</h6>
-                                <select id="learning-approach" class="form-select">
-                                    <option value="constructivist">Constructivist (build your own understanding)</option>
-                                    <option value="guided">Guided Instruction (step by step guidance)</option>
-                                    <option value="exploratory">Exploratory (discover connections)</option>
-                                </select>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="detail-level" id="detail-broad" value="broad" checked>
+                                <label class="form-check-label" for="detail-broad">
+                                    Broad (technical details, formulas, etc.)
+                                </label>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <h6 class="mb-2">Difficulty Level</h6>
-                                <select id="difficulty-level" class="form-select">
-                                    <option value="beginner">Beginner</option>
-                                    <option value="intermediate" selected>Intermediate</option>
-                                    <option value="advanced">Advanced</option>
-                                    <option value="expert">Expert</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <h6 class="mb-2">Focus Areas (select multiple)</h6>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="focus-concepts" checked>
-                                    <label class="form-check-label" for="focus-concepts">Core Concepts</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="focus-relationships">
-                                    <label class="form-check-label" for="focus-relationships">Relationships Between Concepts</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="focus-applications">
-                                    <label class="form-check-label" for="focus-applications">Real-world Applications</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="focus-misconceptions">
-                                    <label class="form-check-label" for="focus-misconceptions">Common Misconceptions</label>
-                                </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="detail-level" id="detail-scholarly" value="scholarly">
+                                <label class="form-check-label" for="detail-scholarly">
+                                    Scholarly (get to the very roots of the topic and build it out piece by piece, establishing many connections between in the topic space)
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -300,6 +336,5 @@
     <script src="https://cdn.jsdelivr.net/npm/cytoscape-popper@2.0.0/cytoscape-popper.min.js"></script>
     <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://unpkg.com/tippy.js@6"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/mindweb.js') }}"></script>
 {% endblock %} 

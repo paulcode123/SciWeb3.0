@@ -193,16 +193,27 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Add panning with middle mouse button or spacebar + drag
   document.addEventListener('mousedown', function(e) {
-    // Middle mouse button (button 1) or Alt+left click
-    if (e.button === 1 || (e.button === 0 && e.altKey)) {
+    // Check if we clicked on a node or UI element - don't start panning if so
+    if (e.target.closest('.node') || e.target.closest('.tree-toolbar') || 
+        e.target.closest('.mini-map') || e.target.closest('.zoom-controls') ||
+        e.target.closest('.node-hover-panel') || e.target.closest('.ai-sidebar') ||
+        e.target.closest('.upload-form') || isDragging || isConnecting) {
+      // Click was on a node or UI element, don't start panning
+      return;
+    }
+    
+    // Middle mouse button (button 1) or Alt+left click or left click on empty space
+    if (e.button === 1 || (e.button === 0 && e.altKey) || e.button === 0) {
       e.preventDefault();
       isPanning = true;
       panStartX = e.clientX;
       panStartY = e.clientY;
       treeCanvas.style.cursor = 'grabbing';
+      document.querySelector('.tree-container').classList.add('panning');
     }
   });
   
+  // Handle mouse move for panning and dragging
   document.addEventListener('mousemove', function(e) {
     if (isPanning) {
       const dx = (e.clientX - panStartX) / scale;
@@ -216,12 +227,73 @@ document.addEventListener('DOMContentLoaded', function() {
       
       updateNodePositions();
     }
+    
+    if (isDragging && draggedNode) {
+      // Mark node as dragged when it actually moves
+      draggedNode.dataset.wasDragged = "true";
+      
+      // Calculate new position in screen coordinates
+      const newScreenLeft = e.clientX - dragOffsetX;
+      const newScreenTop = e.clientY - dragOffsetY;
+      
+      // Convert to world coordinates
+      const newWorldLeft = untransformX(newScreenLeft);
+      const newWorldTop = untransformY(newScreenTop);
+      
+      // Update the original position
+      draggedNode.dataset.originalLeft = newWorldLeft;
+      draggedNode.dataset.originalTop = newWorldTop;
+      
+      // Update displayed position
+      draggedNode.style.left = `${newScreenLeft}px`;
+      draggedNode.style.top = `${newScreenTop}px`;
+      
+      // Redraw edges
+      drawEdges();
+      updateMiniMap();
+    }
+    
+    // Handle connection line drawing
+    if (isConnecting && connectionStart) {
+      drawEdges();
+      
+      const startNode = document.querySelector(`[data-id="${connectionStart}"]`);
+      if (startNode) {
+        const startRect = startNode.getBoundingClientRect();
+        const startX = startRect.left + startRect.width / 2;
+        const startY = startRect.top + startRect.height / 2;
+        
+        // Draw temp line
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(e.clientX, e.clientY);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+    }
   });
   
+  // Handle mouse up for panning and dragging
   document.addEventListener('mouseup', function(e) {
     if (isPanning) {
       isPanning = false;
       treeCanvas.style.cursor = 'default';
+      document.querySelector('.tree-container').classList.remove('panning');
+    }
+    
+    if (isDragging && draggedNode) {
+      // Remove the dragging class to restore animations
+      draggedNode.classList.remove('dragging');
+      
+      // Reset z-index
+      draggedNode.style.zIndex = '5';
+      
+      // Reset drag state (keep wasDragged flag for a moment)
+      setTimeout(() => {
+        draggedNode = null;
+        isDragging = false;
+      }, 50);
     }
   });
   
@@ -309,7 +381,11 @@ document.addEventListener('DOMContentLoaded', function() {
       node.appendChild(img);
     }
     
-    // Add node controls
+    // Create hover panel (initially hidden)
+    const hoverPanel = document.createElement('div');
+    hoverPanel.className = 'node-hover-panel';
+    
+    // Add node controls to hover panel
     const controls = document.createElement('div');
     controls.className = 'node-controls';
     
@@ -317,6 +393,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const deleteBtn = document.createElement('div');
     deleteBtn.className = 'node-control';
     deleteBtn.innerHTML = '✕';
+    deleteBtn.title = 'Delete Node';
     deleteBtn.addEventListener('click', function(e) {
       e.stopPropagation();
       deleteNode(node.dataset.id);
@@ -327,99 +404,155 @@ document.addEventListener('DOMContentLoaded', function() {
     const connectBtn = document.createElement('div');
     connectBtn.className = 'node-control';
     connectBtn.innerHTML = '↔';
+    connectBtn.title = 'Connect to Another Node';
     connectBtn.addEventListener('click', function(e) {
       e.stopPropagation();
       startConnection(node.dataset.id);
     });
     controls.appendChild(connectBtn);
     
-    // Schedule button (only for task, test, assignment, project nodes)
-    if (['task', 'test', 'assignment', 'project'].includes(type)) {
-      const scheduleBtn = document.createElement('div');
-      scheduleBtn.className = 'node-control';
-      scheduleBtn.innerHTML = '📅';
-      scheduleBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        showMessage('Task added to today\'s schedule!');
-      });
-      controls.appendChild(scheduleBtn);
+    // Edit button
+    const editBtn = document.createElement('div');
+    editBtn.className = 'node-control';
+    editBtn.innerHTML = '✎';
+    editBtn.title = 'Edit Node Title';
+    editBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      showEditInterface(node, hoverPanel);
+    });
+    controls.appendChild(editBtn);
+    
+    // Add node info based on type
+    const infoSection = document.createElement('div');
+    infoSection.className = 'node-info';
+    
+    // Add different info based on node type
+    switch(type) {
+      case 'motivator':
+        infoSection.innerHTML = `
+          <h4>Motivator</h4>
+          <p>A personal goal or motivation to help you stay focused.</p>
+          <p>The Envision page helps you visualize and plan your goals.</p>
+        `;
+        break;
+      case 'task':
+        infoSection.innerHTML = `
+          <h4>Task</h4>
+          <p>A specific actionable item that needs to be completed.</p>
+          <p>Connect tasks to classes or projects to organize your work.</p>
+        `;
+        break;
+      case 'challenge':
+        infoSection.innerHTML = `
+          <h4>Challenge</h4>
+          <p>A difficult problem or obstacle to overcome.</p>
+          <p>Breaking down challenges helps make them manageable.</p>
+        `;
+        break;
+      case 'class':
+        infoSection.innerHTML = `
+          <h4>Class</h4>
+          <p>A course or subject you're studying.</p>
+          <p>The Class page contains lectures, notes, and related assignments.</p>
+        `;
+        break;
+      case 'assignment':
+        infoSection.innerHTML = `
+          <h4>Assignment</h4>
+          <p>Coursework that needs to be completed.</p>
+          <p>The Class page helps track your assignments and deadlines.</p>
+        `;
+        break;
+      case 'test':
+        infoSection.innerHTML = `
+          <h4>Test</h4>
+          <p>An exam or quiz to assess your knowledge.</p>
+          <p>The MindWeb page helps you organize study materials for the test.</p>
+        `;
+        break;
+      case 'project':
+        infoSection.innerHTML = `
+          <h4>Project</h4>
+          <p>A larger task with multiple components.</p>
+          <p>The Collaboration page allows you to work with others on this project.</p>
+        `;
+        break;
+      case 'essay':
+        infoSection.innerHTML = `
+          <h4>Essay</h4>
+          <p>A written composition on a particular subject.</p>
+          <p>Connect to class nodes to organize your writing assignments.</p>
+        `;
+        break;
+      case 'image':
+        infoSection.innerHTML = `
+          <h4>Image</h4>
+          <p>Visual content to support your learning.</p>
+          <p>Connect images to related nodes for visual reference.</p>
+        `;
+        break;
     }
     
-    // Open button (only for class nodes)
-    if (type === 'class') {
-      const openBtn = document.createElement('div');
-      openBtn.className = 'node-control';
-      openBtn.innerHTML = '➡️';
-      openBtn.title = 'Open Class Page';
-      openBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        // Encode the title for the URL
-        const encodedClassName = encodeURIComponent(title);
-        window.location.href = `/class/${encodedClassName}`;
-      });
-      controls.appendChild(openBtn);
-      
-      // Also make the entire node clickable to open the class page
-      node.style.cursor = 'pointer';
-      node.addEventListener('dblclick', function(e) {
-        if (!isDragging && !isConnecting) {
-          // Encode the title for the URL
-          const encodedClassName = encodeURIComponent(title);
-          window.location.href = `/class/${encodedClassName}`;
-        }
-      });
-    }
-
-    // Open button (only for motivator nodes)
-    if (type === 'motivator') {
-      const openBtn = document.createElement('div');
-      openBtn.className = 'node-control';
-      openBtn.innerHTML = '🌟';
-      openBtn.title = 'Open Envision Page';
-      openBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        // Use node ID as motivator ID for the URL
-        window.location.href = `/envision/${node.dataset.id}`;
-      });
-      controls.appendChild(openBtn);
-      
-      // Also make the entire node clickable to open the envision page
-      node.style.cursor = 'pointer';
-      node.addEventListener('dblclick', function(e) {
-        if (!isDragging && !isConnecting) {
-          window.location.href = `/envision/${node.dataset.id}`;
-        }
-      });
-    }
+    // Add controls and info to hover panel
+    hoverPanel.appendChild(controls);
+    hoverPanel.appendChild(infoSection);
     
-    // Open button (only for project nodes)
-    if (type === 'project') {
-      const openBtn = document.createElement('div');
-      openBtn.className = 'node-control';
-      openBtn.innerHTML = '📊';
-      openBtn.title = 'Open Collaboration Page';
-      openBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        // Use node ID as project ID for the URL
-        window.location.href = `/collab/${node.dataset.id}`;
-      });
-      controls.appendChild(openBtn);
-      
-      // Also make the entire node clickable to open the collab page
-      node.style.cursor = 'pointer';
-      node.addEventListener('dblclick', function(e) {
-        if (!isDragging && !isConnecting) {
-          window.location.href = `/collab/${node.dataset.id}`;
-        }
-      });
-    }
+    // Add hover panel to the DOM
+    document.body.appendChild(hoverPanel);
     
-    node.appendChild(controls);
+    // Track if the mouse is over the panel
+    let isOverPanel = false;
+    
+    // Show hover panel on mouse enter
+    node.addEventListener('mouseenter', function() {
+      const rect = node.getBoundingClientRect();
+      hoverPanel.style.left = rect.right + 10 + 'px';
+      hoverPanel.style.top = rect.top + 'px';
+      hoverPanel.classList.add('visible');
+    });
+    
+    // Hide hover panel on mouse leave from node
+    node.addEventListener('mouseleave', function(e) {
+      // Get the element the mouse is moving to
+      const toElement = e.relatedTarget;
+      
+      // Don't hide if moving to the hover panel or its children
+      if (toElement && (toElement === hoverPanel || hoverPanel.contains(toElement))) {
+        return;
+      }
+      
+      // Give a short delay to allow pointer to reach panel if moving there
+      setTimeout(() => {
+        if (!isOverPanel) {
+          hoverPanel.classList.remove('visible');
+        }
+      }, 50);
+    });
+    
+    // Track mouse entering hover panel
+    hoverPanel.addEventListener('mouseenter', function() {
+      isOverPanel = true;
+    });
+    
+    // Hide hover panel when mouse leaves the hover panel itself
+    hoverPanel.addEventListener('mouseleave', function(e) {
+      isOverPanel = false;
+      
+      // Get the element the mouse is moving to
+      const toElement = e.relatedTarget;
+      
+      // Don't hide if moving back to the node
+      if (toElement === node || node.contains(toElement)) {
+        return;
+      }
+      
+      hoverPanel.classList.remove('visible');
+    });
     
     // Add node to the DOM
     nodesContainer.appendChild(node);
     
-    // Make node draggable
+    // Make node draggable (click handlers for navigation are added here)
     makeDraggable(node);
     
     // Add to nodes array
@@ -427,7 +560,8 @@ document.addEventListener('DOMContentLoaded', function() {
       id: node.dataset.id,
       element: node,
       type: type,
-      title: title
+      title: title,
+      hoverPanel: hoverPanel
     });
     
     updateMiniMap();
@@ -437,91 +571,99 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Make a node draggable
   function makeDraggable(node) {
+    // Track if node was actually moved during this interaction
+    let wasDragged = false;
+    
     node.addEventListener('mousedown', function(e) {
-      if (e.target.classList.contains('node-control')) return;
       if (isPanning || e.button !== 0) return; // Only left click for dragging
       
-      isDragging = true;
-      draggedNode = node;
+      // Reset drag flag at the start of potential drag
+      wasDragged = false;
       
-      // Suspend animations during dragging by adding a class
-      node.classList.add('dragging');
+      // Set a timeout to determine if this is a click or drag
+      const dragTimeout = setTimeout(() => {
+        isDragging = true;
+        draggedNode = node;
+        
+        // Suspend animations during dragging by adding a class
+        node.classList.add('dragging');
+        
+        // Calculate the offset in screen coordinates
+        const rect = node.getBoundingClientRect();
+        dragOffsetX = e.clientX - rect.left;
+        dragOffsetY = e.clientY - rect.top;
+        
+        // Store current screen position to prevent jumping
+        node.dataset.dragStartLeft = rect.left;
+        node.dataset.dragStartTop = rect.top;
+        
+        // Bring to front
+        node.style.zIndex = '100';
+      }, 200); // Short delay to differentiate between click and drag
       
-      // Calculate the offset in screen coordinates
-      const rect = node.getBoundingClientRect();
-      dragOffsetX = e.clientX - rect.left;
-      dragOffsetY = e.clientY - rect.top;
-      
-      // Store current screen position to prevent jumping
-      node.dataset.dragStartLeft = rect.left;
-      node.dataset.dragStartTop = rect.top;
-      
-      // Bring to front
-      node.style.zIndex = '100';
+      // Store the timeout ID so we can clear it
+      node.dataset.dragTimeout = dragTimeout;
       
       e.stopPropagation();
     });
-  }
-  
-  // Handle mouse move (for dragging)
-  document.addEventListener('mousemove', function(e) {
-    if (isDragging && draggedNode) {
-      // Calculate new position in screen coordinates
-      const newScreenLeft = e.clientX - dragOffsetX;
-      const newScreenTop = e.clientY - dragOffsetY;
-      
-      // Convert to world coordinates
-      const newWorldLeft = untransformX(newScreenLeft);
-      const newWorldTop = untransformY(newScreenTop);
-      
-      // Update the original position
-      draggedNode.dataset.originalLeft = newWorldLeft;
-      draggedNode.dataset.originalTop = newWorldTop;
-      
-      // Update displayed position
-      draggedNode.style.left = `${newScreenLeft}px`;
-      draggedNode.style.top = `${newScreenTop}px`;
-      
-      // Redraw edges
-      drawEdges();
-      updateMiniMap();
-    }
     
-    // Handle connection line drawing
-    if (isConnecting && connectionStart) {
-      drawEdges();
-      
-      const startNode = document.querySelector(`[data-id="${connectionStart}"]`);
-      if (startNode) {
-        const startRect = startNode.getBoundingClientRect();
-        const startX = startRect.left + startRect.width / 2;
-        const startY = startRect.top + startRect.height / 2;
-        
-        // Draw temp line
-        ctx.beginPath();
-        ctx.moveTo(startX, startY);
-        ctx.lineTo(e.clientX, e.clientY);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
+    node.addEventListener('mousemove', function(e) {
+      // If dragging has started, mark this node as having been dragged
+      if (isDragging && draggedNode === node) {
+        wasDragged = true;
       }
-    }
-  });
-  
-  // Handle mouse up (for dragging)
-  document.addEventListener('mouseup', function(e) {
-    if (isDragging && draggedNode) {
-      // Remove the dragging class to restore animations
-      draggedNode.classList.remove('dragging');
+    });
+    
+    node.addEventListener('mouseup', function(e) {
+      // Clear the timeout if this was a click rather than drag start
+      const timeoutId = parseInt(node.dataset.dragTimeout);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        node.dataset.dragTimeout = null;
+      }
       
-      // Reset z-index
-      draggedNode.style.zIndex = '5';
+      // Add data attribute to track if node was dragged
+      node.dataset.wasDragged = wasDragged ? "true" : "false";
       
-      // Reset drag state
-      draggedNode = null;
-      isDragging = false;
-    }
-  });
+      // Reset wasDragged after short delay, so click handler can check it
+      setTimeout(() => {
+        wasDragged = false;
+      }, 50);
+    });
+    
+    // Handle click for navigation - override previous click handler
+    node.addEventListener('click', function(e) {
+      // Only handle click if not dragging, not connecting, and node wasn't just dragged
+      if (!isDragging && !isConnecting && !wasDragged && node.dataset.wasDragged !== "true") {
+        const type = node.dataset.type;
+        const title = node.querySelector('.node-title').textContent;
+        
+        // Different navigation based on node type
+        switch (type) {
+          case 'motivator':
+            window.location.href = `/envision/${node.dataset.id}`;
+            break;
+          case 'class':
+            const encodedClassName = encodeURIComponent(title);
+            window.location.href = `/class/${encodedClassName}`;
+            break;
+          case 'assignment':
+            const encodedAssignmentName = encodeURIComponent(title);
+            window.location.href = `/class/${encodedAssignmentName}`;
+            break;
+          case 'test':
+            window.location.href = `/mindweb/${node.dataset.id}`;
+            break;
+          case 'project':
+            window.location.href = `/collab/${node.dataset.id}`;
+            break;
+        }
+      }
+      
+      // Reset the dragged flag
+      node.dataset.wasDragged = "false";
+    }, { capture: true }); // Use capture to ensure this runs before other click handlers
+  }
   
   // Handle connection overlay click
   connectionOverlay.addEventListener('click', function(e) {
@@ -575,10 +717,18 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Delete a node
   function deleteNode(nodeId) {
+    // Find the node in our array
+    const nodeToDelete = nodes.find(node => node.id === nodeId);
+    
     // Remove from DOM
     const nodeEl = document.querySelector(`[data-id="${nodeId}"]`);
     if (nodeEl) {
       nodeEl.remove();
+    }
+    
+    // Remove the hover panel
+    if (nodeToDelete && nodeToDelete.hoverPanel) {
+      nodeToDelete.hoverPanel.remove();
     }
     
     // Remove from nodes array
@@ -877,5 +1027,90 @@ document.addEventListener('DOMContentLoaded', function() {
     await new Promise(resolve => setTimeout(resolve, 500)); 
     
     addMessageToChat(response, 'ai');
+  }
+
+  // Show edit interface for a node
+  function showEditInterface(node, hoverPanel) {
+    // Create edit interface if it doesn't exist
+    if (!hoverPanel.querySelector('.node-edit-interface')) {
+      const editInterface = document.createElement('div');
+      editInterface.className = 'node-edit-interface';
+      
+      // Get current node title
+      const titleElement = node.querySelector('.node-title');
+      const currentTitle = titleElement.textContent;
+      
+      // Create input field
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'node-edit-input';
+      input.value = currentTitle;
+      input.placeholder = 'Enter node title...';
+      
+      // Create buttons container
+      const buttonsContainer = document.createElement('div');
+      buttonsContainer.className = 'node-edit-buttons';
+      
+      // Save button
+      const saveBtn = document.createElement('button');
+      saveBtn.textContent = 'Save';
+      saveBtn.className = 'node-edit-save';
+      saveBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        
+        // Update node title if not empty
+        const newTitle = input.value.trim();
+        if (newTitle) {
+          titleElement.textContent = newTitle;
+          
+          // Update title in nodes array
+          const nodeObj = nodes.find(n => n.id === node.dataset.id);
+          if (nodeObj) {
+            nodeObj.title = newTitle;
+          }
+          
+          // Show success message
+          showMessage('Node title updated!');
+        }
+        
+        // Remove edit interface
+        editInterface.remove();
+      });
+      
+      // Cancel button
+      const cancelBtn = document.createElement('button');
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.className = 'node-edit-cancel';
+      cancelBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        
+        // Remove edit interface
+        editInterface.remove();
+      });
+      
+      // Add elements to interface
+      buttonsContainer.appendChild(saveBtn);
+      buttonsContainer.appendChild(cancelBtn);
+      editInterface.appendChild(input);
+      editInterface.appendChild(buttonsContainer);
+      
+      // Add interface to hover panel
+      hoverPanel.appendChild(editInterface);
+      
+      // Focus input and select all text
+      setTimeout(() => {
+        input.focus();
+        input.select();
+      }, 10);
+      
+      // Add key event listeners for enter and escape
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          saveBtn.click(); // Trigger save on Enter
+        } else if (e.key === 'Escape') {
+          cancelBtn.click(); // Trigger cancel on Escape
+        }
+      });
+    }
   }
 });

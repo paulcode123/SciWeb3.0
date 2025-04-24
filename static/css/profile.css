@@ -1,0 +1,652 @@
+/* Profile Page Styles */
+:root {
+    --profile-spacing: 2rem;
+    --profile-border-radius: 12px;
+    --profile-box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    --profile-dark-box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.profile-container {
+    display: flex;
+    max-width: 1200px;
+    margin: 7rem auto 2rem;
+    padding: 0 1rem;
+    gap: 2rem;
+}
+
+/* Profile Sidebar */
+.profile-sidebar {
+    flex: 0 0 300px;
+    position: sticky;
+    top: 7rem;
+    align-self: flex-start;
+    background-color: var(--bg-light);
+    border-radius: var(--profile-border-radius);
+    box-shadow: var(--profile-box-shadow);
+    overflow: hidden;
+    transition: background-color var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.dark-mode .profile-sidebar {
+    background-color: var(--bg-dark-accent);
+    box-shadow: var(--profile-dark-box-shadow);
+}
+
+.profile-picture-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    position: relative;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode .profile-picture-container {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.profile-picture {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--primary);
+    margin-bottom: 1rem;
+    transition: transform 0.3s;
+}
+
+.profile-picture:hover {
+    transform: scale(1.05);
+}
+
+#change-picture {
+    position: absolute;
+    bottom: 3.5rem;
+    right: 6rem;
+    background-color: var(--bg-light);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    font-size: 0.9rem;
+    padding: 0;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.dark-mode #change-picture {
+    background-color: var(--bg-dark);
+}
+
+#change-picture:hover {
+    background-color: var(--primary);
+    color: white;
+    transform: scale(1.1);
+}
+
+.profile-nav {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 0;
+}
+
+.profile-nav-item {
+    background: none;
+    border: none;
+    text-align: left;
+    padding: 1rem 2rem;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.3s, color 0.3s;
+    position: relative;
+    outline: none;
+    color: var(--text-dark);
+}
+
+.dark-mode .profile-nav-item {
+    color: var(--text-light);
+}
+
+.profile-nav-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 4px;
+    background-color: transparent;
+    transition: background-color 0.3s;
+}
+
+.profile-nav-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--primary);
+}
+
+.dark-mode .profile-nav-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.profile-nav-item.active {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.profile-nav-item.active::before {
+    background-color: var(--primary);
+}
+
+/* Profile Content */
+.profile-content {
+    flex: 1;
+    background-color: var(--bg-light);
+    border-radius: var(--profile-border-radius);
+    box-shadow: var(--profile-box-shadow);
+    overflow: hidden;
+    transition: background-color var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.dark-mode .profile-content {
+    background-color: var(--bg-dark-accent);
+    box-shadow: var(--profile-dark-box-shadow);
+}
+
+.profile-section {
+    display: none;
+    padding: var(--profile-spacing);
+}
+
+.profile-section.active {
+    display: block;
+    animation: fadeIn 0.5s ease;
+}
+
+.profile-section h2 {
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--primary-light);
+    color: var(--text-dark);
+    font-size: 1.8rem;
+}
+
+.dark-mode .profile-section h2 {
+    color: var(--text-light);
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+.dark-mode .form-group label {
+    color: var(--text-light);
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: var(--font-main);
+    transition: border-color 0.3s, box-shadow 0.3s;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+}
+
+.dark-mode .form-control {
+    background-color: var(--bg-dark);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: var(--text-light);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(255, 26, 117, 0.2);
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.save-btn {
+    display: inline-block;
+    margin-top: 1rem;
+}
+
+/* Privacy Settings */
+.privacy-option {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode .privacy-option {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.privacy-option:last-child {
+    border-bottom: none;
+}
+
+.privacy-option h3 {
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    color: var(--text-dark);
+}
+
+.dark-mode .privacy-option h3 {
+    color: var(--text-light);
+}
+
+.radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.radio-group label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.radio-group label:hover {
+    color: var(--primary);
+}
+
+.radio-group input[type="radio"] {
+    margin-right: 0.5rem;
+    cursor: pointer;
+    accent-color: var(--primary);
+}
+
+/* Classes Section */
+.class-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.class-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: var(--bg-light-accent);
+    border-radius: 8px;
+    transition: transform 0.3s, background-color var(--transition-speed);
+}
+
+.dark-mode .class-item {
+    background-color: var(--bg-dark);
+}
+
+.class-item:hover {
+    transform: translateY(-3px);
+}
+
+.class-info h3 {
+    margin-bottom: 0.2rem;
+    font-size: 1.2rem;
+}
+
+.class-info p {
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 0.9rem;
+}
+
+.dark-mode .class-info p {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.class-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ff3b5c 0%, #ff2b4a 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 10px rgba(255, 43, 74, 0.3);
+}
+
+.btn-danger:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(255, 43, 74, 0.4);
+}
+
+.add-class-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: fit-content;
+}
+
+.add-class-form {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background-color: var(--bg-light-accent);
+    border-radius: 8px;
+}
+
+.dark-mode .add-class-form {
+    background-color: var(--bg-dark);
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+/* Friends Section */
+.friends-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding-bottom: 1rem;
+}
+
+.dark-mode .friends-tabs {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.friends-tab {
+    background: none;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    position: relative;
+    transition: color 0.3s;
+}
+
+.dark-mode .friends-tab {
+    color: var(--text-light);
+}
+
+.friends-tab::after {
+    content: '';
+    position: absolute;
+    bottom: -1rem;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background-color: var(--primary);
+    transition: width 0.3s;
+}
+
+.friends-tab:hover {
+    color: var(--primary);
+}
+
+.friends-tab.active {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.friends-tab.active::after {
+    width: 100%;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.2rem 0.5rem;
+    background-color: var(--primary);
+    color: white;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    margin-left: 0.5rem;
+}
+
+.friends-content {
+    display: none;
+}
+
+.friends-content.active {
+    display: block;
+    animation: fadeIn 0.5s ease;
+}
+
+.friend-search {
+    margin-bottom: 1.5rem;
+}
+
+.friends-list, .requests-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.friend-item, .request-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background-color: var(--bg-light-accent);
+    border-radius: 8px;
+    transition: transform 0.3s, background-color var(--transition-speed);
+}
+
+.dark-mode .friend-item, 
+.dark-mode .request-item {
+    background-color: var(--bg-dark);
+}
+
+.friend-item:hover, 
+.request-item:hover {
+    transform: translateY(-3px);
+}
+
+.friend-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 1rem;
+    border: 2px solid var(--primary);
+}
+
+.friend-info {
+    flex: 1;
+}
+
+.friend-info h3 {
+    margin-bottom: 0.2rem;
+    font-size: 1.1rem;
+}
+
+.friend-info p {
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 0.85rem;
+}
+
+.dark-mode .friend-info p {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.friend-actions, 
+.request-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Appearance Section */
+.appearance-option {
+    margin-bottom: 2rem;
+}
+
+.appearance-option h3 {
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.color-options {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.color-option {
+    position: relative;
+    cursor: pointer;
+}
+
+.color-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.color-circle {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.color-option input[type="radio"]:checked + .color-circle {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
+}
+
+.color-option.pink .color-circle {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+}
+
+.color-option.blue .color-circle {
+    background: linear-gradient(135deg, #0088ff 0%, #60b4ff 100%);
+}
+
+.color-option.purple .color-circle {
+    background: linear-gradient(135deg, #9c27b0 0%, #d05ce3 100%);
+}
+
+.color-option.green .color-circle {
+    background: linear-gradient(135deg, #00c853 0%, #5efc82 100%);
+}
+
+.color-option.orange .color-circle {
+    background: linear-gradient(135deg, #ff9100 0%, #ffc77d 100%);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+    .profile-container {
+        flex-direction: column;
+    }
+    
+    .profile-sidebar {
+        flex: initial;
+        position: initial;
+        width: 100%;
+        margin-bottom: 2rem;
+    }
+    
+    .profile-picture-container {
+        flex-direction: row;
+        align-items: center;
+        padding: 1.5rem;
+    }
+    
+    .profile-picture {
+        width: 100px;
+        height: 100px;
+        margin-bottom: 0;
+        margin-right: 1.5rem;
+    }
+    
+    .profile-nav {
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 0.5rem;
+    }
+    
+    .profile-nav-item {
+        padding: 0.75rem 1rem;
+        white-space: nowrap;
+    }
+    
+    .profile-nav-item::before {
+        width: 100%;
+        height: 3px;
+        bottom: 0;
+        top: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-container {
+        margin-top: 6rem;
+        padding: 0 0.5rem;
+    }
+    
+    .class-item,
+    .friend-item,
+    .request-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .class-actions,
+    .friend-actions,
+    .request-actions {
+        margin-top: 1rem;
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    .friend-avatar {
+        margin-bottom: 0.5rem;
+    }
+    
+    .friend-info {
+        margin-bottom: 0.5rem;
+    }
+    
+    .radio-group {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+} 

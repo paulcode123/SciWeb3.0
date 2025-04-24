@@ -1,0 +1,372 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile - SciWeb 3.0{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-sidebar">
+        <div class="profile-picture-container">
+            <img id="profile-picture" src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="Profile Picture" class="profile-picture">
+            <button id="change-picture" class="btn btn-secondary btn-sm"><i class="fas fa-camera"></i> Change</button>
+            <input type="file" id="picture-upload" accept="image/*" style="display: none;">
+        </div>
+        
+        <div class="profile-nav">
+            <button class="profile-nav-item active" data-section="account">Account</button>
+            <button class="profile-nav-item" data-section="privacy">Privacy</button>
+            <button class="profile-nav-item" data-section="classes">Classes</button>
+            <button class="profile-nav-item" data-section="friends">Friends</button>
+            <button class="profile-nav-item" data-section="appearance">Appearance</button>
+        </div>
+    </div>
+
+    <div class="profile-content">
+        <!-- Account Information Section -->
+        <section id="account-section" class="profile-section active">
+            <h2>Account Information</h2>
+            
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" class="form-control" value="JohnDoe123">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" class="form-control" value="john.doe@example.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="full-name">Full Name</label>
+                <input type="text" id="full-name" class="form-control" value="John Doe">
+            </div>
+            
+            <div class="form-group">
+                <label for="bio">Bio</label>
+                <textarea id="bio" class="form-control" rows="4" placeholder="Tell others about yourself...">High school junior interested in computer science and mathematics. Hoping to attend MIT!</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Change Password</label>
+                <input type="password" id="password" class="form-control" placeholder="New password">
+            </div>
+            
+            <div class="form-group">
+                <label for="confirm-password">Confirm Password</label>
+                <input type="password" id="confirm-password" class="form-control" placeholder="Confirm new password">
+            </div>
+            
+            <button class="btn btn-primary save-btn">Save Changes</button>
+        </section>
+
+        <!-- Privacy Settings Section -->
+        <section id="privacy-section" class="profile-section">
+            <h2>Privacy Settings</h2>
+            
+            <div class="privacy-option">
+                <h3>Who can see my profile?</h3>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="profile-visibility" value="private"> Private
+                    </label>
+                    <label>
+                        <input type="radio" name="profile-visibility" value="friends" checked> Friends Only
+                    </label>
+                    <label>
+                        <input type="radio" name="profile-visibility" value="everyone"> Everyone
+                    </label>
+                </div>
+            </div>
+            
+            <div class="privacy-option">
+                <h3>Who can see my web of knowledge?</h3>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="web-visibility" value="private"> Private
+                    </label>
+                    <label>
+                        <input type="radio" name="web-visibility" value="friends" checked> Friends Only
+                    </label>
+                    <label>
+                        <input type="radio" name="web-visibility" value="everyone"> Everyone
+                    </label>
+                </div>
+            </div>
+            
+            <div class="privacy-option">
+                <h3>Who can see my classes?</h3>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="classes-visibility" value="private"> Private
+                    </label>
+                    <label>
+                        <input type="radio" name="classes-visibility" value="friends" checked> Friends Only
+                    </label>
+                    <label>
+                        <input type="radio" name="classes-visibility" value="everyone"> Everyone
+                    </label>
+                </div>
+            </div>
+            
+            <div class="privacy-option">
+                <h3>Who can see my motivations?</h3>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="motivations-visibility" value="private" checked> Private
+                    </label>
+                    <label>
+                        <input type="radio" name="motivations-visibility" value="friends"> Friends Only
+                    </label>
+                    <label>
+                        <input type="radio" name="motivations-visibility" value="everyone"> Everyone
+                    </label>
+                </div>
+            </div>
+            
+            <div class="privacy-option">
+                <h3>Who can see my friends list?</h3>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="friends-visibility" value="private"> Private
+                    </label>
+                    <label>
+                        <input type="radio" name="friends-visibility" value="friends" checked> Friends Only
+                    </label>
+                    <label>
+                        <input type="radio" name="friends-visibility" value="everyone"> Everyone
+                    </label>
+                </div>
+            </div>
+            
+            <button class="btn btn-primary save-btn">Save Privacy Settings</button>
+        </section>
+
+        <!-- Classes Section -->
+        <section id="classes-section" class="profile-section">
+            <h2>My Classes</h2>
+            
+            <div class="class-list">
+                <div class="class-item">
+                    <div class="class-info">
+                        <h3>AP Calculus BC</h3>
+                        <p>Mr. Stephens • Period 2</p>
+                    </div>
+                    <div class="class-actions">
+                        <button class="btn btn-secondary btn-sm">Edit</button>
+                        <button class="btn btn-danger btn-sm">Remove</button>
+                    </div>
+                </div>
+                
+                <div class="class-item">
+                    <div class="class-info">
+                        <h3>AP Physics C</h3>
+                        <p>Mrs. Johnson • Period 3</p>
+                    </div>
+                    <div class="class-actions">
+                        <button class="btn btn-secondary btn-sm">Edit</button>
+                        <button class="btn btn-danger btn-sm">Remove</button>
+                    </div>
+                </div>
+                
+                <div class="class-item">
+                    <div class="class-info">
+                        <h3>AP Computer Science A</h3>
+                        <p>Mr. Lee • Period 5</p>
+                    </div>
+                    <div class="class-actions">
+                        <button class="btn btn-secondary btn-sm">Edit</button>
+                        <button class="btn btn-danger btn-sm">Remove</button>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="btn btn-primary add-class-btn"><i class="fas fa-plus"></i> Add New Class</button>
+            
+            <div id="add-class-form" class="add-class-form" style="display: none;">
+                <h3>Add New Class</h3>
+                <div class="form-group">
+                    <label for="class-name">Class Name</label>
+                    <input type="text" id="class-name" class="form-control" placeholder="e.g. AP Biology">
+                </div>
+                <div class="form-group">
+                    <label for="teacher-name">Teacher Name</label>
+                    <input type="text" id="teacher-name" class="form-control" placeholder="e.g. Ms. Smith">
+                </div>
+                <div class="form-group">
+                    <label for="period">Period</label>
+                    <input type="text" id="period" class="form-control" placeholder="e.g. Period 4">
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-secondary cancel-btn">Cancel</button>
+                    <button class="btn btn-primary save-class-btn">Add Class</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Friends Section -->
+        <section id="friends-section" class="profile-section">
+            <h2>Friends & Requests</h2>
+            
+            <div class="friends-tabs">
+                <button class="friends-tab active" data-tab="my-friends">My Friends</button>
+                <button class="friends-tab" data-tab="pending-requests">Pending Requests <span class="badge">3</span></button>
+                <button class="friends-tab" data-tab="sent-requests">Sent Requests <span class="badge">1</span></button>
+            </div>
+            
+            <div id="my-friends-content" class="friends-content active">
+                <div class="friend-search">
+                    <input type="text" placeholder="Search friends..." class="form-control">
+                </div>
+                
+                <div class="friends-list">
+                    <div class="friend-item">
+                        <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="Friend" class="friend-avatar">
+                        <div class="friend-info">
+                            <h3>Jane Smith</h3>
+                            <p>@janesmith • 15 mutual classes</p>
+                        </div>
+                        <div class="friend-actions">
+                            <button class="btn btn-secondary btn-sm">View Profile</button>
+                            <button class="btn btn-danger btn-sm">Remove</button>
+                        </div>
+                    </div>
+                    
+                    <div class="friend-item">
+                        <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="Friend" class="friend-avatar">
+                        <div class="friend-info">
+                            <h3>Mike Johnson</h3>
+                            <p>@mikej • 8 mutual classes</p>
+                        </div>
+                        <div class="friend-actions">
+                            <button class="btn btn-secondary btn-sm">View Profile</button>
+                            <button class="btn btn-danger btn-sm">Remove</button>
+                        </div>
+                    </div>
+                    
+                    <div class="friend-item">
+                        <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="Friend" class="friend-avatar">
+                        <div class="friend-info">
+                            <h3>Sarah Williams</h3>
+                            <p>@sarahw • 12 mutual classes</p>
+                        </div>
+                        <div class="friend-actions">
+                            <button class="btn btn-secondary btn-sm">View Profile</button>
+                            <button class="btn btn-danger btn-sm">Remove</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="pending-requests-content" class="friends-content">
+                <div class="requests-list">
+                    <div class="request-item">
+                        <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="Friend" class="friend-avatar">
+                        <div class="friend-info">
+                            <h3>David Lee</h3>
+                            <p>@davidlee • 3 mutual friends</p>
+                        </div>
+                        <div class="request-actions">
+                            <button class="btn btn-primary btn-sm">Accept</button>
+                            <button class="btn btn-danger btn-sm">Reject</button>
+                        </div>
+                    </div>
+                    
+                    <div class="request-item">
+                        <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="Friend" class="friend-avatar">
+                        <div class="friend-info">
+                            <h3>Emma Garcia</h3>
+                            <p>@emmagarcia • 5 mutual friends</p>
+                        </div>
+                        <div class="request-actions">
+                            <button class="btn btn-primary btn-sm">Accept</button>
+                            <button class="btn btn-danger btn-sm">Reject</button>
+                        </div>
+                    </div>
+                    
+                    <div class="request-item">
+                        <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="Friend" class="friend-avatar">
+                        <div class="friend-info">
+                            <h3>Ryan Wilson</h3>
+                            <p>@ryanw • 2 mutual friends</p>
+                        </div>
+                        <div class="request-actions">
+                            <button class="btn btn-primary btn-sm">Accept</button>
+                            <button class="btn btn-danger btn-sm">Reject</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="sent-requests-content" class="friends-content">
+                <div class="requests-list">
+                    <div class="request-item">
+                        <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="Friend" class="friend-avatar">
+                        <div class="friend-info">
+                            <h3>Alex Thompson</h3>
+                            <p>@alexthompson • Sent 2 days ago</p>
+                        </div>
+                        <div class="request-actions">
+                            <button class="btn btn-danger btn-sm">Cancel Request</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Appearance Section -->
+        <section id="appearance-section" class="profile-section">
+            <h2>Appearance Settings</h2>
+            
+            <div class="appearance-option">
+                <h3>Theme Preference</h3>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="theme" value="light"> Light Mode
+                    </label>
+                    <label>
+                        <input type="radio" name="theme" value="dark"> Dark Mode
+                    </label>
+                    <label>
+                        <input type="radio" name="theme" value="system" checked> Use System Setting
+                    </label>
+                </div>
+            </div>
+            
+            <div class="appearance-option">
+                <h3>Color Accent</h3>
+                <div class="color-options">
+                    <label class="color-option pink active" title="Pink">
+                        <input type="radio" name="color-accent" value="pink" checked>
+                        <span class="color-circle"></span>
+                    </label>
+                    <label class="color-option blue" title="Blue">
+                        <input type="radio" name="color-accent" value="blue">
+                        <span class="color-circle"></span>
+                    </label>
+                    <label class="color-option purple" title="Purple">
+                        <input type="radio" name="color-accent" value="purple">
+                        <span class="color-circle"></span>
+                    </label>
+                    <label class="color-option green" title="Green">
+                        <input type="radio" name="color-accent" value="green">
+                        <span class="color-circle"></span>
+                    </label>
+                    <label class="color-option orange" title="Orange">
+                        <input type="radio" name="color-accent" value="orange">
+                        <span class="color-circle"></span>
+                    </label>
+                </div>
+            </div>
+            
+            <button class="btn btn-primary save-btn">Save Appearance Settings</button>
+        </section>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/profile.js') }}"></script>
+{% endblock %} 

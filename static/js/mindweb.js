@@ -1,13 +1,40 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log("DOM Content Loaded - Initializing MindWeb");
     
+    // Initialize theme from localStorage or system preference
+    initializeTheme();
+    
     // Show the starter config modal on page load
     const starterConfigModal = new bootstrap.Modal(document.getElementById('starter-config-modal'));
     
+    // Function to initialize theme based on localStorage or system preference
+    function initializeTheme() {
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (savedTheme === 'dark' || (savedTheme !== 'light' && prefersDarkMode)) {
+            document.body.classList.add('dark-mode');
+            console.log("Applied dark theme to mindweb");
+        }
+        
+        // Listen for theme changes from main.js
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'theme') {
+                if (e.newValue === 'dark') {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+                console.log("Theme updated via localStorage:", e.newValue);
+            }
+        });
+    }
+    
     // Function to extract mindweb ID from URL
     function getMindwebIdFromUrl() {
-        const pathMatch = window.location.pathname.match(/\/mindweb\/(\d+)/);
-        return pathMatch ? pathMatch[1] : null;
+        const path = window.location.pathname;
+        const match = path.match(/\/mindweb\/(\w+)/);
+        return match ? match[1] : null;
     }
     
     // Initialize Cytoscape instance first
@@ -166,29 +193,22 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Handle Start MindWeb button click
     document.getElementById('start-mindweb-btn').addEventListener('click', function() {
-        // Save the learning goals and settings
-        const learningGoals = document.getElementById('learning-goals').value;
-        const aiStyle = document.getElementById('ai-style').value;
-        const learningApproach = document.getElementById('learning-approach').value;
-        const difficultyLevel = document.getElementById('difficulty-level').value;
+        // Save the new configuration settings
+        const startApproach = document.querySelector('input[name="start-approach"]:checked').value;
+        const unconnectedNodes = document.getElementById('unconnected-nodes').value;
+        const informationLevel = document.querySelector('input[name="information-level"]:checked').value;
+        const detailLevel = document.querySelector('input[name="detail-level"]:checked').value;
         
-        // Get focus areas
-        const focusAreas = [];
-        if (document.getElementById('focus-concepts').checked) focusAreas.push('concepts');
-        if (document.getElementById('focus-relationships').checked) focusAreas.push('relationships');
-        if (document.getElementById('focus-applications').checked) focusAreas.push('applications');
-        if (document.getElementById('focus-misconceptions').checked) focusAreas.push('misconceptions');
-        
-        // Update the displayed goal
-        document.getElementById('study-goal-display').textContent = 'Goal: ' + learningGoals;
+        // Update the displayed goal (using a default since we removed the text input)
+        const subject = document.querySelector('.card-header.bg-primary .small').textContent.replace('Subject:', '').trim();
+        document.getElementById('study-goal-display').textContent = 'Goal: Learning ' + subject;
         
         // Save settings to localStorage for persistence
         const settings = {
-            learningGoals,
-            aiStyle,
-            learningApproach,
-            difficultyLevel,
-            focusAreas,
+            startApproach,
+            unconnectedNodes,
+            informationLevel,
+            detailLevel,
             enableAiSuggestions: document.getElementById('enable-ai-suggestions').checked,
             suggestionFrequency: document.querySelector('input[name="suggestion-frequency"]:checked').value
         };
@@ -210,18 +230,28 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('settings-btn').addEventListener('click', function() {
         // Restore current settings to the form
         const settings = JSON.parse(localStorage.getItem('mindweb-settings') || '{}');
-        if (settings.learningGoals) document.getElementById('learning-goals').value = settings.learningGoals;
-        if (settings.aiStyle) document.getElementById('ai-style').value = settings.aiStyle;
-        if (settings.learningApproach) document.getElementById('learning-approach').value = settings.learningApproach;
-        if (settings.difficultyLevel) document.getElementById('difficulty-level').value = settings.difficultyLevel;
         
-        if (settings.focusAreas) {
-            document.getElementById('focus-concepts').checked = settings.focusAreas.includes('concepts');
-            document.getElementById('focus-relationships').checked = settings.focusAreas.includes('relationships');
-            document.getElementById('focus-applications').checked = settings.focusAreas.includes('applications');
-            document.getElementById('focus-misconceptions').checked = settings.focusAreas.includes('misconceptions');
+        // Restore start approach
+        if (settings.startApproach) {
+            document.querySelector(`input[name="start-approach"][value="${settings.startApproach}"]`).checked = true;
         }
         
+        // Restore unconnected nodes value
+        if (settings.unconnectedNodes) {
+            document.getElementById('unconnected-nodes').value = settings.unconnectedNodes;
+        }
+        
+        // Restore information level
+        if (settings.informationLevel) {
+            document.querySelector(`input[name="information-level"][value="${settings.informationLevel}"]`).checked = true;
+        }
+        
+        // Restore detail level
+        if (settings.detailLevel) {
+            document.querySelector(`input[name="detail-level"][value="${settings.detailLevel}"]`).checked = true;
+        }
+        
+        // Restore AI suggestions settings
         if (settings.enableAiSuggestions !== undefined) {
             document.getElementById('enable-ai-suggestions').checked = settings.enableAiSuggestions;
         }
@@ -462,24 +492,33 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateAIGreeting(settings) {
         let greeting = "Hello! I'm your AI study guide. ";
         
-        // Add style-specific message
-        if (settings.aiStyle === 'socratic') {
-            greeting += "I'll ask questions to help you discover insights on your own. ";
-        } else if (settings.aiStyle === 'informative') {
-            greeting += "I'll provide clear explanations to help you understand concepts. ";
-        } else if (settings.aiStyle === 'challenging') {
-            greeting += "I'll challenge your thinking to deepen your understanding. ";
-        } else if (settings.aiStyle === 'supportive') {
-            greeting += "I'm here to encourage and support your learning journey. ";
+        // Add start approach-specific message
+        if (settings.startApproach === 'scratch') {
+            greeting += "Let's start building your knowledge from scratch. ";
+        } else if (settings.startApproach === 'recall') {
+            greeting += "I'll help you organize what you already know. ";
+        } else if (settings.startApproach === 'guided') {
+            greeting += "I'll get you started with some concepts, and you can take it from there. ";
         }
         
-        // Add approach-specific message
-        if (settings.learningApproach === 'constructivist') {
-            greeting += "Let's build your understanding by making connections between ideas. ";
-        } else if (settings.learningApproach === 'guided') {
-            greeting += "I'll guide you step by step through the learning process. ";
-        } else if (settings.learningApproach === 'exploratory') {
-            greeting += "Let's explore different concepts and discover how they're connected. ";
+        // Add information level message
+        if (settings.informationLevel === 'none') {
+            greeting += "I'll guide your thoughts but let you derive everything on your own. ";
+        } else if (settings.informationLevel === 'bit') {
+            greeting += "I'll give you hints when needed, but let you do most of the work. ";
+        } else if (settings.informationLevel === 'some') {
+            greeting += "I'll establish the fundamentals and guide you as you build on them. ";
+        } else if (settings.informationLevel === 'alot') {
+            greeting += "I'll provide lots of information for you to choose from. ";
+        }
+        
+        // Add detail level message
+        if (settings.detailLevel === 'sparse') {
+            greeting += "We'll focus on main ideas only. ";
+        } else if (settings.detailLevel === 'broad') {
+            greeting += "We'll include technical details and formulas. ";
+        } else if (settings.detailLevel === 'scholarly') {
+            greeting += "We'll build a scholarly map with deep connections between concepts. ";
         }
         
         // Add hint about chat capabilities
@@ -762,9 +801,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const nodeEditModal = new bootstrap.Modal(document.getElementById('node-edit-modal'));
     const edgeEditModal = new bootstrap.Modal(document.getElementById('edge-edit-modal'));
     
-    // Node creation button
+    // Node creation button - basic implementation without animation
     document.getElementById('add-concept-btn').addEventListener('click', function() {
         const nodeId = 'n' + Date.now();
+        const centerX = cy.width() / 2;
+        const centerY = cy.height() / 2;
+        
+        // Create node with a slight random offset from center for better layout
+        const randomOffsetX = (Math.random() * 100) - 50;
+        const randomOffsetY = (Math.random() * 100) - 50;
+        
+        // Add node with standard properties without any animation
         cy.add({
             group: 'nodes',
             data: {
@@ -774,8 +821,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 description: ''
             },
             position: {
-                x: cy.width() / 2,
-                y: cy.height() / 2
+                x: centerX + randomOffsetX,
+                y: centerY + randomOffsetY
             }
         });
         
@@ -818,7 +865,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Handler for node clicks during relationship creation
+    // Basic relationship creation function without animation
     function relationshipNodeClickHandler(event) {
         const clickedNode = event.target;
         
@@ -827,20 +874,20 @@ document.addEventListener('DOMContentLoaded', function() {
             sourceNode = clickedNode;
             showNotification("Now select the second concept (target) to create a relationship.");
             
-            // Highlight the selected source node
+            // Simply select the source node without animation
             cy.elements().unselect();
             sourceNode.select();
         } else {
             // Second click - select target node and create the relationship
             const targetNode = clickedNode;
             
-            // Don't create self-loops (unless you want to allow them)
+            // Don't create self-loops
             if (sourceNode.id() === targetNode.id()) {
                 showNotification("You cannot connect a concept to itself. Please select a different target concept.");
                 return;
             }
             
-            // Create the edge
+            // Create the edge with basic properties - no animation
             const edgeId = 'e' + Date.now();
             const newEdge = cy.add({
                 group: 'edges',
@@ -872,105 +919,152 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Delete selected elements
+    // Delete selected elements - simplified for reliability
     document.getElementById('delete-selected-btn').addEventListener('click', function() {
-        const selected = cy.$(":selected");
+        // Get selected elements directly
+        const selected = cy.$(':selected');
+        
         if (selected.length > 0) {
+            // Simply remove the elements without animation
             cy.remove(selected);
+            
+            // Show a notification
+            showNotification("Selected items deleted", 2000);
         } else {
             showNotification("Select a concept or relationship first to delete it.");
         }
     });
 
-    // Save button (mock - would connect to backend in real app)
+    // Enhanced save button with animation
     document.getElementById('save-mindweb-btn').addEventListener('click', function() {
-        const data = {
-            nodes: cy.nodes().map(n => n.data()),
-            edges: cy.edges().map(e => e.data()),
-            positions: cy.nodes().map(n => ({ id: n.id(), position: n.position() }))
-        };
+        // Add a save animation to the button
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        this.disabled = true;
         
-        // Save to localStorage
-        const savedMindwebs = JSON.parse(localStorage.getItem('savedMindwebs') || '[]');
+        // Create pulsing animation for nodes to indicate saving
+        cy.nodes().animate({
+            style: { 'background-opacity': 0.5 },
+            duration: 500
+        }).animate({
+            style: { 'background-opacity': 1 },
+            duration: 500
+        });
         
-        // Check if we're editing an existing mindweb (from URL)
-        const currentMindwebId = getMindwebIdFromUrl();
-        
-        if (currentMindwebId) {
-            // Find the current mindweb
-            const existingIndex = savedMindwebs.findIndex(mw => mw.id === currentMindwebId);
+        setTimeout(() => {
+            const data = {
+                nodes: cy.nodes().map(n => n.data()),
+                edges: cy.edges().map(e => e.data()),
+                positions: cy.nodes().map(n => ({ id: n.id(), position: n.position() }))
+            };
             
-            if (existingIndex >= 0) {
-                // We found the currently loaded mindweb
-                const existingMindweb = savedMindwebs[existingIndex];
-                const saveConfirm = confirm(`Update existing MindWeb "${existingMindweb.name}"?`);
+            // Save to localStorage
+            const savedMindwebs = JSON.parse(localStorage.getItem('savedMindwebs') || '[]');
+            
+            // Check if we're editing an existing mindweb (from URL)
+            const currentMindwebId = getMindwebIdFromUrl();
+            
+            if (currentMindwebId) {
+                // Find the current mindweb
+                const existingIndex = savedMindwebs.findIndex(mw => mw.id === currentMindwebId);
                 
-                if (saveConfirm) {
-                    // Update the existing mindweb
-                    savedMindwebs[existingIndex] = { 
-                        ...existingMindweb,
-                        data: data, 
-                        timestamp: Date.now()
-                    };
+                if (existingIndex >= 0) {
+                    // We found the currently loaded mindweb
+                    const existingMindweb = savedMindwebs[existingIndex];
+                    const saveConfirm = confirm(`Update existing MindWeb "${existingMindweb.name}"?`);
                     
-                    localStorage.setItem('savedMindwebs', JSON.stringify(savedMindwebs));
-                    addAIMessage(`MindWeb "${existingMindweb.name}" has been updated.`);
-                    showNotification(`MindWeb "${existingMindweb.name}" updated`, 3000);
-                    updateSavedMindwebsList();
-                    return;
+                    if (saveConfirm) {
+                        // Update the existing mindweb
+                        savedMindwebs[existingIndex] = { 
+                            ...existingMindweb,
+                            data: data, 
+                            timestamp: Date.now()
+                        };
+                        
+                        localStorage.setItem('savedMindwebs', JSON.stringify(savedMindwebs));
+                        addAIMessage(`MindWeb "${existingMindweb.name}" has been updated.`);
+                        showNotification(`MindWeb "${existingMindweb.name}" updated`, 3000);
+                        updateSavedMindwebsList();
+                        
+                        // Reset button
+                        this.innerHTML = '<i class="fas fa-save"></i> Save MindWeb';
+                        this.disabled = false;
+                        
+                        // Show success animation
+                        this.classList.add('save-success');
+                        setTimeout(() => this.classList.remove('save-success'), 1000);
+                        
+                        return;
+                    }
+                    // If they click cancel, fall through to the normal save-as flow
                 }
-                // If they click cancel, fall through to the normal save-as flow
-            }
-        }
-        
-        // Normal flow - prompt for a name for a new mindweb
-        const savedName = prompt("Enter a name for this MindWeb:", "My MindWeb");
-        
-        if (savedName) {
-            // Generate a two-digit ID for new mindwebs
-            let newId = '';
-            if (savedMindwebs.length > 0) {
-                // Find the highest ID and increment by 1
-                const maxId = Math.max(...savedMindwebs.map(mw => parseInt(mw.id || '0')));
-                newId = String(maxId + 1).padStart(2, '0');
-            } else {
-                newId = '01';
             }
             
-            // Check if name already exists
-            const existingIndex = savedMindwebs.findIndex(mw => mw.name === savedName);
-            if (existingIndex >= 0) {
-                if (confirm(`A MindWeb named "${savedName}" already exists. Do you want to replace it?`)) {
-                    // Keep the existing ID if it has one
-                    const existingId = savedMindwebs[existingIndex].id || newId;
-                    savedMindwebs[existingIndex] = { 
+            // Normal flow - prompt for a name for a new mindweb
+            const savedName = prompt("Enter a name for this MindWeb:", "My MindWeb");
+            
+            if (savedName) {
+                // Generate a two-digit ID for new mindwebs
+                let newId = '';
+                if (savedMindwebs.length > 0) {
+                    // Find the highest ID and increment by 1
+                    const maxId = Math.max(...savedMindwebs.map(mw => parseInt(mw.id || '0')));
+                    newId = String(maxId + 1).padStart(2, '0');
+                } else {
+                    newId = '01';
+                }
+                
+                // Check if name already exists
+                const existingIndex = savedMindwebs.findIndex(mw => mw.name === savedName);
+                if (existingIndex >= 0) {
+                    if (confirm(`A MindWeb named "${savedName}" already exists. Do you want to replace it?`)) {
+                        // Keep the existing ID if it has one
+                        const existingId = savedMindwebs[existingIndex].id || newId;
+                        savedMindwebs[existingIndex] = { 
+                            name: savedName, 
+                            data: data, 
+                            timestamp: Date.now(),
+                            id: existingId
+                        };
+                        
+                        // Update URL with the mindweb ID
+                        updateUrlWithMindwebId(existingId);
+                    } else {
+                        // Reset button if canceled
+                        this.innerHTML = '<i class="fas fa-save"></i> Save MindWeb';
+                        this.disabled = false;
+                        return;
+                    }
+                } else {
+                    savedMindwebs.push({ 
                         name: savedName, 
                         data: data, 
                         timestamp: Date.now(),
-                        id: existingId
-                    };
+                        id: newId
+                    });
                     
-                    // Update URL with the mindweb ID
-                    updateUrlWithMindwebId(existingId);
-                } else {
-                    return;
+                    // Update URL with the new mindweb ID
+                    updateUrlWithMindwebId(newId);
                 }
-            } else {
-                savedMindwebs.push({ 
-                    name: savedName, 
-                    data: data, 
-                    timestamp: Date.now(),
-                    id: newId
-                });
                 
-                // Update URL with the new mindweb ID
-                updateUrlWithMindwebId(newId);
+                localStorage.setItem('savedMindwebs', JSON.stringify(savedMindwebs));
+                addAIMessage(`MindWeb "${savedName}" has been saved to local storage with ID #${newId}.`);
+                updateSavedMindwebsList();
+                
+                // Show success animation
+                cy.nodes().animate({
+                    style: { 'background-opacity': 0.7, 'scale': 1.05 },
+                    duration: 400
+                }).animate({
+                    style: { 'background-opacity': 1, 'scale': 1 },
+                    duration: 400
+                });
             }
             
-            localStorage.setItem('savedMindwebs', JSON.stringify(savedMindwebs));
-            addAIMessage(`MindWeb "${savedName}" has been saved to local storage with ID #${newId}.`);
-            updateSavedMindwebsList();
-        }
+            // Reset button
+            this.innerHTML = '<i class="fas fa-save"></i> Save MindWeb';
+            this.disabled = false;
+            
+        }, 800); // Delay to show the animation
     });
 
     // Create UI for loading saved mindwebs
@@ -1256,7 +1350,7 @@ document.addEventListener('DOMContentLoaded', function() {
         openEdgeEditModal(edge);
     });
 
-    // Node edit modal functionality
+    // Node edit modal functionality - simplified without animations
     function openNodeEditModal(node) {
         const nodeData = node.data();
         
@@ -1268,7 +1362,7 @@ document.addEventListener('DOMContentLoaded', function() {
         nodeEditModal.show();
     }
 
-    // Save node changes
+    // Save node changes without animation
     document.getElementById('save-node-btn').addEventListener('click', function() {
         const nodeId = document.getElementById('node-id').value;
         const nodeName = document.getElementById('node-name').value;
@@ -1276,14 +1370,24 @@ document.addEventListener('DOMContentLoaded', function() {
         const nodeColor = document.getElementById('node-color').value;
         
         const node = cy.getElementById(nodeId);
+        
+        // Update data
         node.data('label', nodeName);
         node.data('description', nodeDescription);
         node.data('color', nodeColor);
         
+        // Update color in the graph
+        if (nodeColor) {
+            node.style('background-color', nodeColor);
+        }
+        
         nodeEditModal.hide();
+        
+        // Refresh the tooltip with the new description
+        addTooltip(node);
     });
 
-    // Edge edit modal functionality
+    // Edge edit modal functionality - simplified without animations
     function openEdgeEditModal(edge) {
         const edgeData = edge.data();
         
@@ -1296,7 +1400,7 @@ document.addEventListener('DOMContentLoaded', function() {
         edgeEditModal.show();
     }
 
-    // Save edge changes
+    // Save edge changes without animation
     document.getElementById('save-edge-btn').addEventListener('click', function() {
         const edgeId = document.getElementById('edge-id').value;
         const edgeLabel = document.getElementById('edge-label').value;

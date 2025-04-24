@@ -17,6 +17,154 @@ def tree():
 def counselor():
     return render_template('counselor.html')
 
+@app.route('/pmods')
+def pmods():
+    return render_template('pmods.html')
+
+@app.route('/profile')
+def profile():
+    # In a real application, this would verify user authentication
+    # and fetch the user's profile data from a database
+    return render_template('profile.html')
+
+@app.route('/users/<username>')
+def user_profile(username):
+    # In a real application, this would fetch the user's profile data from a database
+    # based on the username parameter
+    
+    # Mock data for demonstration
+    user_data = {
+        'username': username,
+        'full_name': 'Jane Smith',
+        'first_name': 'Jane',
+        'bio': 'High school junior interested in biology and chemistry. Planning to study medicine in college!',
+        'education': 'Jefferson High School, Class of 2026',
+        'is_friend': True,
+        'is_self': False,
+        'request_sent': False,
+        'class_count': 6,
+        'friend_count': 42,
+        'connection_count': 156,
+        'classes_visibility': 'friends',
+        'web_visibility': 'friends',
+        'friends_visibility': 'friends',
+        'motivations_visibility': 'friends',
+        'total_nodes': 89,
+        'total_connections': 156,
+        'key_insights': 12,
+        
+        'achievements': [
+            {'name': 'Science Fair Gold Medal', 'icon': 'fas fa-medal'},
+            {'name': 'Biology Olympiad Semifinalist', 'icon': 'fas fa-trophy'},
+            {'name': 'Perfect Attendance', 'icon': 'fas fa-calendar-check'}
+        ],
+        
+        'interests': ['Molecular Biology', 'Organic Chemistry', 'Medical Research', 'Piano', 'Volleyball'],
+        
+        'motivations': [
+            {
+                'title': 'Medical School Acceptance',
+                'description': 'Get into a top 10 medical school to pursue a career in pediatric medicine.',
+                'deadline': 'Fall 2027',
+                'tags': ['Career', 'Academic', 'Long-term']
+            },
+            {
+                'title': 'Complete Research Project',
+                'description': 'Finish my research project on antibiotic resistance in bacteria.',
+                'deadline': 'Spring 2025',
+                'tags': ['Academic', 'Science', 'Short-term']
+            }
+        ],
+        
+        'recent_activities': [
+            {
+                'text': 'Added 5 new nodes to AP Biology web',
+                'time': '2 days ago',
+                'icon': 'fas fa-brain'
+            },
+            {
+                'text': 'Connected "Cellular Respiration" to "Photosynthesis"',
+                'time': '3 days ago',
+                'icon': 'fas fa-link'
+            },
+            {
+                'text': 'Completed Chemistry quiz with score 95%',
+                'time': '1 week ago',
+                'icon': 'fas fa-flask'
+            }
+        ],
+        
+        'classes': [
+            {
+                'id': '1',
+                'name': 'AP Biology',
+                'teacher': 'Mrs. Johnson',
+                'period': 'Period 1',
+                'nodes': 32,
+                'connections': 48
+            },
+            {
+                'id': '2',
+                'name': 'AP Chemistry',
+                'teacher': 'Mr. Roberts',
+                'period': 'Period 3',
+                'nodes': 28,
+                'connections': 45
+            },
+            {
+                'id': '3',
+                'name': 'AP English Literature',
+                'teacher': 'Ms. Garcia',
+                'period': 'Period 4',
+                'nodes': 15,
+                'connections': 22
+            },
+            {
+                'id': '4',
+                'name': 'AP Calculus BC',
+                'teacher': 'Dr. Williams',
+                'period': 'Period 5',
+                'nodes': 14,
+                'connections': 41
+            }
+        ],
+        
+        'friends': [
+            {
+                'name': 'Alex Thompson',
+                'username': 'alexthompson',
+                'is_mutual': True
+            },
+            {
+                'name': 'Emily Wilson',
+                'username': 'emilyw',
+                'is_mutual': True
+            },
+            {
+                'name': 'Michael Chen',
+                'username': 'michaelc',
+                'is_mutual': False
+            },
+            {
+                'name': 'Sophia Rodriguez',
+                'username': 'sophiar',
+                'is_mutual': True
+            },
+            {
+                'name': 'David Kim',
+                'username': 'davidk',
+                'is_mutual': False
+            },
+            {
+                'name': 'Olivia Parker',
+                'username': 'oliviap',
+                'is_mutual': True
+            }
+        ]
+    }
+    
+    return render_template('user_profile.html', **user_data)
+
 @app.route('/schedule')
 def schedule():
     # In a real application, this would pull data from a database

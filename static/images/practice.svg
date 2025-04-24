@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="256" fill="#f4f6f9"/>
+  
+  <!-- Clipboard -->
+  <rect x="136" y="96" width="240" height="320" rx="16" fill="#ffffff" stroke="#4a90e2" stroke-width="8"/>
+  <rect x="136" y="96" width="240" height="48" rx="16" fill="#4a90e2"/>
+  <rect x="168" y="176" width="176" height="16" rx="8" fill="#e0e0e0"/>
+  <rect x="168" y="208" width="176" height="16" rx="8" fill="#e0e0e0"/>
+  <rect x="168" y="240" width="176" height="16" rx="8" fill="#e0e0e0"/>
+  
+  <!-- Checkboxes -->
+  <rect x="168" y="288" width="24" height="24" rx="4" fill="#ffffff" stroke="#4a90e2" stroke-width="4"/>
+  <path d="M173 300 L180 307 L187 293" stroke="#4a90e2" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <rect x="168" y="328" width="24" height="24" rx="4" fill="#ffffff" stroke="#4a90e2" stroke-width="4"/>
+  <path d="M173 340 L180 347 L187 333" stroke="#4a90e2" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <rect x="168" y="368" width="24" height="24" rx="4" fill="#ffffff" stroke="#4a90e2" stroke-width="4"/>
+  
+  <!-- Checkbox text -->
+  <rect x="208" y="292" width="120" height="16" rx="8" fill="#e0e0e0"/>
+  <rect x="208" y="332" width="120" height="16" rx="8" fill="#e0e0e0"/>
+  <rect x="208" y="372" width="120" height="16" rx="8" fill="#e0e0e0"/>
+  
+  <!-- Pencil -->
+  <g transform="translate(344, 144) rotate(45)">
+    <rect x="0" y="0" width="16" height="80" rx="2" fill="#ffc107"/>
+    <polygon points="0,0 16,0 16,16 0,16" fill="#e57373"/>
+    <polygon points="0,0 16,0 8,-8" fill="#e57373"/>
+  </g>
+  
+  <!-- Speech bubble with steps -->
+  <g transform="translate(96, 144)">
+    <path d="M0,16 Q0,0 16,0 L80,0 Q96,0 96,16 L96,64 Q96,80 80,80 L48,80 L32,96 L32,80 L16,80 Q0,80 0,64 Z" fill="#6c63ff" opacity="0.8"/>
+    <rect x="16" y="20" width="64" height="4" rx="2" fill="#ffffff"/>
+    <rect x="16" y="32" width="64" height="4" rx="2" fill="#ffffff"/>
+    <rect x="16" y="44" width="48" height="4" rx="2" fill="#ffffff"/>
+    <rect x="16" y="56" width="32" height="4" rx="2" fill="#ffffff"/>
+  </g>
+  
+  <!-- Mathematical symbols -->
+  <text x="352" y="352" font-family="'Segoe UI', Arial, sans-serif" font-size="24" font-weight="bold" fill="#4a90e2">x²</text>
+  <text x="384" y="352" font-family="'Segoe UI', Arial, sans-serif" font-size="24" fill="#4a90e2">+</text>
+  <text x="408" y="352" font-family="'Segoe UI', Arial, sans-serif" font-size="24" font-weight="bold" fill="#4a90e2">y²</text>
+  <text x="384" y="384" font-family="'Segoe UI', Arial, sans-serif" font-size="24" fill="#4a90e2">=</text>
+  <text x="384" y="416" font-family="'Segoe UI', Arial, sans-serif" font-size="24" font-weight="bold" fill="#4a90e2">1</text>
+  
+  <!-- Logical Steps Arrow -->
+  <path d="M316,208 L340,208 L340,228 L356,212 L340,196 L340,216 L316,216 Z" fill="#28a745" opacity="0.8"/>
+</svg> 

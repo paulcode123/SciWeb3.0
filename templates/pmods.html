@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block title %}Practice Modules - SciWeb 3.0{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pmods.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="pmods-container">
+    <div class="pmods-header">
+        <h1>Practice Modules</h1>
+        <p>Personalize your learning experience and test your understanding</p>
+    </div>
+
+    <div class="pmods-wrapper">
+        <!-- Configuration Panel -->
+        <div class="config-panel">
+            <h2>Module Settings</h2>
+            
+            <div class="config-section">
+                <h3>Practice Mode</h3>
+                <div class="mode-options">
+                    <div class="mode-option">
+                        <input type="radio" id="mode-test" name="practice-mode" value="test">
+                        <label for="mode-test">
+                            <i class="fas fa-clipboard-check"></i>
+                            <span>Test Mode</span>
+                            <small>No feedback until the end</small>
+                        </label>
+                    </div>
+                    
+                    <div class="mode-option">
+                        <input type="radio" id="mode-freeform" name="practice-mode" value="freeform" checked>
+                        <label for="mode-freeform">
+                            <i class="fas fa-pencil-alt"></i>
+                            <span>Freeform</span>
+                            <small>Feedback after every problem</small>
+                        </label>
+                    </div>
+                    
+                    <div class="mode-option">
+                        <input type="radio" id="mode-logical" name="practice-mode" value="logical">
+                        <label for="mode-logical">
+                            <i class="fas fa-check-square"></i>
+                            <span>Logical Steps</span>
+                            <small>Real-time verification</small>
+                        </label>
+                    </div>
+                    
+                    <div class="mode-option">
+                        <input type="radio" id="mode-record" name="practice-mode" value="record">
+                        <label for="mode-record">
+                            <i class="fas fa-microphone"></i>
+                            <span>Record Logic</span>
+                            <small>Voice or typed with traceback</small>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="config-section">
+                <h3>Question Configuration</h3>
+                
+                <div class="config-row">
+                    <label for="topic-select">Topics:</label>
+                    <select id="topic-select" multiple>
+                        <option value="algebra">Algebra</option>
+                        <option value="calculus">Calculus</option>
+                        <option value="statistics">Statistics</option>
+                        <option value="geometry">Geometry</option>
+                        <option value="probability">Probability</option>
+                    </select>
+                </div>
+                
+                <div class="config-row">
+                    <label>Difficulty:</label>
+                    <div class="difficulty-slider">
+                        <input type="range" id="difficulty" min="1" max="5" value="3">
+                        <div class="difficulty-labels">
+                            <span>Easy</span>
+                            <span>Medium</span>
+                            <span>Hard</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="config-row">
+                    <label>Problem Types:</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="type-mcq" checked>
+                            <label for="type-mcq">Multiple Choice</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="type-saq" checked>
+                            <label for="type-saq">Short Answer</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="type-proof">
+                            <label for="type-proof">Proofs</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="config-row">
+                    <label for="grading-strictness">Grading Strictness:</label>
+                    <select id="grading-strictness">
+                        <option value="lenient">Lenient</option>
+                        <option value="moderate" selected>Moderate</option>
+                        <option value="strict">Strict</option>
+                    </select>
+                </div>
+                
+                <div class="config-row">
+                    <label for="questions-count">Number of Questions:</label>
+                    <input type="number" id="questions-count" min="1" max="20" value="5">
+                </div>
+                
+                <div class="config-row">
+                    <label>Time Limit:</label>
+                    <div class="time-limit-options">
+                        <div class="radio-item">
+                            <input type="radio" id="time-none" name="time-limit" checked>
+                            <label for="time-none">No Limit</label>
+                        </div>
+                        <div class="time-input-container">
+                            <input type="radio" id="time-custom" name="time-limit">
+                            <input type="number" id="time-minutes" min="1" max="180" value="30" disabled>
+                            <label for="time-minutes">minutes</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="config-row">
+                    <label>AI Assistance:</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="ai-hint" checked>
+                            <label for="ai-hint">Hints</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="ai-tree">
+                            <label for="ai-tree">Map to Tree</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="ai-similar">
+                            <label for="ai-similar">Similar Problems</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="config-row">
+                    <label>Feedback Type:</label>
+                    <select id="feedback-type">
+                        <option value="traceback">Full Traceback</option>
+                        <option value="hint" selected>Hint</option>
+                        <option value="redo">Redo with Logic Stepping</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button id="start-practice" class="primary-button">Start Practice</button>
+        </div>
+
+        <!-- Practice Area -->
+        <div class="practice-area">
+            <div class="no-practice-message">
+                <img src="{{ url_for('static', filename='images/practice.svg') }}" alt="Practice" class="practice-illustration">
+                <h2>Ready to practice?</h2>
+                <p>Configure your practice session and click 'Start Practice' to begin.</p>
+            </div>
+            
+            <div class="practice-content" style="display: none;">
+                <div class="practice-header">
+                    <div class="question-counter">Question <span id="current-question">1</span> of <span id="total-questions">5</span></div>
+                    <div class="timer" id="timer" style="display: none;">30:00</div>
+                </div>
+                
+                <div class="question-container">
+                    <div class="question-content">
+                        <h3>Question <span id="question-number">1</span></h3>
+                        <div class="question-text">
+                            <p id="question-text">Question text will appear here...</p>
+                        </div>
+                        <div class="question-image" id="question-image-container" style="display: none;">
+                            <img id="question-image" src="" alt="Question image">
+                        </div>
+                    </div>
+                    
+                    <div class="answer-container">
+                        <!-- Multiple Choice Container -->
+                        <div id="mcq-container" class="answer-type-container" style="display: none;">
+                            <div class="mcq-options">
+                                <!-- Options will be dynamically generated -->
+                            </div>
+                        </div>
+                        
+                        <!-- Short Answer Container -->
+                        <div id="saq-container" class="answer-type-container" style="display: none;">
+                            <textarea id="saq-answer" placeholder="Type your answer here..."></textarea>
+                        </div>
+                        
+                        <!-- Logical Steps Container -->
+                        <div id="logical-steps-container" class="answer-type-container" style="display: none;">
+                            <div class="steps-list" id="steps-list">
+                                <!-- Steps will be added dynamically -->
+                            </div>
+                            <div class="step-input-container">
+                                <input type="text" id="step-input" placeholder="Enter logical step...">
+                                <button id="add-step" class="step-button">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Voice Recording Container -->
+                        <div id="voice-container" class="answer-type-container" style="display: none;">
+                            <div class="recording-controls">
+                                <button id="start-recording" class="record-button">
+                                    <i class="fas fa-microphone"></i> Start Recording
+                                </button>
+                                <button id="stop-recording" class="record-button" style="display: none;">
+                                    <i class="fas fa-stop"></i> Stop Recording
+                                </button>
+                                <div class="recording-status" id="recording-status"></div>
+                            </div>
+                            <div class="recording-playback" id="recording-playback" style="display: none;">
+                                <audio id="recording-audio" controls></audio>
+                            </div>
+                        </div>
+                        
+                        <div class="answer-actions">
+                            <button id="submit-answer" class="primary-button">Submit Answer</button>
+                            <button id="get-hint" class="secondary-button">
+                                <i class="fas fa-lightbulb"></i> Get Hint
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="feedback-container" id="feedback-container" style="display: none;">
+                    <div class="feedback-header">
+                        <h3 id="feedback-title">Feedback</h3>
+                        <button id="close-feedback" class="close-button">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="feedback-content" id="feedback-content">
+                        <!-- Feedback content will be dynamically added -->
+                    </div>
+                    <div class="feedback-actions">
+                        <button id="map-to-web" class="web-button">
+                            <i class="fas fa-project-diagram"></i> Map to Web
+                        </button>
+                        <button id="next-question" class="primary-button">Next Question</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pmods.js') }}"></script>
+{% endblock %} 
