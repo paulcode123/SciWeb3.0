@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SciWeb 3.0 - NHS Tutoring</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nhs.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="logo">
+            <div class="logo-text">SciWeb</div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/tree">Tree</a></li>
+            <li><a href="/schedule">Schedule</a></li>
+            <li><a href="/counselor">Counselor</a></li>
+            <li><a href="/nhs">NHS</a></li>
+            <li><a href="/signup">Sign Up</a></li>
+        </ul>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
+    </nav>
+
+    <!-- NHS Hero Section - smaller version -->
+    <section class="nhs-hero" style="padding: 2rem;">
+        <h1>NHS Tutoring</h1>
+        <p>Request a tutor or sign up to become a tutor</p>
+    </section>
+
+    <div class="nhs-container">
+        <!-- Tutoring Tabs -->
+        <div class="nhs-card">
+            <div class="nhs-tabs" id="tutoring-tabs">
+                <button class="nhs-tab active" data-tab="request">Request a Tutor</button>
+                <button class="nhs-tab" data-tab="become">Become a Tutor</button>
+                <button class="nhs-tab" data-tab="schedule">Tutoring Schedule</button>
+            </div>
+            
+            <!-- Request a Tutor Tab -->
+            <div class="nhs-tab-content active" id="request-tab">
+                <div class="nhs-card-body">
+                    <form id="request-form">
+                        <h2 style="margin-bottom: 1.5rem;">Request Tutoring Assistance</h2>
+                        
+                        <div class="nhs-form-group">
+                            <label class="nhs-form-label" for="subject">Subject</label>
+                            <select class="nhs-form-select" id="subject" required>
+                                <option value="" disabled selected>Select a subject</option>
+                                <option value="math">Mathematics</option>
+                                <option value="science">Science</option>
+                                <option value="english">English</option>
+                                <option value="history">History</option>
+                                <option value="language">Foreign Language</option>
+                                <option value="computer">Computer Science</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="nhs-form-group" id="specific-subject-group" style="display: none;">
+                            <label class="nhs-form-label" for="specific-subject">Specific Topic/Course</label>
+                            <input class="nhs-form-input" type="text" id="specific-subject" placeholder="e.g., AP Calculus, Spanish 2, Physics">
+                        </div>
+                        
+                        <div class="nhs-form-group">
+                            <label class="nhs-form-label">Preferred Format</label>
+                            <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                                <div style="flex: 1;">
+                                    <input type="radio" id="format-in-person" name="format" value="in-person" checked>
+                                    <label for="format-in-person">In-Person</label>
+                                </div>
+                                <div style="flex: 1;">
+                                    <input type="radio" id="format-virtual" name="format" value="virtual">
+                                    <label for="format-virtual">Virtual</label>
+                                </div>
+                                <div style="flex: 1;">
+                                    <input type="radio" id="format-either" name="format" value="either">
+                                    <label for="format-either">Either</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="nhs-form-group">
+                            <label class="nhs-form-label" for="availability">Your Availability</label>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-top: 0.5rem;">
+                                <div>
+                                    <input type="checkbox" id="monday" name="availability" value="monday">
+                                    <label for="monday">Monday</label>
+                                </div>
+                                <div>
+                                    <input type="checkbox" id="tuesday" name="availability" value="tuesday">
+                                    <label for="tuesday">Tuesday</label>
+                                </div>
+                                <div>
+                                    <input type="checkbox" id="wednesday" name="availability" value="wednesday">
+                                    <label for="wednesday">Wednesday</label>
+                                </div>
+                                <div>
+                                    <input type="checkbox" id="thursday" name="availability" value="thursday">
+                                    <label for="thursday">Thursday</label>
+                                </div>
+                                <div>
+                                    <input type="checkbox" id="friday" name="availability" value="friday">
+                                    <label for="friday">Friday</label>
+                                </div>
+                                <div>
+                                    <input type="checkbox" id="weekend" name="availability" value="weekend">
+                                    <label for="weekend">Weekend</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="nhs-form-group">
+                            <label class="nhs-form-label" for="time-preference">Preferred Time</label>
+                            <select class="nhs-form-select" id="time-preference">
+                                <option value="after-school">After School (3-5 PM)</option>
+                                <option value="evening">Evening (5-7 PM)</option>
+                                <option value="lunch">Lunch Period</option>
+                                <option value="study-hall">During Study Hall</option>
+                                <option value="weekend">Weekend</option>
+                            </select>
+                        </div>
+                        
+                        <div class="nhs-form-group">
+                            <label class="nhs-form-label" for="description">Specific Topics or Challenges</label>
+                            <textarea class="nhs-form-textarea" id="description" rows="3" placeholder="Describe what you're having trouble with or what topics you want to focus on"></textarea>
+                        </div>
+                        
+                        <div class="nhs-form-group">
+                            <label class="nhs-form-label" for="urgency">How Urgent Is Your Request?</label>
+                            <select class="nhs-form-select" id="urgency">
+                                <option value="not-urgent">Not Urgent - Regular Study Help</option>
+                                <option value="somewhat">Somewhat Urgent - Test Coming Up</option>
+                                <option value="very">Very Urgent - Test This Week</option>
+                                <option value="emergency">Emergency - Test Tomorrow</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="nhs-btn nhs-btn-primary" style="width: 100%;">
+                            <i class="fas fa-paper-plane"></i> Submit Tutoring Request
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Become a Tutor Tab -->
+            <div class="nhs-tab-content" id="become-tab">
+                <div class="nhs-card-body">
+                    <form id="tutor-form">
+                        <h2 style="margin-bottom: 1.5rem;">Volunteer as an NHS Tutor</h2>
+                        
+                        <div class="nhs-form-group">
+                            <label class="nhs-form-label">Subjects You Can Tutor</label>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-top: 0.5rem;">
+                                <div>
+                                    <input type="checkbox" id="tutor-math" name="tutor-subjects" value="math">
+                                    <label for="tutor-math">Mathematics</label>
+                                </div>
+                                <div>
+                                    <input type="checkbox" id="tutor-science" name="tutor-subjects" value="science">
+                                    <label for="tutor-science">Science</label>
+                                </div>
+                                <div>
+                                    <input type="checkbox" id="tutor-english" name="tutor-subjects" value="english">
+                                    <label for="tutor-english">English</label>
+                                </div>
+                                <div>
+                                    <input type="checkbox" id="tutor-history" name="tutor-subjects" value="history">
+                                    <label for="tutor-history">History</label>
+                                </div>
+                                <div>
+                                    <input type="checkbox" id="tutor-language" name="tutor-subjects" value="language">
+                                    <label for="tutor-language">Foreign Language</label>
+                                </div>
+                                <div>
+                                    <input type="checkbox" id="tutor-computer" name="tutor-subjects" value="computer">
+                                    <label for="tutor-computer">Computer Science</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="nhs-form-group">
+                            <label class="nhs-form-label" for="tutor-details">Specific Courses/Topics</label>
+                            <textarea class="nhs-form-textarea" id="tutor-details" rows="2" placeholder="List specific courses you excel in (e.g., AP Calculus AB, Physics, Spanish 3)"></textarea>
+                        </div>
+                        
+                        <div class="nhs-form-group">
+                            <label class="nhs-form-label" for="tutor-experience">Relevant Experience</label>
+                            <textarea class="nhs-form-textarea" id="tutor-experience" rows="2" placeholder="Have you tutored before? List any relevant experience."></textarea>
+                        </div>
+                        
+                        <div class="nhs-form-group">
+                            <label class="nhs-form-label">Your Availability</label>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-top: 0.5rem;">
+                                <div>
+                                    <input type="checkbox" id="tutor-monday" name="tutor-availability" value="monday">
+                                    <label for="tutor-monday">Monday</label>
+                                </div>
+                                <div>
+                                    <input type="checkbox" id="tutor-tuesday" name="tutor-availability" value="tuesday">
+                                    <label for="tutor-tuesday">Tuesday</label>
+                                </div>
+                                <div>
+                                    <input type="checkbox" id="tutor-wednesday" name="tutor-availability" value="wednesday">
+                                    <label for="tutor-wednesday">Wednesday</label>
+                                </div>
+                                <div>
+                                    <input type="checkbox" id="tutor-thursday" name="tutor-availability" value="thursday">
+                                    <label for="tutor-thursday">Thursday</label>
+                                </div>
+                                <div>
+                                    <input type="checkbox" id="tutor-friday" name="tutor-availability" value="friday">
+                                    <label for="tutor-friday">Friday</label>
+                                </div>
+                                <div>
+                                    <input type="checkbox" id="tutor-weekend" name="tutor-availability" value="weekend">
+                                    <label for="tutor-weekend">Weekend</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="nhs-form-group">
+                            <label class="nhs-form-label">Tutoring Format</label>
+                            <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                                <div style="flex: 1;">
+                                    <input type="checkbox" id="tutor-in-person" name="tutor-format" value="in-person" checked>
+                                    <label for="tutor-in-person">In-Person</label>
+                                </div>
+                                <div style="flex: 1;">
+                                    <input type="checkbox" id="tutor-virtual" name="tutor-format" value="virtual">
+                                    <label for="tutor-virtual">Virtual</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="nhs-form-group">
+                            <label class="nhs-form-label">Certification</label>
+                            <div style="display: flex; align-items: center; margin-top: 0.5rem;">
+                                <input type="checkbox" id="tutor-certification" required style="margin-right: 0.75rem;">
+                                <label for="tutor-certification">I understand that tutoring counts toward my NHS service hours and I commit to being reliable and prepared for all sessions.</label>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="nhs-btn nhs-btn-accent" style="width: 100%;">
+                            <i class="fas fa-user-plus"></i> Register as a Tutor
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Schedule Tab -->
+            <div class="nhs-tab-content" id="schedule-tab">
+                <div class="nhs-card-body">
+                    <h2 style="margin-bottom: 1.5rem;">Upcoming Tutoring Sessions</h2>
+                    
+                    <div class="nhs-schedule-filters" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                        <select class="nhs-form-select" style="flex: 1;">
+                            <option value="all">All Subjects</option>
+                            <option value="math">Mathematics</option>
+                            <option value="science">Science</option>
+                            <option value="english">English</option>
+                            <option value="history">History</option>
+                            <option value="language">Foreign Language</option>
+                            <option value="computer">Computer Science</option>
+                        </select>
+                        <select class="nhs-form-select" style="flex: 1;">
+                            <option value="all">All Days</option>
+                            <option value="monday">Monday</option>
+                            <option value="tuesday">Tuesday</option>
+                            <option value="wednesday">Wednesday</option>
+                            <option value="thursday">Thursday</option>
+                            <option value="friday">Friday</option>
+                            <option value="weekend">Weekend</option>
+                        </select>
+                    </div>
+                    
+                    <table class="nhs-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Subject</th>
+                                <th>Tutor</th>
+                                <th>Location</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Apr 26, 2025</td>
+                                <td>3:30 - 4:30 PM</td>
+                                <td>Calculus AB</td>
+                                <td>Sarah Chen</td>
+                                <td>Library Room B</td>
+                                <td><button class="nhs-btn nhs-btn-primary" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">Join</button></td>
+                            </tr>
+                            <tr>
+                                <td>Apr 26, 2025</td>
+                                <td>4:00 - 5:00 PM</td>
+                                <td>Chemistry</td>
+                                <td>Michael Johnson</td>
+                                <td>Science Lab 2</td>
+                                <td><button class="nhs-btn nhs-btn-primary" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">Join</button></td>
+                            </tr>
+                            <tr>
+                                <td>Apr 27, 2025</td>
+                                <td>3:30 - 4:30 PM</td>
+                                <td>Spanish</td>
+                                <td>Elena Rodriguez</td>
+                                <td>Room 203</td>
+                                <td><button class="nhs-btn nhs-btn-primary" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">Join</button></td>
+                            </tr>
+                            <tr>
+                                <td>Apr 27, 2025</td>
+                                <td>5:00 - 6:00 PM</td>
+                                <td>Physics</td>
+                                <td>Alex Thompson</td>
+                                <td>Virtual (Zoom)</td>
+                                <td><button class="nhs-btn nhs-btn-primary" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">Join</button></td>
+                            </tr>
+                            <tr>
+                                <td>Apr 28, 2025</td>
+                                <td>Lunch Period</td>
+                                <td>English Literature</td>
+                                <td>Jamie Park</td>
+                                <td>Library Main Area</td>
+                                <td><button class="nhs-btn nhs-btn-primary" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">Join</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div style="margin-top: 1.5rem; text-align: center;">
+                        <a href="#" class="nhs-btn nhs-btn-secondary">
+                            <i class="fas fa-calendar-alt"></i> View Full Calendar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Testimonials -->
+        <div class="nhs-card" style="margin-top: 2rem;">
+            <div class="nhs-card-header">
+                <h2 class="nhs-card-title">Student Testimonials</h2>
+            </div>
+            <div class="nhs-card-body">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                    <div class="nhs-card" style="margin-bottom: 0;">
+                        <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                            <div style="width: 40px; height: 40px; border-radius: 50%; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center; margin-right: 0.75rem;">
+                                <i class="fas fa-user" style="color: var(--nhs-primary);"></i>
+                            </div>
+                            <div>
+                                <h4 style="margin: 0; font-size: 1rem;">Dylan M.</h4>
+                                <p style="margin: 0; font-size: 0.85rem; opacity: 0.7;">11th Grade</p>
+                            </div>
+                        </div>
+                        <p>"The NHS tutoring helped me improve my calculus grade from a C to an A-. My tutor made complex concepts much clearer!"</p>
+                    </div>
+                    
+                    <div class="nhs-card" style="margin-bottom: 0;">
+                        <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                            <div style="width: 40px; height: 40px; border-radius: 50%; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center; margin-right: 0.75rem;">
+                                <i class="fas fa-user" style="color: var(--nhs-accent);"></i>
+                            </div>
+                            <div>
+                                <h4 style="margin: 0; font-size: 1rem;">Sophia T.</h4>
+                                <p style="margin: 0; font-size: 0.85rem; opacity: 0.7;">9th Grade</p>
+                            </div>
+                        </div>
+                        <p>"I was struggling with chemistry, but after just a few sessions with my NHS tutor, I'm finally understanding the material and feeling confident."</p>
+                    </div>
+                    
+                    <div class="nhs-card" style="margin-bottom: 0;">
+                        <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                            <div style="width: 40px; height: 40px; border-radius: 50%; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center; margin-right: 0.75rem;">
+                                <i class="fas fa-user" style="color: var(--nhs-success);"></i>
+                            </div>
+                            <div>
+                                <h4 style="margin: 0; font-size: 1rem;">Ethan K.</h4>
+                                <p style="margin: 0; font-size: 0.85rem; opacity: 0.7;">10th Grade</p>
+                            </div>
+                        </div>
+                        <p>"The Spanish tutoring sessions were exactly what I needed before my AP exam. My tutor was patient and helped me practice conversational skills."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-info">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="footer-logo">
+                <p>Building the future of education together.</p>
+            </div>
+            <div class="footer-links">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/tree">Tree</a></li>
+                    <li><a href="/schedule">Schedule</a></li>
+                    <li><a href="/counselor">Counselor</a></li>
+                    <li><a href="/nhs">NHS</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h3>NHS Resources</h3>
+                <ul>
+                    <li><a href="/nhs/credits">Credit Submission</a></li>
+                    <li><a href="/nhs/tutoring">Tutoring Program</a></li>
+                    <li><a href="#">Leadership Opportunities</a></li>
+                    <li><a href="#">Service Projects</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h3>Connect</h3>
+                <ul>
+                    <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
+                    <li><a href="#"><i class="fab fa-github"></i> GitHub</a></li>
+                    <li><a href="#"><i class="fab fa-discord"></i> Discord</a></li>
+                    <li><a href="#"><i class="fas fa-envelope"></i> Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 SciWeb. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        // Tab functionality
+        document.querySelectorAll('.nhs-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and tab contents
+                document.querySelectorAll('.nhs-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.nhs-tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                
+                // Show corresponding tab content
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+            });
+        });
+        
+        // Form handlers
+        document.getElementById('request-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            alert('Tutoring request submitted! You will be matched with an available tutor soon.');
+        });
+        
+        document.getElementById('tutor-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            alert('Thank you for volunteering as a tutor! Your application will be reviewed by NHS advisors.');
+        });
+        
+        // Show specific subject field when subject is selected
+        document.getElementById('subject').addEventListener('change', function() {
+            document.getElementById('specific-subject-group').style.display = 'block';
+        });
+    </script>
+    <style>
+        /* Tab styling */
+        .nhs-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--nhs-border);
+            margin-bottom: 1rem;
+        }
+        
+        .nhs-tab {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-weight: 600;
+            color: var(--nhs-text);
+            opacity: 0.7;
+            position: relative;
+            transition: opacity 0.3s ease;
+        }
+        
+        .nhs-tab:hover {
+            opacity: 1;
+        }
+        
+        .nhs-tab.active {
+            opacity: 1;
+            color: var(--nhs-primary);
+        }
+        
+        .nhs-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--nhs-primary);
+        }
+        
+        .nhs-tab-content {
+            display: none;
+        }
+        
+        .nhs-tab-content.active {
+            display: block;
+        }
+    </style>
+</body>
+</html> 

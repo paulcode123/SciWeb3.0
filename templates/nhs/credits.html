@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SciWeb 3.0 - NHS Credit Submission</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nhs.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="logo">
+            <div class="logo-text">SciWeb</div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/tree">Tree</a></li>
+            <li><a href="/schedule">Schedule</a></li>
+            <li><a href="/counselor">Counselor</a></li>
+            <li><a href="/nhs">NHS</a></li>
+            <li><a href="/signup">Sign Up</a></li>
+        </ul>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
+    </nav>
+
+    <!-- NHS Hero Section - smaller version -->
+    <section class="nhs-hero" style="padding: 2rem;">
+        <h1>NHS Credit Submission</h1>
+        <p>Log your service hours and track your progress</p>
+    </section>
+
+    <div class="nhs-container">
+        <!-- Progress Summary -->
+        <div class="nhs-stats">
+            <div class="nhs-stat-card">
+                <div class="nhs-stat-value">18.5</div>
+                <div class="nhs-stat-label">Credits Completed</div>
+            </div>
+            <div class="nhs-stat-card">
+                <div class="nhs-stat-value">6.5</div>
+                <div class="nhs-stat-label">Credits Remaining</div>
+            </div>
+            <div class="nhs-stat-card">
+                <div class="nhs-stat-value">3</div>
+                <div class="nhs-stat-label">Pending Approval</div>
+            </div>
+            <div class="nhs-stat-card">
+                <div class="nhs-stat-value">25</div>
+                <div class="nhs-stat-label">Annual Goal</div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard - 2 column layout -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+            <!-- Credit Submission Form -->
+            <div class="nhs-card">
+                <div class="nhs-card-header">
+                    <h2 class="nhs-card-title">Submit New Credits</h2>
+                </div>
+                <div class="nhs-card-body">
+                    <form id="credit-form">
+                        <div class="nhs-form-group">
+                            <label class="nhs-form-label" for="service-type">Service Type</label>
+                            <select class="nhs-form-select" id="service-type" required>
+                                <option value="" disabled selected>Select a service type</option>
+                                <option value="community">Community Service</option>
+                                <option value="tutoring">Tutoring Session</option>
+                                <option value="fundraising">Fundraising Event</option>
+                                <option value="leadership">Leadership Role</option>
+                                <option value="mentoring">Mentoring Program</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="nhs-form-group">
+                            <label class="nhs-form-label" for="activity-title">Activity Title</label>
+                            <input class="nhs-form-input" type="text" id="activity-title" placeholder="e.g., Beach Clean-up, Math Tutoring" required>
+                        </div>
+                        
+                        <div class="nhs-form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div>
+                                <label class="nhs-form-label" for="date">Date</label>
+                                <input class="nhs-form-input" type="date" id="date" required>
+                            </div>
+                            <div>
+                                <label class="nhs-form-label" for="hours">Hours</label>
+                                <input class="nhs-form-input" type="number" id="hours" min="0.5" step="0.5" placeholder="Number of hours" required>
+                            </div>
+                        </div>
+                        
+                        <div class="nhs-form-group">
+                            <label class="nhs-form-label" for="location">Location</label>
+                            <input class="nhs-form-input" type="text" id="location" placeholder="Where did the activity take place?">
+                        </div>
+                        
+                        <div class="nhs-form-group">
+                            <label class="nhs-form-label" for="description">Description</label>
+                            <textarea class="nhs-form-textarea" id="description" rows="3" placeholder="Describe your role and what you accomplished"></textarea>
+                        </div>
+                        
+                        <div class="nhs-form-group">
+                            <label class="nhs-form-label" for="supervisor">Supervisor/Contact</label>
+                            <input class="nhs-form-input" type="text" id="supervisor" placeholder="Name of supervising adult">
+                        </div>
+                        
+                        <div class="nhs-form-group">
+                            <label class="nhs-form-label" for="supervisor-email">Supervisor Email</label>
+                            <input class="nhs-form-input" type="email" id="supervisor-email" placeholder="Email for verification">
+                        </div>
+                        
+                        <div class="nhs-form-group">
+                            <label class="nhs-form-label">Certification</label>
+                            <div style="display: flex; align-items: center; margin-top: 0.5rem;">
+                                <input type="checkbox" id="certification" required style="margin-right: 0.75rem;">
+                                <label for="certification">I certify that the information provided above is accurate and truthful.</label>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="nhs-btn nhs-btn-primary" style="width: 100%;">
+                            <i class="fas fa-paper-plane"></i> Submit Credit Request
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Recent Submissions & Requirements -->
+            <div>
+                <!-- Recent Activity -->
+                <div class="nhs-card">
+                    <div class="nhs-card-header">
+                        <h2 class="nhs-card-title">Recent Submissions</h2>
+                        <a href="#" class="nhs-btn nhs-btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">View All</a>
+                    </div>
+                    <div class="nhs-card-body">
+                        <table class="nhs-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Activity</th>
+                                    <th>Hours</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Apr 20, 2025</td>
+                                    <td>City Food Bank Volunteer</td>
+                                    <td>3.0</td>
+                                    <td><span class="nhs-badge nhs-badge-warning">Pending</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Apr 15, 2025</td>
+                                    <td>Biology Tutoring</td>
+                                    <td>2.0</td>
+                                    <td><span class="nhs-badge nhs-badge-success">Approved</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Apr 10, 2025</td>
+                                    <td>Earth Day Planning Committee</td>
+                                    <td>1.5</td>
+                                    <td><span class="nhs-badge nhs-badge-success">Approved</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Apr 5, 2025</td>
+                                    <td>Senior Center Visit</td>
+                                    <td>2.5</td>
+                                    <td><span class="nhs-badge nhs-badge-danger">Rejected</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Requirements -->
+                <div class="nhs-card" style="margin-top: 1.5rem;">
+                    <div class="nhs-card-header">
+                        <h2 class="nhs-card-title">Credit Requirements</h2>
+                    </div>
+                    <div class="nhs-card-body">
+                        <div style="margin-bottom: 1rem;">
+                            <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem;">Annual Requirements</h3>
+                            <ul style="padding-left: 1.5rem;">
+                                <li>25 total service hours/credits per academic year</li>
+                                <li>At least 10 hours must be in community service</li>
+                                <li>At least 5 hours must be in school service or tutoring</li>
+                                <li>The remaining 10 hours can be in any approved category</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem;">Credit Values</h3>
+                            <ul style="padding-left: 1.5rem;">
+                                <li>1 hour of service = 1 credit</li>
+                                <li>Leadership roles may qualify for additional credits</li>
+                                <li>Organizing events may earn up to 1.5x normal credits</li>
+                            </ul>
+                        </div>
+                        
+                        <a href="#" class="nhs-btn nhs-btn-secondary" style="width: 100%;">
+                            <i class="fas fa-book"></i> View Full Requirements
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Helper Section -->
+        <div class="nhs-card" style="margin-top: 1.5rem;">
+            <div class="nhs-card-header">
+                <h2 class="nhs-card-title">Need Service Opportunities?</h2>
+            </div>
+            <div class="nhs-card-body">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+                    <div class="nhs-card" style="margin-bottom: 0;">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem;"><i class="fas fa-seedling"></i> Community Garden</h3>
+                        <p>Help maintain the school community garden on Saturdays from 9am-12pm.</p>
+                        <p style="margin-top: 0.5rem;"><strong>Contact:</strong> Mrs. Peterson</p>
+                    </div>
+                    
+                    <div class="nhs-card" style="margin-bottom: 0;">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem;"><i class="fas fa-book-reader"></i> Peer Tutoring</h3>
+                        <p>Sign up for after-school tutoring sessions in the library, Monday-Thursday.</p>
+                        <p style="margin-top: 0.5rem;"><strong>Contact:</strong> Mr. Johnson</p>
+                    </div>
+                    
+                    <div class="nhs-card" style="margin-bottom: 0;">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem;"><i class="fas fa-hands-helping"></i> Food Drive</h3>
+                        <p>Help collect and organize donations for the annual spring food drive.</p>
+                        <p style="margin-top: 0.5rem;"><strong>Contact:</strong> Ms. Williams</p>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 1rem; text-align: center;">
+                    <a href="#" class="nhs-btn nhs-btn-accent">
+                        <i class="fas fa-search"></i> Browse All Opportunities
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-info">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="footer-logo">
+                <p>Building the future of education together.</p>
+            </div>
+            <div class="footer-links">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/tree">Tree</a></li>
+                    <li><a href="/schedule">Schedule</a></li>
+                    <li><a href="/counselor">Counselor</a></li>
+                    <li><a href="/nhs">NHS</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h3>NHS Resources</h3>
+                <ul>
+                    <li><a href="/nhs/credits">Credit Submission</a></li>
+                    <li><a href="/nhs/tutoring">Tutoring Program</a></li>
+                    <li><a href="#">Leadership Opportunities</a></li>
+                    <li><a href="#">Service Projects</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h3>Connect</h3>
+                <ul>
+                    <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
+                    <li><a href="#"><i class="fab fa-github"></i> GitHub</a></li>
+                    <li><a href="#"><i class="fab fa-discord"></i> Discord</a></li>
+                    <li><a href="#"><i class="fas fa-envelope"></i> Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 SciWeb. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        // Simple form handling for demo
+        document.getElementById('credit-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            alert('Credit submission received! It will be reviewed by NHS advisors.');
+        });
+    </script>
+</body>
+</html> 

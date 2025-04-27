@@ -287,5 +287,36 @@ def verify_email(token):
     # For now, we'll just redirect to the first onboarding step
     return render_template('email_verified.html')
 
+# NHS Pages
+@app.route('/nhs')
+def nhs_home():
+    return render_template('nhs/index.html')
+
+@app.route('/nhs/admin')
+def nhs_admin():
+    return render_template('nhs/admin.html')
+
+@app.route('/nhs/members')
+def nhs_members():
+    return render_template('nhs/members.html')
+
+@app.route('/nhs/students')
+def nhs_students():
+    return render_template('nhs/students.html')
+
+@app.route('/nhs/teachers')
+def nhs_teachers():
+    return render_template('nhs/teachers.html')
+
+@app.route('/nhs/credits', methods=['GET', 'POST'])
+def nhs_credits():
+    # In a real application, this would handle credit submission and approval
+    return render_template('nhs/credits.html')
+
+@app.route('/nhs/tutoring', methods=['GET', 'POST'])
+def nhs_tutoring():
+    # In a real application, this would handle tutoring session registration
+    return render_template('nhs/tutoring.html')
+
 if __name__ == '__main__':
     app.run(debug=True) 

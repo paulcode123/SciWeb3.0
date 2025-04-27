@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <circle cx="150" cy="150" r="150" fill="#8E44AD" opacity="0.1"/>
+  
+  <!-- Head -->
+  <circle cx="150" cy="115" r="85" fill="#F9D2FC"/>
+  
+  <!-- Hair -->
+  <path d="M215 100C215 133.689 187.689 161 154 161C120.311 161 93 133.689 93 100C93 66.3105 120.311 39 154 39C187.689 39 215 66.3105 215 100Z" fill="#53254A"/>
+  <path d="M98 75C98 75 90 85 90 100C90 115 95 130 115 140C135 150 160 150 160 150H195C195 150 210 140 215 115C220 90 215 80 215 80L165 50L98 75Z" fill="#3A1934"/>
+  
+  <!-- Glasses -->
+  <circle cx="120" cy="115" r="25" fill="#FFE0B2" stroke="#8B6E59" stroke-width="2"/>
+  <circle cx="180" cy="115" r="25" fill="#FFE0B2" stroke="#8B6E59" stroke-width="2"/>
+  <path d="M155 115H145" stroke="#8B6E59" stroke-width="4"/>
+  <path d="M95 115H85" stroke="#8B6E59" stroke-width="4"/>
+  <path d="M215 115H205" stroke="#8B6E59" stroke-width="4"/>
+  
+  <!-- Eyes -->
+  <ellipse cx="120" cy="115" rx="10" ry="15" fill="#1B1464"/>
+  <ellipse cx="180" cy="115" rx="10" ry="15" fill="#1B1464"/>
+  <circle cx="117" cy="110" r="3" fill="white"/>
+  <circle cx="177" cy="110" r="3" fill="white"/>
+  
+  <!-- Eyebrows -->
+  <path d="M105 95C105 95 115 90 130 95" stroke="#3A1934" stroke-width="3" stroke-linecap="round"/>
+  <path d="M165 95C165 95 175 90 190 95" stroke="#3A1934" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- Nose -->
+  <path d="M150 120C150 120 145 135 150 140" stroke="#C48E71" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- Mouth -->
+  <path d="M135 155C135 155 145 165 165 155" stroke="#9B4A4A" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- Graduation Cap -->
+  <rect x="105" y="45" width="90" height="20" fill="#3A1934"/>
+  <path d="M105 45L150 20L195 45H105Z" fill="#53254A"/>
+  <path d="M150 20L150 5" stroke="#5D4037" stroke-width="4"/>
+  <circle cx="150" cy="5" r="5" fill="#8E44AD"/>
+  <path d="M175 30L190 70" stroke="#5D4037" stroke-width="2"/>
+  <rect x="180" y="70" width="20" height="20" fill="#8E44AD"/>
+  
+  <!-- Body/Suit -->
+  <path d="M95 190C95 190 120 160 150 160C180 160 205 190 205 190V250H95V190Z" fill="#8E44AD"/>
+  <path d="M125 160V190" stroke="white" stroke-width="4"/>
+  <path d="M175 160V190" stroke="white" stroke-width="4"/>
+  <rect x="135" y="190" width="30" height="60" fill="white"/>
+  
+  <!-- Tie -->
+  <path d="M150 160L140 190L150 220L160 190L150 160Z" fill="#FF1A75"/>
+  <path d="M140 165L160 165" stroke="#CC0051" stroke-width="2"/>
+  
+  <!-- Hands -->
+  <circle cx="95" cy="210" r="15" fill="#F9D2FC"/>
+  <circle cx="205" cy="210" r="15" fill="#F9D2FC"/>
+  
+  <!-- Badge -->
+  <circle cx="115" cy="175" r="10" fill="#FFD700"/>
+  <circle cx="115" cy="175" r="8" fill="#FFC107"/>
+</svg> 

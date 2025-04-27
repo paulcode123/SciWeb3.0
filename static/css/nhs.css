@@ -1,0 +1,319 @@
+/* NHS Pages Styles */
+:root {
+    --nhs-primary: var(--primary);
+    --nhs-secondary: var(--primary-light);
+    --nhs-accent: #3498db;
+    --nhs-gold: #F1C40F;
+    --nhs-success: #2ECC71;
+    --nhs-warning: #F39C12;
+    --nhs-danger: #E74C3C;
+    --nhs-card-bg: var(--bg-light);
+    --nhs-text: var(--text-dark);
+    --nhs-text-light: var(--text-light);
+    --nhs-border: rgba(0, 0, 0, 0.1);
+    --nhs-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode overrides */
+body.dark-mode {
+    --nhs-card-bg: var(--bg-dark-accent);
+    --nhs-text: var(--text-light);
+    --nhs-border: rgba(255, 255, 255, 0.1);
+    --nhs-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* NHS Hero Banner */
+.nhs-hero {
+    background: linear-gradient(135deg, var(--nhs-primary) 0%, var(--nhs-secondary) 100%);
+    color: white;
+    padding: 3rem 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    border-radius: 0 0 20px 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.nhs-hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.nhs-hero p {
+    font-size: 1.2rem;
+    max-width: 800px;
+    margin: 0 auto;
+    opacity: 0.9;
+}
+
+.nhs-hero::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.2), transparent);
+    pointer-events: none;
+}
+
+/* NHS Container */
+.nhs-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem 3rem;
+}
+
+/* NHS Card Components */
+.nhs-card {
+    background: var(--nhs-card-bg);
+    border-radius: 12px;
+    box-shadow: var(--nhs-shadow);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--nhs-border);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.nhs-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.nhs-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--nhs-border);
+}
+
+.nhs-card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--nhs-text);
+    margin: 0;
+}
+
+.nhs-card-body {
+    color: var(--nhs-text);
+}
+
+/* NHS Grid Layout */
+.nhs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+/* NHS Forms */
+.nhs-form-group {
+    margin-bottom: 1.5rem;
+}
+
+.nhs-form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--nhs-text);
+}
+
+.nhs-form-input,
+.nhs-form-select,
+.nhs-form-textarea {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--nhs-border);
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+    font-family: var(--font-main);
+}
+
+body.dark-mode .nhs-form-input,
+body.dark-mode .nhs-form-select,
+body.dark-mode .nhs-form-textarea {
+    background-color: var(--bg-dark);
+    color: var(--text-light);
+    border-color: var(--nhs-border);
+}
+
+.nhs-form-input:focus,
+.nhs-form-select:focus,
+.nhs-form-textarea:focus {
+    outline: none;
+    border-color: var(--nhs-primary);
+    box-shadow: 0 0 0 3px rgba(255, 26, 117, 0.2);
+}
+
+/* NHS Buttons */
+.nhs-btn {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    font-family: var(--font-main);
+}
+
+.nhs-btn-primary {
+    background: linear-gradient(135deg, var(--nhs-primary) 0%, var(--nhs-secondary) 100%);
+    color: white;
+}
+
+.nhs-btn-secondary {
+    background-color: transparent;
+    border: 2px solid var(--nhs-primary);
+    color: var(--nhs-primary);
+}
+
+.nhs-btn-accent {
+    background-color: var(--nhs-accent);
+    color: white;
+}
+
+.nhs-btn-gold {
+    background-color: var(--nhs-gold);
+    color: #333;
+}
+
+.nhs-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* NHS Badges */
+.nhs-badge {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.nhs-badge-primary {
+    background-color: var(--nhs-primary);
+    color: white;
+}
+
+.nhs-badge-accent {
+    background-color: var(--nhs-accent);
+    color: white;
+}
+
+.nhs-badge-gold {
+    background-color: var(--nhs-gold);
+    color: #333;
+}
+
+.nhs-badge-success {
+    background-color: var(--nhs-success);
+    color: white;
+}
+
+.nhs-badge-warning {
+    background-color: var(--nhs-warning);
+    color: white;
+}
+
+.nhs-badge-danger {
+    background-color: var(--nhs-danger);
+    color: white;
+}
+
+/* NHS Tables */
+.nhs-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+}
+
+.nhs-table th,
+.nhs-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--nhs-border);
+}
+
+.nhs-table th {
+    font-weight: 600;
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+body.dark-mode .nhs-table th {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.nhs-table tr:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+body.dark-mode .nhs-table tr:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* NHS Stats */
+.nhs-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.nhs-stat-card {
+    background: var(--nhs-card-bg);
+    border-radius: 12px;
+    box-shadow: var(--nhs-shadow);
+    padding: 1.5rem;
+    text-align: center;
+    border: 1px solid var(--nhs-border);
+}
+
+.nhs-stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--nhs-primary);
+}
+
+.nhs-stat-label {
+    font-size: 1rem;
+    color: var(--nhs-text);
+    opacity: 0.8;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .nhs-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .nhs-hero h1 {
+        font-size: 2rem;
+    }
+    
+    .nhs-hero p {
+        font-size: 1rem;
+    }
+    
+    .nhs-stats {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .nhs-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .nhs-stats {
+        grid-template-columns: 1fr;
+    }
+} 

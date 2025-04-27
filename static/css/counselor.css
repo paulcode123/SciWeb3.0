@@ -1,30 +1,30 @@
 /* Counselor Page Styling */
 :root {
-    --primary-color: #4a6fa5;
-    --secondary-color: #6c87b0;
-    --accent-color: #2d4a77;
-    --text-color: #333;
-    --light-bg: #f5f7fa;
-    --dark-bg: #1e2a3a;
-    --dark-text: #e0e0e0;
-    --card-bg: #ffffff;
+    --primary-color: var(--primary);
+    --secondary-color: var(--primary-light);
+    --accent-color: var(--primary-dark);
+    --text-color: var(--text-dark);
+    --light-bg: var(--bg-light);
+    --dark-bg: var(--bg-dark);
+    --dark-text: var(--text-light);
+    --card-bg: var(--bg-light);
     --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     --transition: all 0.3s ease;
 }
 
 body {
-    background: linear-gradient(to bottom, #ffffff, #a8c4ff, #0a4b9e);
+    background: linear-gradient(to bottom, var(--bg-light), #ffcce0, var(--primary));
     margin: 0;
-    font-family: 'Roboto', sans-serif;
+    font-family: var(--font-main);
     min-height: 100vh;
     overflow-x: hidden;
 }
 
 .dark-mode {
     --text-color: var(--dark-text);
-    --card-bg: #2c3e50;
+    --card-bg: var(--bg-dark-accent);
     --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    background: linear-gradient(to bottom, #1a1a2e, #16213e, #0f3460);
+    background: linear-gradient(to bottom, var(--bg-dark), #2d1a1f, #3d0024);
 }
 
 /* Background Pattern */
@@ -184,7 +184,7 @@ body {
     position: absolute;
     width: 60%;
     height: 4px;
-    background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+    background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
     bottom: -10px;
     left: 20%;
 }
@@ -193,60 +193,69 @@ body {
 .counselor-cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
-    justify-content: center;
-    align-items: stretch;
+    gap: 2rem;
+    margin-top: 2rem;
 }
 
 .counselor-card {
+    background: var(--card-bg);
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: var(--card-shadow);
+    transition: var(--transition);
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    height: 100%;
-    min-height: 520px;
-    background-color: var(--card-bg);
-    border-radius: 16px;
-    box-shadow: var(--card-shadow);
-    padding: 2rem;
-    transition: var(--transition);
+    align-items: center;
     text-align: center;
+    color: var(--text-color);
     position: relative;
     overflow: hidden;
-}
-
-.counselor-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 5px;
-    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .counselor-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    transform: translateY(-10px);
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
+}
+
+.counselor-card h2 {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+.dark-mode .counselor-card {
+    background-color: var(--card-bg);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* Animated Avatars */
 .avatar {
     width: 120px;
     height: 120px;
-    border-radius: 50%;
-    margin: 0 auto 20px;
-    background: linear-gradient(135deg, var(--primary-lighter) 0%, var(--primary) 100%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    border-radius: 60px;
     overflow: hidden;
-    position: relative;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    border: 3px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 1.5rem;
+    border: 3px solid var(--primary-color);
+    background: #f8f8f8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .avatar img {
-    display: none; /* Hide the actual images since they aren't loading */
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.counselor-card:hover .avatar img {
+    transform: scale(1.1);
 }
 
 /* Animated Avatar Faces */
@@ -276,47 +285,38 @@ body {
 
 /* Different styles for each counselor */
 #admissions-officer .avatar {
-    background: linear-gradient(135deg, #4f72e5 0%, #2850d5 100%);
+    border-color: var(--primary-color);
 }
 
 #admissions-officer .avatar::before {
-    box-shadow: -15px 0 0 -2px rgba(255, 255, 255, 0.8), 
-                15px 0 0 -2px rgba(255, 255, 255, 0.8);
-    width: 10%;
+    background: radial-gradient(circle at center, var(--primary-color) 0%, transparent 70%);
+    animation: blink 3s infinite;
 }
 
 #strategic-coordinator .avatar {
-    background: linear-gradient(135deg, #ff9e6f 0%, #ff6b3d 100%);
+    border-color: var(--secondary-color);
 }
 
 #strategic-coordinator .avatar::before {
-    width: 15%;
-    height: 15%;
-    box-shadow: -18px 0 0 0 rgba(255, 255, 255, 0.8), 
-                18px 0 0 0 rgba(255, 255, 255, 0.8);
+    background: radial-gradient(circle at center, var(--secondary-color) 0%, transparent 70%);
+    animation: blink 5s infinite;
 }
 
 #strategic-coordinator .avatar::after {
-    width: 30%;
-    height: 8%;
-    border-radius: 10px;
+    border-color: var(--secondary-color);
 }
 
 #assistant .avatar {
-    background: linear-gradient(135deg, #67e8b6 0%, #15af81 100%);
+    border-color: var(--accent-color);
 }
 
 #assistant .avatar::before {
-    width: 12%;
-    height: 12%;
-    box-shadow: -18px 0 0 0 rgba(255, 255, 255, 0.8), 
-                18px 0 0 0 rgba(255, 255, 255, 0.8);
+    background: radial-gradient(circle at center, var(--accent-color) 0%, transparent 70%);
+    animation: blink 2s infinite;
 }
 
 #assistant .avatar::after {
-    width: 35%;
-    height: 6%;
-    border-radius: 50px;
+    display: none;
 }
 
 /* Avatar animations */
@@ -339,12 +339,6 @@ body {
 
 #assistant .avatar::before {
     animation-delay: 1s;
-}
-
-.counselor-card h2 {
-    color: var(--primary-color);
-    margin-bottom: 0.8rem;
-    font-size: 1.5rem;
 }
 
 .counselor-card p {
@@ -378,38 +372,44 @@ body {
 }
 
 .btn {
-    background: linear-gradient(to right, var(--primary-color), var(--accent-color));
-    color: white;
-    border: none;
-    padding: 0.8rem 1.8rem;
+    display: inline-block;
+    padding: 0.8rem 2rem;
     border-radius: 30px;
-    font-weight: 500;
+    font-weight: 600;
+    color: white;
+    background: var(--primary-color);
+    border: none;
     cursor: pointer;
-    transition: var(--transition);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(255, 26, 117, 0.3);
 }
 
 .btn:hover {
-    background: linear-gradient(to right, var(--accent-color), var(--primary-color));
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    transform: translateY(-3px);
+    box-shadow: 0 7px 20px rgba(255, 26, 117, 0.4);
+    background: var(--secondary-color);
 }
 
 /* Chat Container */
 .chat-container {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 380px;
-    height: 520px;
+    bottom: 30px;
+    right: 30px;
+    width: 350px;
+    height: 500px;
     background-color: var(--card-bg);
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border-radius: 15px;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    z-index: 1000;
-    overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    z-index: 100;
+    border: 1px solid rgba(255, 26, 117, 0.2);
 }
 
 .chat-container.hidden {
@@ -421,8 +421,8 @@ body {
 .chat-header {
     display: flex;
     align-items: center;
-    padding: 1rem 1.5rem;
-    background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+    padding: 15px;
+    background-color: var(--primary-color);
     color: white;
 }
 
@@ -472,36 +472,46 @@ body {
 }
 
 .chat-messages {
-    flex-grow: 1;
-    padding: 1.5rem;
+    flex: 1;
+    padding: 15px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
-    background-color: var(--card-bg);
+    gap: 10px;
+    background-color: var(--light-bg);
+    transition: background-color 0.3s ease;
+}
+
+.dark-mode .chat-messages {
+    background-color: var(--dark-bg);
 }
 
 .message {
-    max-width: 85%;
-    padding: 0.9rem 1.2rem;
+    padding: 10px 15px;
     border-radius: 18px;
-    margin-bottom: 0.5rem;
+    max-width: 80%;
     line-height: 1.4;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    position: relative;
+    margin-bottom: 5px;
 }
 
 .user-message {
     align-self: flex-end;
-    background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+    background-color: var(--primary-color);
     color: white;
     border-bottom-right-radius: 5px;
 }
 
 .counselor-message {
     align-self: flex-start;
-    background-color: #f5f5f5;
+    background-color: #f1f1f1;
     color: var(--text-color);
     border-bottom-left-radius: 5px;
+}
+
+.dark-mode .counselor-message {
+    background-color: #2a2a2a;
+    color: var(--dark-text);
 }
 
 /* Typing Indicator */
@@ -546,49 +556,46 @@ body {
 
 .chat-input {
     display: flex;
-    padding: 1rem;
+    padding: 10px;
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     background-color: var(--card-bg);
 }
 
 .chat-input textarea {
-    flex-grow: 1;
-    padding: 0.8rem 1.2rem;
-    border: 1px solid #ddd;
-    border-radius: 24px;
+    flex: 1;
+    border: none;
+    padding: 10px;
+    border-radius: 20px;
     resize: none;
-    font-family: inherit;
-    background-color: var(--card-bg);
+    outline: none;
+    background-color: var(--light-bg);
     color: var(--text-color);
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-    transition: var(--transition);
+    transition: all 0.3s ease;
 }
 
-.chat-input textarea:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(74, 111, 165, 0.2);
+.dark-mode .chat-input textarea {
+    background-color: #2a2a2a;
+    color: var(--dark-text);
 }
 
 .chat-input button {
-    background: linear-gradient(to right, var(--primary-color), var(--accent-color));
-    color: white;
-    border: none;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    width: 45px;
-    height: 45px;
-    margin-left: 0.8rem;
+    border: none;
+    background-color: var(--primary-color);
+    color: white;
+    margin-left: 10px;
     cursor: pointer;
     display: flex;
-    justify-content: center;
     align-items: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transition: var(--transition);
+    justify-content: center;
+    transition: all 0.3s ease;
 }
 
 .chat-input button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    background-color: var(--secondary-color);
+    transform: scale(1.1);
 }
 
 /* Floating Assistant */
@@ -666,15 +673,15 @@ body {
 }
 
 .connection-quarterly {
-    background-color: #f9a825; /* Amber for quarterly */
+    background-color: var(--primary-color);
 }
 
 .connection-weekly {
-    background-color: #43a047; /* Green for weekly */
+    background-color: var(--secondary-color);
 }
 
 .connection-daily {
-    background-color: #1e88e5; /* Blue for daily */
+    background-color: var(--accent-color);
 }
 
 .connection-label {
@@ -729,26 +736,27 @@ body {
 
 /* Button alignment and styling */
 .counselor-card .btn {
-    margin-top: auto;
-    width: 100%;
-    padding: 12px 24px;
-    cursor: pointer;
-    background-color: var(--primary);
+    background: var(--primary-color);
     color: white;
     border: none;
-    border-radius: 8px;
-    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 30px;
+    cursor: pointer;
     transition: all 0.3s ease;
-    font-size: 1rem;
+    margin-top: 1.5rem;
+    font-weight: 600;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(255, 26, 117, 0.3);
 }
 
 .counselor-card .btn:hover {
-    background-color: var(--primary-darker);
     transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 7px 20px rgba(255, 26, 117, 0.4);
+    background: var(--secondary-color);
 }
 
 .counselor-card .btn:active {
     transform: translateY(-1px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 3px 10px rgba(255, 26, 117, 0.4);
 } 

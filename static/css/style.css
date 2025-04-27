@@ -12,6 +12,15 @@
   --transition-speed: 0.3s;
   --font-main: 'Poppins', sans-serif;
   --font-heading: 'Montserrat', sans-serif;
+  
+  /* Consistent color scheme for all pages */
+  --theme-primary: #ff1a75;
+  --theme-secondary: #ff4d94;
+  --theme-accent: #cc0051;
+  --theme-success: #2ECC71;
+  --theme-warning: #F39C12;
+  --theme-danger: #E74C3C;
+  --theme-info: #3498DB;
 }
 
 * {

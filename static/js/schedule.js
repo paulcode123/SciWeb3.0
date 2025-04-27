@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const modalTitle = document.getElementById('modal-title');
     const closeModalBtns = document.querySelectorAll('.close-modal, .cancel-btn');
     const rsvpBtns = document.querySelectorAll('.rsvp-btn');
-    const themeToggle = document.querySelector('.theme-toggle');
+    const themeToggle = document.getElementById('theme-toggle');
     const prevDayBtn = document.getElementById('prev-day');
     const nextDayBtn = document.getElementById('next-day');
     const currentDateEl = document.getElementById('current-date');
@@ -26,6 +26,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const activateFocusBtn = document.getElementById('activate-focus-mode');
     const focusModeOverlay = document.getElementById('focus-mode-overlay');
     const exitFocusModeBtn = document.getElementById('exit-focus-mode');
+    
+    // Convert 24-hour time to 12-hour format for display
+    function convertTo12Hour(time24h) {
+        if (!time24h) return '';
+        const [hours, minutes] = time24h.split(':');
+        const hour = parseInt(hours, 10);
+        return `${hour % 12 || 12}:${minutes} ${hour >= 12 ? 'PM' : 'AM'}`;
+    }
     
     // Initialize current date
     const today = new Date();
@@ -45,30 +53,32 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Theme toggle functionality
+    // Theme toggle functionality - fixed to match site-wide implementation
     themeToggle.addEventListener('click', function() {
         document.body.classList.toggle('dark-mode');
-        const icon = themeToggle.querySelector('i');
+        
         if (document.body.classList.contains('dark-mode')) {
-            icon.classList.remove('fa-moon');
-            icon.classList.add('fa-sun');
+            themeToggle.innerHTML = '☀️';
         } else {
-            icon.classList.remove('fa-sun');
-            icon.classList.add('fa-moon');
+            themeToggle.innerHTML = '🌙';
         }
         
         // Save preference to localStorage
-        localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
     });
     
-    // Load theme preference from localStorage
+    // Load theme preference from localStorage - fixed to match site-wide implementation
     function loadThemePreference() {
-        const darkMode = localStorage.getItem('darkMode') === 'true';
-        if (darkMode) {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
             document.body.classList.add('dark-mode');
-            const icon = themeToggle.querySelector('i');
-            icon.classList.remove('fa-moon');
-            icon.classList.add('fa-sun');
+            themeToggle.innerHTML = '☀️';
+        } else if (savedTheme === 'light') {
+            document.body.classList.remove('dark-mode');
+            themeToggle.innerHTML = '🌙';
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.body.classList.add('dark-mode');
+            themeToggle.innerHTML = '☀️';
         }
     }
     loadThemePreference();
@@ -109,11 +119,19 @@ document.addEventListener('DOMContentLoaded', function() {
         modal.classList.remove('show');
     }
     
+    // Close modal when clicking close button
     closeModalBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             const modal = this.closest('.modal');
             closeModal(modal);
         });
+    });
+    
+    // Close modal when clicking outside
+    window.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal') && e.target.classList.contains('show')) {
+            closeModal(e.target);
+        }
     });
     
     // Add task functionality
@@ -192,86 +210,135 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Handle task form submission
+    // Form submission handlers
     taskForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
-        const taskId = document.getElementById('task-id').value;
-        const title = document.getElementById('task-title').value;
-        const startTime = document.getElementById('task-start-time').value;
-        const endTime = document.getElementById('task-end-time').value;
-        const location = document.getElementById('task-location').value;
-        const category = document.getElementById('task-category').value;
-        const priority = document.getElementById('task-priority').value;
+        // Get form values
+        const taskTitle = document.getElementById('task-title').value;
+        const taskLocation = document.getElementById('task-location').value;
+        const taskCategory = document.getElementById('task-category').value;
+        const taskPriority = document.getElementById('task-priority').value;
+        const taskStartTime = document.getElementById('task-start-time').value;
+        const taskEndTime = document.getElementById('task-end-time').value;
+        const taskId = document.getElementById('task-id').value || generateID();
         
-        // Convert to 12-hour format for display
-        function convertTo12Hour(time24h) {
-            const [hours, minutes] = time24h.split(':');
-            const hour = parseInt(hours, 10);
-            
-            return `${hour % 12 || 12}:${minutes} ${hour >= 12 ? 'PM' : 'AM'}`;
-        }
+        // Convert the times to 12-hour format for display
+        const displayStartTime = convertTo12Hour(taskStartTime);
+        const displayEndTime = convertTo12Hour(taskEndTime);
         
-        const timeDisplay = `${convertTo12Hour(startTime)} - ${convertTo12Hour(endTime)}`;
+        // In a real application, you would save this data to a database
+        // For now, we'll just add it to the DOM
         
-        if (taskId) {
-            // Edit existing task
-            const taskItem = document.querySelector(`.task-item[data-id="${taskId}"]`);
-            taskItem.querySelector('h3').textContent = title;
-            taskItem.querySelector('p').textContent = `📍 ${location}`;
-            taskItem.querySelector('.task-time').textContent = timeDisplay;
-            taskItem.querySelector('.task-category').textContent = category;
-            taskItem.querySelector('.task-category').className = `task-category ${category}`;
-            taskItem.dataset.category = category;
-            taskItem.dataset.priority = priority;
+        let taskItem;
+        if (document.querySelector(`.task-item[data-id="${taskId}"]`)) {
+            // Update existing task
+            taskItem = document.querySelector(`.task-item[data-id="${taskId}"]`);
+            taskItem.querySelector('h3').textContent = taskTitle;
+            taskItem.querySelector('p').textContent = `📍 ${taskLocation}`;
+            taskItem.querySelector('.task-time').textContent = `${displayStartTime} - ${displayEndTime}`;
+            taskItem.querySelector('.task-category').textContent = taskCategory;
+            taskItem.dataset.category = taskCategory;
+            taskItem.dataset.priority = taskPriority;
         } else {
-            // Create new task
-            const newId = new Date().getTime(); // Simple unique ID for demonstration
+            // Create new task HTML
+            taskItem = document.createElement('div');
+            taskItem.className = 'task-item';
+            taskItem.dataset.id = taskId;
+            taskItem.dataset.category = taskCategory;
+            taskItem.dataset.priority = taskPriority;
             
-            const taskHTML = `
-                <div class="task-item" data-id="${newId}" data-category="${category}" data-priority="${priority}">
-                    <div class="task-drag-handle"><i class="fas fa-grip-lines"></i></div>
-                    <div class="task-time">${timeDisplay}</div>
-                    <div class="task-content">
-                        <h3>${title}</h3>
-                        <p><i class="fas fa-map-marker-alt"></i> ${location}</p>
-                        <div class="task-category ${category}">${category}</div>
-                    </div>
-                    <div class="task-actions">
-                        <button class="task-btn edit-task" title="Edit"><i class="fas fa-edit"></i></button>
-                        <button class="task-btn delete-task" title="Delete"><i class="fas fa-trash"></i></button>
-                    </div>
+            taskItem.innerHTML = `
+                <div class="task-drag-handle">
+                    <i class="fas fa-grip-lines"></i>
+                </div>
+                <div class="task-time">${displayStartTime} - ${displayEndTime}</div>
+                <div class="task-content">
+                    <h3>${taskTitle}</h3>
+                    <p>📍 ${taskLocation}</p>
+                    <span class="task-category ${taskCategory}">${taskCategory}</span>
+                </div>
+                <div class="task-actions">
+                    <button class="task-btn edit-task" title="Edit Task">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="task-btn delete-task" title="Delete Task">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
                 </div>
             `;
             
-            taskList.insertAdjacentHTML('beforeend', taskHTML);
+            // Add to task list
+            taskList.appendChild(taskItem);
         }
         
         // Close the modal
         closeModal(taskModal);
+        
+        // Show a success message
+        showNotification('Task saved successfully!');
     });
     
-    // Create event functionality
+    // Create event functionality with actual DOM updates
     createEventBtn.addEventListener('click', function() {
         eventForm.reset();
         openModal(eventModal);
     });
     
-    // Handle event form submission
+    // Event form submission
     eventForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
-        const title = document.getElementById('event-title').value;
-        const category = document.getElementById('event-category').value;
-        const date = document.getElementById('event-date').value;
-        const startTime = document.getElementById('event-start-time').value;
-        const endTime = document.getElementById('event-end-time').value;
-        const location = document.getElementById('event-location').value;
+        // Get form values
+        const eventTitle = document.getElementById('event-title').value;
+        const eventDesc = document.getElementById('event-description').value;
+        const eventCategory = document.getElementById('event-category').value;
+        const eventDate = document.getElementById('event-date').value;
+        const eventStartTime = document.getElementById('event-start-time').value;
+        const eventEndTime = document.getElementById('event-end-time').value;
+        const eventLocation = document.getElementById('event-location').value;
+        const eventHost = document.getElementById('event-host').value;
         
-        // In a real application, you would save this to a database
-        // For now, we'll just show a confirmation and close the modal
-        alert(`Event "${title}" created successfully!`);
+        // In a real application, you would save this data to a database
+        // For now, we'll just add it to the DOM
+        
+        // Get container for events
+        const eventsContainer = document.querySelector('.events-list');
+        
+        // Format date and time for display
+        const date = new Date(eventDate);
+        const formattedDate = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        const displayStartTime = convertTo12Hour(eventStartTime);
+        
+        // Create event HTML
+        const eventItem = document.createElement('div');
+        eventItem.className = 'event-item';
+        
+        eventItem.innerHTML = `
+            <div class="event-date">
+                <div class="event-day">${formattedDate}</div>
+                <div class="event-time">${displayStartTime}</div>
+            </div>
+            <div class="event-content">
+                <span class="event-category ${eventCategory}">${eventCategory.replace('_', ' ')}</span>
+                <h3>${eventTitle}</h3>
+                <p>${eventDesc}</p>
+                <p class="event-host">Hosted by: ${eventHost}</p>
+                <div class="event-rsvp">
+                    <span>📍 ${eventLocation}</span>
+                    <button class="rsvp-btn">RSVP</button>
+                </div>
+            </div>
+        `;
+        
+        // Add to events list
+        eventsContainer.appendChild(eventItem);
+        
+        // Close the modal
         closeModal(eventModal);
+        
+        // Show a success message
+        showNotification('Event created successfully!');
     });
     
     // RSVP functionality
@@ -435,4 +502,31 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     checkFirstTimeUser();
+    
+    // Show notification function
+    function showNotification(message) {
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        // Show notification
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+        
+        // Hide and remove after 3 seconds
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 300);
+        }, 3000);
+    }
+    
+    // Function to generate a random ID
+    function generateID() {
+        return 'task_' + Math.random().toString(36).substr(2, 9);
+    }
 }); 

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SciWeb 3.0 - National Honor Society</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nhs.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="logo">
+            <div class="logo-text">SciWeb</div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/tree">Tree</a></li>
+            <li><a href="/schedule">Schedule</a></li>
+            <li><a href="/counselor">Counselor</a></li>
+            <li><a href="/nhs" class="active">NHS</a></li>
+            <li><a href="/signup">Sign Up</a></li>
+        </ul>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
+    </nav>
+
+    <!-- NHS Hero Section -->
+    <section class="nhs-hero">
+        <h1>National Honor Society</h1>
+        <p>Character. Scholarship. Leadership. Service.</p>
+    </section>
+
+    <div class="nhs-container">
+        <!-- Statistics Summary -->
+        <div class="nhs-stats">
+            <div class="nhs-stat-card">
+                <div class="nhs-stat-value">120+</div>
+                <div class="nhs-stat-label">Active Members</div>
+            </div>
+            <div class="nhs-stat-card">
+                <div class="nhs-stat-value">1,500+</div>
+                <div class="nhs-stat-label">Community Service Hours</div>
+            </div>
+            <div class="nhs-stat-card">
+                <div class="nhs-stat-value">300+</div>
+                <div class="nhs-stat-label">Tutoring Sessions</div>
+            </div>
+            <div class="nhs-stat-card">
+                <div class="nhs-stat-value">50+</div>
+                <div class="nhs-stat-label">Ongoing Projects</div>
+            </div>
+        </div>
+
+        <!-- About NHS Section -->
+        <div class="nhs-card">
+            <div class="nhs-card-header">
+                <h2 class="nhs-card-title">About Our NHS Chapter</h2>
+            </div>
+            <div class="nhs-card-body">
+                <p>Our National Honor Society chapter recognizes students who demonstrate excellence in scholarship, service, leadership, and character. NHS members are committed to making a positive impact in both our school and the broader community.</p>
+                <p>Through a variety of service projects, tutoring initiatives, and leadership opportunities, we strive to foster personal growth and build a stronger, more supportive academic environment for all students.</p>
+                
+                <h3 style="margin-top: 1.5rem;">Our Four Pillars</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                    <div>
+                        <h4><i class="fas fa-book"></i> Scholarship</h4>
+                        <p>Maintaining a minimum 3.5 GPA and showing dedication to learning and academic growth.</p>
+                    </div>
+                    <div>
+                        <h4><i class="fas fa-hands-helping"></i> Service</h4>
+                        <p>Contributing time and energy to improve the school and community through volunteer activities.</p>
+                    </div>
+                    <div>
+                        <h4><i class="fas fa-chess-queen"></i> Leadership</h4>
+                        <p>Demonstrating initiative, positive influence, and the ability to inspire and guide others.</p>
+                    </div>
+                    <div>
+                        <h4><i class="fas fa-heart"></i> Character</h4>
+                        <p>Exhibiting qualities such as integrity, respect, and ethical behavior in all aspects of life.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Portal Cards Section -->
+        <h2 style="margin-bottom: 1.5rem; color: var(--nhs-text);">NHS Portals</h2>
+        <div class="nhs-grid">
+            <!-- Administration Portal -->
+            <div class="nhs-card">
+                <div class="nhs-card-header">
+                    <h3 class="nhs-card-title">Administration</h3>
+                    <span class="nhs-badge nhs-badge-primary">Restricted Access</span>
+                </div>
+                <div class="nhs-card-body">
+                    <p>Portal for NHS faculty advisors and administration to manage members, events, and approve service hours.</p>
+                    <ul style="margin: 1rem 0; padding-left: 1.5rem;">
+                        <li>Approve new member applications</li>
+                        <li>Review service hour submissions</li>
+                        <li>Manage events and announcements</li>
+                        <li>Generate reports and analytics</li>
+                    </ul>
+                    <a href="/nhs/admin" class="nhs-btn nhs-btn-primary" style="width: 100%;">
+                        <i class="fas fa-lock"></i> Admin Portal
+                    </a>
+                </div>
+            </div>
+
+            <!-- Member Portal -->
+            <div class="nhs-card">
+                <div class="nhs-card-header">
+                    <h3 class="nhs-card-title">Members</h3>
+                    <span class="nhs-badge nhs-badge-accent">Members Only</span>
+                </div>
+                <div class="nhs-card-body">
+                    <p>Dashboard for current NHS members to log service hours, sign up for tutoring, and access resources.</p>
+                    <ul style="margin: 1rem 0; padding-left: 1.5rem;">
+                        <li>Log community service hours</li>
+                        <li>Sign up as a tutor</li>
+                        <li>View your progress and credits</li>
+                        <li>Access exclusive resources</li>
+                    </ul>
+                    <a href="/nhs/members" class="nhs-btn nhs-btn-accent" style="width: 100%;">
+                        <i class="fas fa-user-check"></i> Member Portal
+                    </a>
+                </div>
+            </div>
+
+            <!-- Student Portal -->
+            <div class="nhs-card">
+                <div class="nhs-card-header">
+                    <h3 class="nhs-card-title">Students</h3>
+                    <span class="nhs-badge nhs-badge-success">All Students</span>
+                </div>
+                <div class="nhs-card-body">
+                    <p>Access point for all students to request tutoring, check eligibility, and apply for NHS membership.</p>
+                    <ul style="margin: 1rem 0; padding-left: 1.5rem;">
+                        <li>Request tutoring sessions</li>
+                        <li>Check NHS eligibility</li>
+                        <li>Apply for membership</li>
+                        <li>View upcoming NHS events</li>
+                    </ul>
+                    <a href="/nhs/students" class="nhs-btn nhs-btn-success" style="width: 100%; background-color: var(--nhs-success);">
+                        <i class="fas fa-graduation-cap"></i> Student Portal
+                    </a>
+                </div>
+            </div>
+
+            <!-- Teacher Portal -->
+            <div class="nhs-card">
+                <div class="nhs-card-header">
+                    <h3 class="nhs-card-title">Teachers</h3>
+                    <span class="nhs-badge nhs-badge-warning">Faculty Only</span>
+                </div>
+                <div class="nhs-card-body">
+                    <p>Resources for teachers to recommend students, verify service hours, and coordinate with NHS tutors.</p>
+                    <ul style="margin: 1rem 0; padding-left: 1.5rem;">
+                        <li>Recommend students for NHS</li>
+                        <li>Verify student service activities</li>
+                        <li>Request NHS tutors for your class</li>
+                        <li>Provide student character references</li>
+                    </ul>
+                    <a href="/nhs/teachers" class="nhs-btn nhs-btn-warning" style="width: 100%; background-color: var(--nhs-warning);">
+                        <i class="fas fa-chalkboard-teacher"></i> Teacher Portal
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Access Section -->
+        <div class="nhs-card" style="margin-top: 2rem;">
+            <div class="nhs-card-header">
+                <h2 class="nhs-card-title">Quick Actions</h2>
+            </div>
+            <div class="nhs-card-body">
+                <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+                    <a href="/nhs/credits" class="nhs-btn nhs-btn-primary">
+                        <i class="fas fa-star"></i> Submit Credits
+                    </a>
+                    <a href="/nhs/tutoring" class="nhs-btn nhs-btn-accent">
+                        <i class="fas fa-book-reader"></i> Sign Up for Tutoring
+                    </a>
+                    <a href="#" class="nhs-btn nhs-btn-secondary">
+                        <i class="fas fa-calendar-alt"></i> View Events Calendar
+                    </a>
+                    <a href="#" class="nhs-btn nhs-btn-gold" style="background-color: var(--nhs-gold);">
+                        <i class="fas fa-file-alt"></i> Application Guidelines
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Events -->
+        <div class="nhs-card">
+            <div class="nhs-card-header">
+                <h2 class="nhs-card-title">Upcoming NHS Events</h2>
+                <a href="#" class="nhs-btn nhs-btn-secondary" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+                    <i class="fas fa-calendar-alt"></i> View All
+                </a>
+            </div>
+            <div class="nhs-card-body">
+                <table class="nhs-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Event</th>
+                            <th>Location</th>
+                            <th>Category</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>May 5, 2025</td>
+                            <td>NHS Induction Ceremony</td>
+                            <td>School Auditorium</td>
+                            <td><span class="nhs-badge nhs-badge-primary">Ceremony</span></td>
+                        </tr>
+                        <tr>
+                            <td>May 10, 2025</td>
+                            <td>Community Clean-Up Day</td>
+                            <td>City Park</td>
+                            <td><span class="nhs-badge nhs-badge-success">Service</span></td>
+                        </tr>
+                        <tr>
+                            <td>May 15, 2025</td>
+                            <td>Final Exam Tutoring Marathon</td>
+                            <td>School Library</td>
+                            <td><span class="nhs-badge nhs-badge-accent">Tutoring</span></td>
+                        </tr>
+                        <tr>
+                            <td>May 25, 2025</td>
+                            <td>Senior NHS Member Recognition</td>
+                            <td>School Cafeteria</td>
+                            <td><span class="nhs-badge nhs-badge-gold">Recognition</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-info">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="footer-logo">
+                <p>Building the future of education together.</p>
+            </div>
+            <div class="footer-links">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/tree">Tree</a></li>
+                    <li><a href="/schedule">Schedule</a></li>
+                    <li><a href="/counselor">Counselor</a></li>
+                    <li><a href="/nhs">NHS</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h3>NHS Resources</h3>
+                <ul>
+                    <li><a href="/nhs/credits">Credit Submission</a></li>
+                    <li><a href="/nhs/tutoring">Tutoring Program</a></li>
+                    <li><a href="#">Leadership Opportunities</a></li>
+                    <li><a href="#">Service Projects</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h3>Connect</h3>
+                <ul>
+                    <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
+                    <li><a href="#"><i class="fab fa-github"></i> GitHub</a></li>
+                    <li><a href="#"><i class="fab fa-discord"></i> Discord</a></li>
+                    <li><a href="#"><i class="fas fa-envelope"></i> Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 SciWeb. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html> 
