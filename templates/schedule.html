@@ -1,19 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SciWeb 3.0 - Schedule</title>
+{% extends "base.html" %}
+
+{% block title %}SciWeb 3.0 - Schedule{% endblock %}
+
+{% block head %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/schedule.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Draggable JS library -->
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
     <div class="schedule-bg-pattern"></div>
-    
     <!-- Floating Elements -->
     <div class="floating-elements">
         <div class="floating-element"></div>
@@ -21,7 +15,6 @@
         <div class="floating-element"></div>
         <div class="floating-element"></div>
     </div>
-    
     <!-- Stars -->
     <div class="stars">
         <div class="star"></div>
@@ -35,10 +28,8 @@
         <div class="star"></div>
         <div class="star"></div>
     </div>
-
     <!-- Main Title -->
     <h1 class="main-title">Schedule Planner</h1>
-
     <header>
         <nav class="navbar">
             <div class="logo-container">
@@ -55,7 +46,6 @@
             <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
         </nav>
     </header>
-
     <main class="schedule-container">
         <div class="schedule-header">
             <h1>My Schedule</h1>
@@ -65,7 +55,6 @@
                 <button class="date-nav-btn" id="next-day"><i class="fas fa-chevron-right"></i></button>
             </div>
         </div>
-
         <div class="schedule-grid">
             <!-- Today's Tasks Section -->
             <section class="today-tasks panel">
@@ -76,7 +65,6 @@
                         <button class="panel-btn" id="add-break" title="Add Break"><i class="fas fa-coffee"></i></button>
                     </div>
                 </div>
-                
                 <div class="task-list" id="sortable-tasks">
                     {% for task in today_tasks %}
                     <div class="task-item" data-id="{{ task.id }}" data-category="{{ task.category }}" data-priority="{{ task.priority }}">
@@ -94,20 +82,17 @@
                     </div>
                     {% endfor %}
                 </div>
-                
                 <div class="course-selection">
                     <a href="/tree" class="course-link">
                         <i class="fas fa-graduation-cap"></i> Course Selection & Academic Planning
                     </a>
                 </div>
             </section>
-
             <!-- Focus Tools Section -->
             <section class="focus-tools panel">
                 <div class="panel-header">
                     <h2><i class="fas fa-bullseye"></i> Focus Tools</h2>
                 </div>
-                
                 <div class="tools-container">
                     <div class="focus-tool" id="pomodoro-timer">
                         <div class="tool-header">
@@ -127,7 +112,6 @@
                             <button class="mode-btn" data-time="15">Long Break</button>
                         </div>
                     </div>
-
                     <div class="focus-tool" id="focus-mode">
                         <div class="tool-header">
                             <h3><i class="fas fa-eye"></i> Focus Mode</h3>
@@ -151,7 +135,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="focus-tool" id="task-tracker">
                         <div class="tool-header">
                             <h3><i class="fas fa-tasks"></i> Task Tracker</h3>
@@ -172,7 +155,6 @@
                     </div>
                 </div>
             </section>
-
             <!-- SciEvents Section -->
             <section class="scievents panel">
                 <div class="panel-header">
@@ -181,7 +163,6 @@
                         <button class="panel-btn" id="create-event" title="Create Event"><i class="fas fa-plus"></i> Create Event</button>
                     </div>
                 </div>
-                
                 <div class="events-list">
                     {% for event in upcoming_events %}
                     <div class="event-item">
@@ -203,176 +184,10 @@
                     {% endfor %}
                 </div>
             </section>
-
-            <!-- Counselor Meeting Reminder -->
-            <section class="counselor-reminder panel">
-                <div class="panel-header">
-                    <h2><i class="fas fa-user-tie"></i> Counselor Meeting</h2>
-                </div>
-                
-                <div class="counselor-reminder-content">
-                    <p>It's been 6 days since your last counselor meeting. Weekly check-ins help you stay on track with your academic goals.</p>
-                    
-                    <div class="meeting-topics">
-                        <h3>Topics to review:</h3>
-                        <ul>
-                            <li><i class="fas fa-check-circle"></i> Grade review for this week</li>
-                            <li><i class="fas fa-check-circle"></i> Extracurricular activities update</li>
-                            <li><i class="fas fa-check-circle"></i> College application progress</li>
-                            <li><i class="fas fa-check-circle"></i> Academic plan adjustments</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="schedule-actions">
-                        <button class="schedule-btn primary">
-                            <i class="fas fa-calendar-plus"></i> Schedule Meeting
-                        </button>
-                        <button class="schedule-btn secondary">
-                            <i class="fas fa-calendar-day"></i> See Available Times
-                        </button>
-                    </div>
-                </div>
-            </section>
         </div>
     </main>
+{% endblock %}
 
-    <!-- Modal for Adding/Editing Tasks -->
-    <div class="modal" id="task-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modal-title">Add New Task</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="task-form">
-                    <input type="hidden" id="task-id">
-                    <div class="form-group">
-                        <label for="task-title">Title</label>
-                        <input type="text" id="task-title" required>
-                    </div>
-                    <div class="form-group time-group">
-                        <div>
-                            <label for="task-start-time">Start Time</label>
-                            <input type="time" id="task-start-time" required>
-                        </div>
-                        <div>
-                            <label for="task-end-time">End Time</label>
-                            <input type="time" id="task-end-time" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="task-location">Location</label>
-                        <input type="text" id="task-location">
-                    </div>
-                    <div class="form-group">
-                        <label for="task-category">Category</label>
-                        <select id="task-category">
-                            <option value="class">Class</option>
-                            <option value="lab">Lab</option>
-                            <option value="study">Study</option>
-                            <option value="break">Break</option>
-                            <option value="extracurricular">Extracurricular</option>
-                            <option value="meeting">Meeting</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="task-priority">Priority</label>
-                        <select id="task-priority">
-                            <option value="high">High</option>
-                            <option value="medium">Medium</option>
-                            <option value="low">Low</option>
-                        </select>
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" class="cancel-btn">Cancel</button>
-                        <button type="submit" class="submit-btn">Save Task</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal for Creating Events -->
-    <div class="modal" id="event-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Create New SciEvent™</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="event-form">
-                    <div class="form-group">
-                        <label for="event-title">Event Title</label>
-                        <input type="text" id="event-title" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="event-category">Event Type</label>
-                        <select id="event-category">
-                            <option value="study_group">Study Group</option>
-                            <option value="study_session">Study Session</option>
-                            <option value="tutoring">Tutoring Session</option>
-                            <option value="scigame">SciGame</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="event-date">Date</label>
-                        <input type="date" id="event-date" required>
-                    </div>
-                    <div class="form-group time-group">
-                        <div>
-                            <label for="event-start-time">Start Time</label>
-                            <input type="time" id="event-start-time" required>
-                        </div>
-                        <div>
-                            <label for="event-end-time">End Time</label>
-                            <input type="time" id="event-end-time" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="event-location">Location</label>
-                        <input type="text" id="event-location" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="event-description">Description</label>
-                        <textarea id="event-description" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="event-capacity">Capacity (Max. Participants)</label>
-                        <input type="number" id="event-capacity" min="1" value="10">
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" class="cancel-btn">Cancel</button>
-                        <button type="submit" class="submit-btn">Create Event</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Focus Mode Overlay -->
-    <div id="focus-mode-overlay" class="hidden">
-        <div class="focus-content">
-            <h2>FOCUS MODE ACTIVE</h2>
-            <div class="current-task">
-                <h3>Current Task</h3>
-                <p id="focus-task-name">Study Session - Chemistry</p>
-                <p id="focus-task-time">02:30 PM - 03:30 PM</p>
-            </div>
-            <div class="breathing-guide">
-                <div class="breathing-circle"></div>
-                <p>Breathe in... breathe out...</p>
-            </div>
-            <div class="focus-message">Stay focused! You're doing great.</div>
-            <button id="exit-focus-mode">Exit Focus Mode</button>
-        </div>
-    </div>
-
-    <footer>
-        <p>&copy; 2023 SciWeb 3.0. All rights reserved.</p>
-    </footer>
-
+{% block scripts %}
     <script src="{{ url_for('static', filename='js/schedule.js') }}"></script>
-</body>
-</html> 
+{% endblock %} 

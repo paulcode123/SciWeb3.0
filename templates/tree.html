@@ -1,41 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SciWeb - Tree</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/tree.css') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="logo-container">
-            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="logo">
-            <div class="logo-text">SciWeb</div>
-        </div>
-        <ul class="nav-links">
-            <li><a href="/">Home</a></li>
-            <li><a href="/tree" class="active">Tree</a></li>
-            <li><a href="/schedule">Schedule</a></li>
-            <li><a href="/counselor">Counselor</a></li>
-            <li><a href="/signup">Sign Up</a></li>
-        </ul>
-        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
-    </nav>
+{% extends "base.html" %}
 
+{% block title %}SciWeb - Tree{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tree.css') }}">
+{% endblock %}
+
+{% block content %}
     <!-- Tree Container -->
     <div class="tree-container">
         <!-- Canvas for drawing edges -->
         <canvas class="tree-canvas"></canvas>
-        
         <!-- Container for nodes -->
         <div class="nodes-container"></div>
-        
         <!-- Toolbar -->
         <div class="tree-toolbar">
             <button class="tool-button btn-motivator" data-tooltip="Add Motivator Node">
@@ -47,39 +24,33 @@
             <button class="tool-button btn-challenge" data-tooltip="Add Challenge Node">
                 <i class="fas fa-mountain"></i>
             </button>
-            <button class="tool-button btn-class" data-tooltip="Add Class Node">
-                <i class="fas fa-chalkboard-teacher"></i>
-            </button>
-            <button class="tool-button btn-assignment" data-tooltip="Add Assignment Node">
-                <i class="fas fa-book"></i>
-            </button>
-            <button class="tool-button btn-test" data-tooltip="Add Test Node">
-                <i class="fas fa-clipboard-check"></i>
-            </button>
-            <button class="tool-button btn-project" data-tooltip="Add Project Node">
-                <i class="fas fa-project-diagram"></i>
-            </button>
-            <button class="tool-button btn-essay" data-tooltip="Add Essay Node">
-                <i class="fas fa-file-alt"></i>
-            </button>
+            <div class="school-menu">
+                <button class="tool-button btn-school" data-tooltip="School Items">
+                    <i class="fas fa-graduation-cap"></i>
+                </button>
+                <div class="school-submenu">
+                    <button class="submenu-button btn-assignment" data-type="assignment" data-tooltip="Assignment">
+                        <i class="fas fa-book"></i>
+                    </button>
+                    <button class="submenu-button btn-test" data-type="test" data-tooltip="Test">
+                        <i class="fas fa-clipboard-check"></i>
+                    </button>
+                    <button class="submenu-button btn-project" data-type="project" data-tooltip="Project">
+                        <i class="fas fa-project-diagram"></i>
+                    </button>
+                    <button class="submenu-button btn-essay" data-type="essay" data-tooltip="Essay">
+                        <i class="fas fa-file-alt"></i>
+                    </button>
+                </div>
+            </div>
             <button class="tool-button btn-image" data-tooltip="Add Image Node">
                 <i class="fas fa-image"></i>
             </button>
-            <hr style="width: 80%; border-color: rgba(255, 255, 255, 0.1); margin: 5px 0;">
-            <button class="tool-button btn-clear" data-tooltip="Clear All Nodes">
-                <i class="fas fa-trash-alt"></i>
-            </button>
-            <button class="tool-button btn-save" data-tooltip="Reset View">
-                <i class="fas fa-home"></i>
-            </button>
         </div>
-        
         <!-- Status Message -->
         <div class="status-message"></div>
-        
         <!-- Overlay for connecting nodes -->
         <div class="connection-overlay"></div>
-        
         <!-- Image Upload Form -->
         <div class="upload-overlay"></div>
         <div class="upload-form">
@@ -87,17 +58,14 @@
             <form>
                 <label for="image-url">Image URL:</label>
                 <input type="text" id="image-url" placeholder="https://example.com/image.jpg" required>
-                
                 <label for="image-title">Title (optional):</label>
                 <input type="text" id="image-title" placeholder="My Image">
-                
                 <div style="display: flex; justify-content: space-between; margin-top: 15px;">
                     <button type="button" class="close-upload">Cancel</button>
                     <button type="submit">Add Image</button>
                 </div>
             </form>
         </div>
-        
         <!-- Mini-Map for Navigation -->
         <div class="mini-map-toggle">
             <i class="fas fa-map"></i>
@@ -105,14 +73,12 @@
         <div class="mini-map">
             <div class="mini-map-viewport"></div>
         </div>
-        
         <!-- Zoom Controls -->
         <div class="zoom-controls">
             <button class="zoom-in"><i class="fas fa-plus"></i></button>
             <div class="zoom-level">100%</div>
             <button class="zoom-out"><i class="fas fa-minus"></i></button>
         </div>
-        
         <!-- AI Assistant Sidebar -->
         <div class="ai-sidebar">
             <div class="ai-header">
@@ -130,15 +96,13 @@
                 <button id="ai-send-btn"><i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
-        
         <!-- AI Assistant Toggle Button -->
         <button class="ai-toggle-btn">
             <i class="fas fa-robot"></i>
         </button>
-        
     </div>
+{% endblock %}
 
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block scripts %}
     <script src="{{ url_for('static', filename='js/tree.js') }}"></script>
-</body>
-</html> 
+{% endblock %} 

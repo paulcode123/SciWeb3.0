@@ -28,10 +28,15 @@
   overflow: hidden;
   background: var(--bg-light);
   transition: background-color var(--transition-speed);
+  cursor: grab;
 }
 
 .dark-mode .tree-container {
   background: var(--bg-dark);
+}
+
+.tree-container.panning {
+  cursor: grabbing;
 }
 
 /* Canvas for drawing edges between nodes */
@@ -62,7 +67,7 @@
   min-height: 60px;
   border-radius: 12px;
   padding: 15px;
-  cursor: grab;
+  cursor: pointer;
   box-shadow: var(--node-shadow-light);
   transform-origin: center;
   z-index: 5;
@@ -75,6 +80,13 @@
   color: white;
   font-weight: 500;
   overflow: hidden;
+}
+
+/* Pause animations when dragging */
+.node.dragging {
+  animation-play-state: paused !important;
+  transition: none !important;
+  transform: scale(1) !important;
 }
 
 .dark-mode .node {
@@ -294,6 +306,120 @@
   opacity: 1;
 }
 
+/* School menu and submenu */
+.school-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.btn-school {
+  background: linear-gradient(135deg, #8E44AD, #A569BD);
+}
+
+/* Create an invisible path between button and submenu */
+.school-menu::after {
+  content: '';
+  position: absolute;
+  top: 25px; /* Half the height of the button */
+  left: 50px; /* Width of the button */
+  width: 20px; /* Width of the connector */
+  height: 2px; /* Height of the connector */
+  background-color: transparent; /* Make it invisible */
+  z-index: 201; /* Above the submenu */
+}
+
+.school-submenu {
+  position: absolute;
+  left: 60px;
+  top: 0;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  padding: 15px;
+  z-index: 200;
+  display: none;
+  flex-direction: column;
+  gap: 15px;
+  /* Add invisible padding to create a buffer zone */
+  margin-left: -10px; /* Pull left to close any gap */
+  padding-left: 25px; /* Add extra padding on left side */
+  transition: visibility 0s, opacity 0.3s;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.dark-mode .school-submenu {
+  background: rgba(0, 0, 0, 0.8);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+}
+
+.school-menu:hover .school-submenu {
+  display: flex;
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Submenu button styles */
+.submenu-button {
+  width: 45px;
+  height: 45px;
+  border-radius: 10px;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2rem;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+  position: relative;
+}
+
+.submenu-button:hover {
+  transform: scale(1.1);
+}
+
+.submenu-button:active {
+  transform: scale(0.95);
+}
+
+.submenu-button::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 55px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.submenu-button:hover::after {
+  opacity: 1;
+}
+
+/* Button colors matching the node types */
+.submenu-button.btn-assignment {
+  background: var(--node-assignment);
+}
+
+.submenu-button.btn-test {
+  background: var(--node-test);
+}
+
+.submenu-button.btn-project {
+  background: var(--node-project);
+}
+
+.submenu-button.btn-essay {
+  background: var(--node-essay);
+}
+
+/* Button Specific Colors */
 .btn-motivator {
   background: var(--node-motivator);
 }
@@ -822,5 +948,189 @@
   }
   .ai-toggle-btn {
     bottom: 150px; /* Adjust position */
+  }
+}
+
+/* Hover Panel Styling */
+.node-hover-panel {
+  position: fixed;
+  z-index: 1000;
+  background: var(--bg-light);
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+  padding: 15px;
+  width: 250px;
+  pointer-events: all;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  opacity: 0;
+  color: var(--text-dark);
+  margin-left: 15px; /* Add more spacing between node and panel */
+  transform: translateX(-10px);
+}
+
+.dark-mode .node-hover-panel {
+  background: var(--bg-dark);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+  color: var(--text-light);
+}
+
+.node-hover-panel.visible {
+  display: flex;
+  opacity: 1;
+  transform: translateX(0);
+  animation: fade-in 0.2s forwards;
+}
+
+.node-hover-panel::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 20px;
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-right: 10px solid var(--bg-light);
+  transition: border-right-color var(--transition-speed);
+}
+
+.dark-mode .node-hover-panel::before {
+  border-right-color: var(--bg-dark);
+}
+
+/* Node Info Section */
+.node-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.node-info h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--primary);
+  border-bottom: 1px solid var(--bg-light-accent);
+  padding-bottom: 5px;
+}
+
+.dark-mode .node-info h4 {
+  border-bottom-color: var(--bg-dark-accent);
+}
+
+.node-info p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Move Controls to Hover Panel */
+.node-hover-panel .node-controls {
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+  margin: 0;
+  width: 100%;
+}
+
+.node-hover-panel .node-control {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: var(--primary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 14px;
+  transition: transform 0.2s, background-color 0.2s;
+  color: white;
+}
+
+.node-hover-panel .node-control:hover {
+  transform: scale(1.1);
+  background-color: #ff4d94;
+}
+
+/* Node Edit Interface */
+.node-edit-interface {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  background: var(--bg-light-accent);
+  border-radius: 8px;
+  margin-top: 10px;
+  animation: fade-in 0.2s forwards;
+}
+
+.dark-mode .node-edit-interface {
+  background: var(--bg-dark-accent);
+}
+
+.node-edit-input {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--primary);
+  font-size: 0.9rem;
+  background: var(--bg-light);
+  color: var(--text-dark);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dark-mode .node-edit-input {
+  background: var(--bg-dark);
+  color: var(--text-light);
+  border-color: var(--primary);
+}
+
+.node-edit-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.node-edit-buttons button {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+  flex: 1;
+}
+
+.node-edit-save {
+  background-color: var(--primary);
+  color: white;
+}
+
+.node-edit-save:hover {
+  background-color: #ff4d94;
+  transform: scale(1.05);
+}
+
+.node-edit-cancel {
+  background-color: #95a5a6;
+  color: white;
+}
+
+.node-edit-cancel:hover {
+  background-color: #7f8c8d;
+  transform: scale(1.05);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 } 
