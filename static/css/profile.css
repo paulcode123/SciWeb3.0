@@ -649,4 +649,101 @@ textarea.form-control {
         flex-direction: column;
         gap: 0.75rem;
     }
+}
+
+/* Logout Button Styles */
+.logout-container {
+    margin-top: 30px;
+    padding: 0 15px;
+}
+
+.logout-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    background-color: var(--theme-danger);
+    border: none;
+    color: white;
+}
+
+.logout-btn i {
+    margin-right: 10px;
+}
+
+.logout-btn:hover {
+    background-color: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode .logout-btn:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Message Notification System */
+.message-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    max-width: 350px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.message {
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    font-weight: 500;
+}
+
+.message.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.message-icon {
+    margin-right: 12px;
+    font-size: 1.2rem;
+}
+
+.message.success {
+    background-color: #e6f7ee;
+    color: #0c854e;
+    border-left: 4px solid #0c854e;
+}
+
+.message.error {
+    background-color: #feeaea;
+    color: #e53935;
+    border-left: 4px solid #e53935;
+}
+
+.dark-mode .message.success {
+    background-color: rgba(12, 133, 78, 0.2);
+    color: #4caf50;
+    border-left: 4px solid #4caf50;
+}
+
+.dark-mode .message.error {
+    background-color: rgba(229, 57, 53, 0.2);
+    color: #ef5350;
+    border-left: 4px solid #ef5350;
+}
+
+/* Data attribute for class items */
+.class-item[data-id] {
+    position: relative;
 } 

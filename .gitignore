@@ -1,2 +1,6 @@
 # api_keys.json
 api_keys.json
+service_key3.json
+
+# pycache
+__pycache__

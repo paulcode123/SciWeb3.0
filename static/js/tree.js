@@ -19,6 +19,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const aiChatBox = document.querySelector('.ai-chat-box');
   const aiInput = document.querySelector('#ai-input');
   const aiSendBtn = document.querySelector('#ai-send-btn');
+  const introOverlay = document.querySelector('.intro-overlay');
+  const introButton = document.querySelector('.intro-button');
   
   // Canvas Setup
   const ctx = treeCanvas.getContext('2d');
@@ -36,6 +38,26 @@ document.addEventListener('DOMContentLoaded', function() {
   let isConnecting = false;
   let miniMapVisible = false;
   
+  // Add autosave functionality
+  let saveTimeout;
+  const SAVE_DELAY = 2000; // 2 seconds delay before saving
+  
+  // Handle intro overlay
+  if (introButton) {
+    introButton.addEventListener('click', function() {
+      // Add closing animation class
+      introOverlay.classList.add('closing');
+      
+      // After animation completes, hide the overlay
+      setTimeout(() => {
+        introOverlay.style.display = 'none';
+        
+        // Show welcome message
+        showMessage('Welcome to Your Web! Start by adding a node.');
+      }, 800);
+    });
+  }
+  
   // Pan and Zoom state
   let offsetX = 0;
   let offsetY = 0;
@@ -46,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // AI State
   const OPENAI_API_KEY = 'sk-YOUR_SAMPLE_API_KEY_HERE'; // Replace with your actual key if using a real backend
-  const nodeTypes = ['motivator', 'task', 'challenge', 'class', 'assignment', 'test', 'project', 'essay', 'image'];
+  const nodeTypes = ['motivator', 'task', 'challenge', 'idea', 'class', 'assignment', 'test', 'project', 'essay', 'image'];
   
   // Initialize canvas for line drawing
   function resizeCanvas() {
@@ -232,6 +254,13 @@ document.addEventListener('DOMContentLoaded', function() {
       // Mark node as dragged when it actually moves
       draggedNode.dataset.wasDragged = "true";
       
+      // Ensure hover panel stays hidden while dragging
+      const nodeId = draggedNode.dataset.id;
+      const nodeObj = nodes.find(n => n.id === nodeId);
+      if (nodeObj && nodeObj.hoverPanel && nodeObj.hoverPanel.classList.contains('visible')) {
+        nodeObj.hoverPanel.classList.remove('visible');
+      }
+      
       // Calculate new position in screen coordinates
       const newScreenLeft = e.clientX - dragOffsetX;
       const newScreenTop = e.clientY - dragOffsetY;
@@ -260,12 +289,14 @@ document.addEventListener('DOMContentLoaded', function() {
       const startNode = document.querySelector(`[data-id="${connectionStart}"]`);
       if (startNode) {
         const startRect = startNode.getBoundingClientRect();
-        const startX = startRect.left + startRect.width / 2;
-        const startY = startRect.top + startRect.height / 2;
+        const startCenter = {
+          x: startRect.left + (startRect.width / 2),
+          y: startRect.top + (startRect.height / 2)
+        };
         
-        // Draw temp line
+        // Draw temp line from center of startNode to mouse position
         ctx.beginPath();
-        ctx.moveTo(startX, startY);
+        ctx.moveTo(startCenter.x, startCenter.y);
         ctx.lineTo(e.clientX, e.clientY);
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
         ctx.lineWidth = 2;
@@ -299,16 +330,16 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Add keyboard shortcuts for panning and zooming
   document.addEventListener('keydown', function(e) {
-    // Don't interfere if user is typing in AI input
-    if (e.target === aiInput) return;
+    // Don't interfere if user is typing in an input field or textarea
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+      return;
+    }
     
     // Spacebar to toggle pan mode
     if (e.code === 'Space' && !isPanning && !isConnecting && !isDragging) {
       e.preventDefault();
       treeCanvas.style.cursor = 'grab';
-      isPanning = true;
-      panStartX = 0;
-      panStartY = 0;
+      // We don't need to set panStartX/Y here, mousemove will handle it
     }
     
     // Plus key to zoom in
@@ -422,6 +453,33 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     controls.appendChild(editBtn);
     
+    // Due date button (only for task, assignment, test, project, essay nodes)
+    if (['task', 'assignment', 'test', 'project', 'essay'].includes(type)) {
+      const dueDateBtn = document.createElement('div');
+      dueDateBtn.className = 'node-control';
+      dueDateBtn.innerHTML = '📅';
+      dueDateBtn.title = 'Set Due Date';
+      dueDateBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        showDueDateInterface(node, hoverPanel);
+      });
+      controls.appendChild(dueDateBtn);
+      
+      // If node already has a due date, display it in the info section
+      if (node.dataset.dueDate) {
+        const dueDate = new Date(node.dataset.dueDate);
+        const formattedDate = dueDate.toLocaleDateString();
+        
+        // Add due date to node title if not already there
+        if (!node.querySelector('.node-due-date')) {
+          const dueDateElement = document.createElement('div');
+          dueDateElement.className = 'node-due-date';
+          dueDateElement.textContent = `Due: ${formattedDate}`;
+          node.appendChild(dueDateElement);
+        }
+      }
+    }
+    
     // Add node info based on type
     const infoSection = document.createElement('div');
     infoSection.className = 'node-info';
@@ -431,8 +489,8 @@ document.addEventListener('DOMContentLoaded', function() {
       case 'motivator':
         infoSection.innerHTML = `
           <h4>Motivator</h4>
-          <p>A personal goal or motivation to help you stay focused.</p>
-          <p>The Envision page helps you visualize and plan your goals.</p>
+          <p>A personal goal or motivation that drives your hard work.</p>
+          <p>The Envision page helps you visualize and feel renewed energy and drive from your motivators.</p>
         `;
         break;
       case 'task':
@@ -445,15 +503,15 @@ document.addEventListener('DOMContentLoaded', function() {
       case 'challenge':
         infoSection.innerHTML = `
           <h4>Challenge</h4>
-          <p>A difficult problem or obstacle to overcome.</p>
-          <p>Breaking down challenges helps make them manageable.</p>
+          <p>A difficult problem or obstacle to overcome, or a question, dilemma, or consideration that you need to think about.</p>
+          <p>Breaking down challenges with idea nodes helps make them manageable.</p>
         `;
         break;
       case 'class':
         infoSection.innerHTML = `
           <h4>Class</h4>
           <p>A course or subject you're studying.</p>
-          <p>The Class page contains lectures, notes, and related assignments.</p>
+          <p>The Class page contains grades, resources, chats, and practice problems.</p>
         `;
         break;
       case 'assignment':
@@ -467,13 +525,13 @@ document.addEventListener('DOMContentLoaded', function() {
         infoSection.innerHTML = `
           <h4>Test</h4>
           <p>An exam or quiz to assess your knowledge.</p>
-          <p>The MindWeb page helps you organize study materials for the test.</p>
+          <p>The MindWeb page helps you study by mapping out and expanding on your knowledge.</p>
         `;
         break;
       case 'project':
         infoSection.innerHTML = `
           <h4>Project</h4>
-          <p>A larger task with multiple components.</p>
+          <p>A larger task involving multiple people and components.</p>
           <p>The Collaboration page allows you to work with others on this project.</p>
         `;
         break;
@@ -489,6 +547,13 @@ document.addEventListener('DOMContentLoaded', function() {
           <h4>Image</h4>
           <p>Visual content to support your learning.</p>
           <p>Connect images to related nodes for visual reference.</p>
+        `;
+        break;
+      case 'idea':
+        infoSection.innerHTML = `
+          <h4>Idea</h4>
+          <p>A concept, thought, or potential solution.</p>
+          <p>Connect ideas to challenges, tasks, or other ideas to map out your thinking.</p>
         `;
         break;
     }
@@ -580,6 +645,13 @@ document.addEventListener('DOMContentLoaded', function() {
       // Reset drag flag at the start of potential drag
       wasDragged = false;
       
+      // Hide any visible hover panel for this node
+      const nodeId = node.dataset.id;
+      const nodeObj = nodes.find(n => n.id === nodeId);
+      if (nodeObj && nodeObj.hoverPanel) {
+        nodeObj.hoverPanel.classList.remove('visible');
+      }
+      
       // Set a timeout to determine if this is a click or drag
       const dragTimeout = setTimeout(() => {
         isDragging = true;
@@ -667,7 +739,6 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Handle connection overlay click
   connectionOverlay.addEventListener('click', function(e) {
-    // Find if we clicked on a node
     const nodeElements = document.querySelectorAll('.node');
     let targetNode = null;
     
@@ -685,18 +756,25 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     if (targetNode && targetNode.dataset.id !== connectionStart) {
-      // Add the edge
-      edges.push({
+      const newEdge = {
         from: connectionStart,
         to: targetNode.dataset.id
-      });
+      };
       
-      // Draw the edges
-      drawEdges();
-      showMessage('Connection created!');
+      // Check if edge already exists
+      const edgeExists = edges.some(edge => 
+        edge.from === newEdge.from && edge.to === newEdge.to ||
+        edge.from === newEdge.to && edge.to === newEdge.from
+      );
+      
+      if (!edgeExists) {
+        edges.push(newEdge);
+        drawEdges();
+        showMessage('Connection created!');
+        scheduleAutosave();
+      }
     }
     
-    // End connecting mode
     endConnection();
   });
   
@@ -742,6 +820,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateMiniMap();
     
     showMessage('Node deleted!');
+    scheduleAutosave();
   }
   
   // Draw edges between nodes
@@ -758,22 +837,29 @@ document.addEventListener('DOMContentLoaded', function() {
         const fromRect = fromNode.getBoundingClientRect();
         const toRect = toNode.getBoundingClientRect();
         
-        const fromX = fromRect.left + fromRect.width / 2;
-        const fromY = fromRect.top + fromRect.height / 2;
-        const toX = toRect.left + toRect.width / 2;
-        const toY = toRect.top + toRect.height / 2;
+        // Calculate center points accounting for any transformations
+        // Use the visual center of the node, not just the bounding box center
+        const fromCenter = {
+          x: fromRect.left + (fromRect.width / 2),
+          y: fromRect.top + (fromRect.height / 2)
+        };
         
-        // Draw line
+        const toCenter = {
+          x: toRect.left + (toRect.width / 2),
+          y: toRect.top + (toRect.height / 2)
+        };
+        
+        // Draw line from center to center
         ctx.beginPath();
-        ctx.moveTo(fromX, fromY);
-        ctx.lineTo(toX, toY);
+        ctx.moveTo(fromCenter.x, fromCenter.y);
+        ctx.lineTo(toCenter.x, toCenter.y);
         
         // Get node types for line color
         const fromType = fromNode.dataset.type;
         const toType = toNode.dataset.type;
         
         // Set line style based on node types
-        const gradient = ctx.createLinearGradient(fromX, fromY, toX, toY);
+        const gradient = ctx.createLinearGradient(fromCenter.x, fromCenter.y, toCenter.x, toCenter.y);
         
         const fromColor = getColorForType(fromType);
         const toColor = getColorForType(toType);
@@ -799,7 +885,8 @@ document.addEventListener('DOMContentLoaded', function() {
       'test': '#E74C3C',
       'project': '#16A085',
       'essay': '#F1C40F',
-      'image': '#3498DB'
+      'image': '#3498DB',
+      'idea': '#00bcd4'
     };
     
     return colors[type] || '#7f8c8d';
@@ -842,6 +929,12 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('.btn-challenge').addEventListener('click', function() {
     const center = getViewCenter();
     createNode('challenge', 'Challenge', center.x, center.y);
+  });
+  
+  // Add listener for the new idea button
+  document.querySelector('.btn-idea').addEventListener('click', function() {
+    const center = getViewCenter();
+    createNode('idea', 'Idea', center.x, center.y);
   });
   
   // School submenu event listeners
@@ -964,6 +1057,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // For this example, we'll just parse commands directly.
     
     let response = "I couldn't understand that command. Try things like: \n`addNode(task, 'Finish homework')`\n`getNodeStructure()`\n`nodeInfo(1)`\n`editNode(1, 'New Title')`\n`deleteNode(1)`";
+    // Update AI's understanding of node types
+    response += `\nAvailable types: ${nodeTypes.join(', ')}`;
     let commandHandled = false;
 
     try {
@@ -979,11 +1074,16 @@ document.addEventListener('DOMContentLoaded', function() {
             if (args.length >= 2) {
               const type = args[0];
               const name = args[1];
-              // Optional parentId (simplified) and info
-              // const parentId = args.length > 2 ? args[2] : null;
-              // const info = args.length > 3 ? args[3] : null;
-              response = await aiAddNode(type, null, name, null);
-              commandHandled = true;
+              // Validate type against known types
+              if (!nodeTypes.includes(type)) {
+                response = `Error: Invalid node type '${type}'. Available types: ${nodeTypes.join(', ')}`;
+              } else {
+                // Optional parentId (simplified) and info
+                // const parentId = args.length > 2 ? args[2] : null;
+                // const info = args.length > 3 ? args[3] : null;
+                response = await aiAddNode(type, null, name, null);
+                commandHandled = true;
+              }
             } else {
               response = 'Error: `addNode` requires at least `type` and `name` arguments.';
             }
@@ -1071,6 +1171,9 @@ document.addEventListener('DOMContentLoaded', function() {
           
           // Show success message
           showMessage('Node title updated!');
+          
+          // Schedule autosave when title is updated
+          scheduleAutosave();
         }
         
         // Remove edit interface
@@ -1113,4 +1216,378 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
   }
+
+  // Show due date interface for a node
+  function showDueDateInterface(node, hoverPanel) {
+    // Create due date interface if it doesn't exist
+    if (!hoverPanel.querySelector('.node-duedate-interface')) {
+      const dueDateInterface = document.createElement('div');
+      dueDateInterface.className = 'node-edit-interface node-duedate-interface';
+      
+      // Create label
+      const label = document.createElement('label');
+      label.textContent = 'Set due date:';
+      label.htmlFor = 'due-date-input';
+      
+      // Create input field
+      const input = document.createElement('input');
+      input.type = 'date';
+      input.id = 'due-date-input';
+      input.className = 'node-edit-input';
+      
+      // Set current value if exists
+      if (node.dataset.dueDate) {
+        const dueDate = new Date(node.dataset.dueDate);
+        input.valueAsDate = dueDate;
+      } else {
+        // Default to tomorrow
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        input.valueAsDate = tomorrow;
+      }
+      
+      // Create buttons container
+      const buttonsContainer = document.createElement('div');
+      buttonsContainer.className = 'node-edit-buttons';
+      
+      // Save button
+      const saveBtn = document.createElement('button');
+      saveBtn.textContent = 'Save';
+      saveBtn.className = 'node-edit-save';
+      saveBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        
+        // Get date value
+        const selectedDate = input.valueAsDate;
+        
+        if (selectedDate) {
+          // Store due date in node dataset
+          node.dataset.dueDate = selectedDate.toISOString();
+          
+          // Update the node in the nodes array
+          const nodeObj = nodes.find(n => n.id === node.dataset.id);
+          if (nodeObj) {
+            nodeObj.dueDate = selectedDate.toISOString();
+          }
+          
+          // Add or update due date display in node
+          let dueDateElement = node.querySelector('.node-due-date');
+          
+          if (!dueDateElement) {
+            dueDateElement = document.createElement('div');
+            dueDateElement.className = 'node-due-date';
+            node.appendChild(dueDateElement);
+          }
+          
+          dueDateElement.textContent = `Due: ${selectedDate.toLocaleDateString()}`;
+          
+          // Show success message
+          showMessage('Due date set!');
+          
+          // Schedule autosave after setting due date
+          scheduleAutosave();
+        }
+        
+        // Remove due date interface
+        dueDateInterface.remove();
+      });
+      
+      // Cancel button
+      const cancelBtn = document.createElement('button');
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.className = 'node-edit-cancel';
+      cancelBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        dueDateInterface.remove();
+      });
+      
+      // Remove button (if a due date exists)
+      if (node.dataset.dueDate) {
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = 'Remove';
+        removeBtn.className = 'node-edit-remove';
+        removeBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          
+          // Remove due date from node dataset
+          delete node.dataset.dueDate;
+          
+          // Update the node in the nodes array
+          const nodeObj = nodes.find(n => n.id === node.dataset.id);
+          if (nodeObj) {
+            delete nodeObj.dueDate;
+          }
+          
+          // Remove due date display from node
+          const dueDateElement = node.querySelector('.node-due-date');
+          if (dueDateElement) {
+            dueDateElement.remove();
+          }
+          
+          // Show success message
+          showMessage('Due date removed!');
+          
+          // Schedule autosave after removing due date
+          scheduleAutosave();
+          
+          // Remove due date interface
+          dueDateInterface.remove();
+        });
+        
+        buttonsContainer.appendChild(removeBtn);
+      }
+      
+      // Add save and cancel buttons
+      buttonsContainer.appendChild(saveBtn);
+      buttonsContainer.appendChild(cancelBtn);
+      
+      // Add elements to interface
+      dueDateInterface.appendChild(label);
+      dueDateInterface.appendChild(input);
+      dueDateInterface.appendChild(buttonsContainer);
+      
+      // Add interface to hover panel
+      hoverPanel.appendChild(dueDateInterface);
+    }
+  }
+
+  // Function to save tree state
+  async function saveTreeState() {
+    // Get current user ID from localStorage
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+      console.error('No user ID found');
+      return;
+    }
+
+    // Prepare tree data - now properly capturing all node data from the DOM
+    const treeData = {
+      userId: userId,
+      nodes: Array.from(document.querySelectorAll('.node')).map(nodeEl => {
+        const nodeObj = nodes.find(n => n.id === nodeEl.dataset.id);
+        return {
+          id: nodeEl.dataset.id,
+          type: nodeEl.dataset.type,
+          title: nodeEl.querySelector('.node-title').textContent,
+          position: {
+            x: parseInt(nodeEl.dataset.originalLeft || nodeEl.style.left),
+            y: parseInt(nodeEl.dataset.originalTop || nodeEl.style.top)
+          },
+          dueDate: nodeEl.dataset.dueDate || null,
+          content: nodeObj?.type === 'image' ? nodeObj.content : null
+        };
+      }),
+      edges: edges.map(edge => ({
+        from: edge.from,
+        to: edge.to
+      })),
+      updatedAt: new Date().toISOString()
+    };
+
+    console.log('Saving tree state:', userId, treeData);
+
+    try {
+      // Send to server
+      const response = await fetch('/api/Trees/' + userId, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(treeData)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Server error:', response.status, errorText);
+        throw new Error(`Failed to save tree state: ${response.status}`);
+      }
+
+      console.log('Tree state saved successfully');
+    } catch (error) {
+      console.error('Error saving tree state:', error);
+      showMessage('Error saving your web. Please try again later.');
+    }
+  }
+
+  // Function to schedule autosave
+  function scheduleAutosave() {
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(saveTreeState, SAVE_DELAY);
+  }
+
+  // Load tree state on page load
+  async function loadTreeState() {
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+      console.error('No user ID found');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/Trees/' + userId);
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          console.log('No tree found for user, creating new tree...');
+          // Create new tree for user with the userId as the document ID
+          const newTree = {
+            userId: userId,
+            nodes: [],
+            edges: [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+
+          // Create a new document with a specific ID rather than letting Firebase generate one
+          const createResponse = await fetch('/api/Trees/' + userId, {
+            method: 'PUT', // PUT will create the document if it doesn't exist
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newTree)
+          });
+          
+          if (!createResponse.ok) {
+            throw new Error('Failed to create new tree');
+          }
+          
+          console.log('New tree created successfully');
+          
+          // Return empty tree data
+          return {
+            nodes: [],
+            edges: []
+          };
+        } else {
+          throw new Error(`Failed to load tree state: ${response.status}`);
+        }
+      }
+
+      const treeData = await response.json();
+      
+      // Clear existing nodes and edges
+      nodes.forEach(node => {
+        if (node.element) node.element.remove();
+        if (node.hoverPanel) node.hoverPanel.remove();
+      });
+      nodes = [];
+      edges = [];
+      
+      // Get the actual tree data from the response
+      let actualTreeData = treeData;
+      // Check if the response has the document ID as a key (Firebase format)
+      if (treeData[userId]) {
+        actualTreeData = treeData[userId];
+      }
+
+      // Recreate nodes if they exist
+      if (actualTreeData.nodes && actualTreeData.nodes.length > 0) {
+        actualTreeData.nodes.forEach(nodeData => {
+          createNode(
+            nodeData.type,
+            nodeData.title,
+            nodeData.position.x,
+            nodeData.position.y,
+            nodeData.content
+          );
+        });
+      }
+
+      // Recreate edges if they exist
+      if (actualTreeData.edges && actualTreeData.edges.length > 0) {
+        edges = actualTreeData.edges;
+        drawEdges();
+      }
+
+    } catch (error) {
+      console.error('Error loading tree state:', error);
+    }
+  }
+
+  // Load tree state on page load
+  loadTreeState();
+
+  // Modify existing functions to trigger autosave
+
+  // Modify createNode function to properly track nodes
+  const originalCreateNode = createNode;
+  createNode = function(type, title, left, top, content = null) {
+    const node = originalCreateNode.apply(this, arguments);
+    
+    // Ensure node is properly added to nodes array with all required data
+    const nodeData = {
+      id: node.dataset.id,
+      element: node,
+      type: type,
+      title: title,
+      content: content,
+      position: {
+        x: left,
+        y: top
+      }
+    };
+    
+    // Update nodes array
+    const existingNodeIndex = nodes.findIndex(n => n.id === node.dataset.id);
+    if (existingNodeIndex !== -1) {
+      nodes[existingNodeIndex] = nodeData;
+    } else {
+      nodes.push(nodeData);
+    }
+
+    scheduleAutosave();
+    return node;
+  };
+
+  // Modify the edge creation logic in the connection overlay click handler
+  connectionOverlay.addEventListener('click', function(e) {
+    const nodeElements = document.querySelectorAll('.node');
+    let targetNode = null;
+    
+    for (const node of nodeElements) {
+      const rect = node.getBoundingClientRect();
+      if (
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom
+      ) {
+        targetNode = node;
+        break;
+      }
+    }
+    
+    if (targetNode && targetNode.dataset.id !== connectionStart) {
+      const newEdge = {
+        from: connectionStart,
+        to: targetNode.dataset.id
+      };
+      
+      // Check if edge already exists
+      const edgeExists = edges.some(edge => 
+        edge.from === newEdge.from && edge.to === newEdge.to ||
+        edge.from === newEdge.to && edge.to === newEdge.from
+      );
+      
+      if (!edgeExists) {
+        edges.push(newEdge);
+        drawEdges();
+        showMessage('Connection created!');
+        scheduleAutosave();
+      }
+    }
+    
+    endConnection();
+  });
+
+  // Add autosave to node dragging
+  document.addEventListener('mouseup', function(e) {
+    if (draggedNode) {
+      scheduleAutosave();
+    }
+    // ... existing mouseup code ...
+  });
+
+  // Note: The autosave functionality for showEditInterface and showDueDateInterface
+  // has been incorporated directly into the original function definitions above
 });

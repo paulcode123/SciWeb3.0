@@ -1,9 +1,13 @@
-from flask import Flask, render_template, redirect, request
+from flask import Flask, render_template, redirect, request, jsonify, session
 from ai_routes import ai_bp
-
+from firebase_routes import firebase_routes
 app = Flask(__name__)
 # Register the AI Blueprint
 app.register_blueprint(ai_bp, url_prefix='/ai')
+app.register_blueprint(firebase_routes, url_prefix='/api')
+
+# Set a secret key for session management
+app.secret_key = 'your_secret_key_here'  # This should be a secure random key in production
 
 @app.route('/')
 def home():
@@ -26,6 +30,124 @@ def profile():
     # In a real application, this would verify user authentication
     # and fetch the user's profile data from a database
     return render_template('profile.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    # Show login page for GET requests
+    if request.method == 'GET':
+        return render_template('login.html')
+    
+    # Process login for POST requests (form submission)
+    # Note: This is a fallback, most login will be handled via the API
+    if request.method == 'POST':
+        # In a real application, you'd validate credentials here
+        # and then redirect on success or show errors
+        return redirect('/')
+
+# Authentication API endpoints
+@app.route('/api/auth/login', methods=['POST'])
+def api_login():
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        password = data.get('password')
+        remember = data.get('remember', False)
+        
+        # In a real application, you would:
+        # 1. Validate user credentials against your database
+        # 2. Set auth tokens/session data
+        # 3. Return appropriate response
+        
+        # For demo purposes, we'll just check against the Firebase database
+        # using a helper function
+        from firebase_admin import firestore
+        
+        # Connect to Firestore
+        db = firestore.client()
+        
+        # Query members collection
+        members_ref = db.collection('Members')
+        query = members_ref.where('email', '==', email).limit(1)
+        results = list(query.stream())
+        
+        if not results:
+            return jsonify({"error": "User not found"}), 404
+        
+        user_doc = results[0]
+        user_data = user_doc.to_dict()
+        
+        # In a real app, you'd properly hash and validate the password
+        # This is just a simplified example - NEVER store plain passwords
+        if user_data.get('password') != password:
+            return jsonify({"error": "Invalid password"}), 401
+        
+        # Set session data for server-side tracking
+        session['user_id'] = user_doc.id
+        session['user_email'] = email
+        session['logged_in'] = True
+        
+        # Prepare user data to return (exclude sensitive info)
+        safe_user_data = {
+            'id': user_doc.id,
+            'email': user_data.get('email'),
+            'first_name': user_data.get('first_name'),
+            'last_name': user_data.get('last_name'),
+            'username': user_data.get('username'),
+            'profilePicUrl': user_data.get('profilePicUrl')
+        }
+        
+        return jsonify({
+            "success": True,
+            "message": "Login successful",
+            "user": safe_user_data
+        })
+        
+    except Exception as e:
+        print(f"Login error: {str(e)}")
+        return jsonify({"error": "Login failed"}), 500
+
+@app.route('/api/auth/logout', methods=['POST'])
+def api_logout():
+    # Clear session data
+    session.clear()
+    return jsonify({"success": True, "message": "Logged out successfully"})
+
+@app.route('/api/auth/user', methods=['GET'])
+def get_current_user():
+    # Check if user is logged in
+    if not session.get('logged_in'):
+        return jsonify({"error": "Not authenticated"}), 401
+    
+    # Return current user data
+    user_id = session.get('user_id')
+    
+    # In a real app, you'd fetch this from the database
+    try:
+        from firebase_admin import firestore
+        db = firestore.client()
+        user_doc = db.collection('Members').document(user_id).get()
+        
+        if not user_doc.exists:
+            session.clear()  # Clear invalid session
+            return jsonify({"error": "User not found"}), 404
+        
+        user_data = user_doc.to_dict()
+        
+        # Return non-sensitive user data
+        safe_user_data = {
+            'id': user_id,
+            'email': user_data.get('email'),
+            'first_name': user_data.get('first_name'),
+            'last_name': user_data.get('last_name'),
+            'username': user_data.get('username'),
+            'profilePicUrl': user_data.get('profilePicUrl')
+        }
+        
+        return jsonify({"user": safe_user_data})
+    
+    except Exception as e:
+        print(f"Error retrieving user: {str(e)}")
+        return jsonify({"error": "Server error"}), 500
 
 @app.route('/users/<username>')
 def user_profile(username):
@@ -340,6 +462,10 @@ def class_page(class_id):
 @app.route('/collab')
 def collab():
     return render_template('collab.html')
+
+@app.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html')
 
 @app.route('/collab/<project_id>')
 def project_collab(project_id):

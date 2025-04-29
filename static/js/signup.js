@@ -320,17 +320,50 @@ document.addEventListener('DOMContentLoaded', function() {
         signupForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // In a real app, this would submit the form data to the server
-            // For now, we'll simulate success and redirect to the first onboarding step
-            
             // Show loading state
             verifyBtn.disabled = true;
             verifyBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Verifying...';
             
-            // Simulate verification process
-            setTimeout(() => {
-                window.location.href = '/onboarding/usertype';
-            }, 2000);
+            // Get form data
+            const userData = {
+                first_name: firstNameInput.value,
+                last_name: lastNameInput.value,
+                email: emailInput.value,
+                username: document.getElementById('username').value || '',
+                grade: document.getElementById('grade').value,
+                password: passwordInput.value, // Note: In production, password should be hashed on the server
+                verification_code: verificationCodeInput.value,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            
+            // Send data to server to create user
+            fetch('/api/Members', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.id) {
+                    // Success - store user ID and redirect to onboarding
+                    localStorage.setItem('userId', data.id);
+                    window.location.href = '/onboarding/usertype';
+                } else {
+                    // Handle error
+                    alert('Error creating account: ' + (data.error || 'Unknown error'));
+                    verifyBtn.disabled = false;
+                    verifyBtn.innerHTML = 'Verify & Continue';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error creating account. Please try again.');
+                verifyBtn.disabled = false;
+                verifyBtn.innerHTML = 'Verify & Continue';
+            });
         });
     }
 }); 

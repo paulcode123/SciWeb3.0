@@ -22,6 +22,11 @@
             <button class="profile-nav-item" data-section="friends">Friends</button>
             <button class="profile-nav-item" data-section="appearance">Appearance</button>
         </div>
+        
+        <!-- Logout Button -->
+        <div class="logout-container">
+            <button id="logout-btn" class="btn btn-danger logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
     </div>
 
     <div class="profile-content">
@@ -218,44 +223,19 @@
             
             <div id="my-friends-content" class="friends-content active">
                 <div class="friend-search">
-                    <input type="text" placeholder="Search friends..." class="form-control">
+                    <div class="input-group mb-3">
+                        <input type="text" id="friend-username" placeholder="Enter username to add a friend..." class="form-control">
+                        <div class="input-group-append">
+                            <button id="add-friend-btn" class="btn btn-primary">Add Friend</button>
+                        </div>
+                    </div>
+                    <p id="friend-status-message" class="mt-2" style="display: none;"></p>
                 </div>
                 
-                <div class="friends-list">
-                    <div class="friend-item">
-                        <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="Friend" class="friend-avatar">
-                        <div class="friend-info">
-                            <h3>Jane Smith</h3>
-                            <p>@janesmith • 15 mutual classes</p>
-                        </div>
-                        <div class="friend-actions">
-                            <button class="btn btn-secondary btn-sm">View Profile</button>
-                            <button class="btn btn-danger btn-sm">Remove</button>
-                        </div>
-                    </div>
-                    
-                    <div class="friend-item">
-                        <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="Friend" class="friend-avatar">
-                        <div class="friend-info">
-                            <h3>Mike Johnson</h3>
-                            <p>@mikej • 8 mutual classes</p>
-                        </div>
-                        <div class="friend-actions">
-                            <button class="btn btn-secondary btn-sm">View Profile</button>
-                            <button class="btn btn-danger btn-sm">Remove</button>
-                        </div>
-                    </div>
-                    
-                    <div class="friend-item">
-                        <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="Friend" class="friend-avatar">
-                        <div class="friend-info">
-                            <h3>Sarah Williams</h3>
-                            <p>@sarahw • 12 mutual classes</p>
-                        </div>
-                        <div class="friend-actions">
-                            <button class="btn btn-secondary btn-sm">View Profile</button>
-                            <button class="btn btn-danger btn-sm">Remove</button>
-                        </div>
+                <div id="friends-list" class="friends-list">
+                    <!-- Friends will be loaded dynamically with JavaScript -->
+                    <div id="no-friends-message" style="display: none;">
+                        <p class="text-center">You don't have any friends yet. Add some friends to see them here!</p>
                     </div>
                 </div>
             </div>

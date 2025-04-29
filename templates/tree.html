@@ -7,6 +7,62 @@
 {% endblock %}
 
 {% block content %}
+    <!-- Intro Overlay -->
+    <div class="intro-overlay">
+        <div class="intro-content">
+            <h1 class="intro-title">Welcome to <span class="highlight">Your Web</span></h1>
+            <div class="intro-grid">
+                <div class="intro-section">
+                    <div class="intro-icon"><i class="fas fa-brain"></i></div>
+                    <h2>Discover Your Motivations</h2>
+                    <p>Everything you do, you do for a reason. Uncover the deeper motivations that drive your actions and decisions.</p>
+                </div>
+                <div class="intro-section">
+                    <div class="intro-icon"><i class="fas fa-project-diagram"></i></div>
+                    <h2>Build Your Network</h2>
+                    <p>Connect your ideas, challenges, tasks, and people into a comprehensive web that reflects your thought process.</p>
+                </div>
+                <div class="intro-section">
+                    <div class="intro-icon"><i class="fas fa-lightbulb"></i></div>
+                    <h2>Visualize Connections</h2>
+                    <p>See relationships between your goals and the steps needed to achieve them. Identify patterns in your thinking.</p>
+                </div>
+                <div class="intro-section">
+                    <div class="intro-icon"><i class="fas fa-tasks"></i></div>
+                    <h2>Organize & Excel</h2>
+                    <p>Transform abstract thoughts into concrete plans. Break down complex challenges into manageable tasks.</p>
+                </div>
+                <div class="intro-section">
+                    <div class="intro-icon"><i class="fas fa-robot"></i></div>
+                    <h2>AI-Powered Insights</h2>
+                    <p>Our AI learns from your web, providing personalized recommendations and helping you further map out your ideas.</p>
+                </div>
+                <div class="intro-section">
+                    <div class="intro-icon"><i class="fas fa-bullseye"></i></div>
+                    <h2>Achieve Your Goals</h2>
+                    <p>With a clear visualization of your motivations and tasks, you'll be better equipped to excel in whatever you want to do.</p>
+                </div>
+            </div>
+            <div class="intro-quote">
+                <blockquote>"Understanding the 'why' behind your goals transforms the way you approach the 'how'."</blockquote>
+            </div>
+            <button class="intro-button">Start Building Your Web</button>
+            <div class="intro-tips">
+                <p>💡 <strong>Tip:</strong> Begin by adding a Motivator node to represent your main goal or inspiration.</p>
+            </div>
+        </div>
+        <div class="intro-background">
+            <div class="node-particle"></div>
+            <div class="node-particle"></div>
+            <div class="node-particle"></div>
+            <div class="node-particle"></div>
+            <div class="node-particle"></div>
+            <div class="node-particle"></div>
+            <div class="node-particle"></div>
+            <div class="node-particle"></div>
+        </div>
+    </div>
+
     <!-- Tree Container -->
     <div class="tree-container">
         <!-- Canvas for drawing edges -->
@@ -23,6 +79,9 @@
             </button>
             <button class="tool-button btn-challenge" data-tooltip="Add Challenge Node">
                 <i class="fas fa-mountain"></i>
+            </button>
+            <button class="tool-button btn-idea" data-tooltip="Add Idea Node">
+                <i class="fas fa-lightbulb"></i>
             </button>
             <div class="school-menu">
                 <button class="tool-button btn-school" data-tooltip="School Items">

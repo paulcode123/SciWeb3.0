@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const themeToggle = document.getElementById('theme-toggle');
   console.log("Theme toggle element:", themeToggle);
   
+
   // Only proceed if theme toggle exists
   if (themeToggle) {
     const body = document.body;

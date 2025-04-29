@@ -10,8 +10,8 @@
     <!-- Class Header -->
     <section class="class-header">
         <div class="class-info">
-            <h1 class="class-title">{{ class_name }}</h1>
-            <p class="class-subtitle">{{ class_description }}</p>
+            <h1 class="class-title">{{ class_name | default('Class Name') }}</h1>
+            <p class="class-subtitle">{{ class_description | default('Class Description') }}</p>
         </div>
         <div class="class-actions">
             <button class="btn btn-primary"><i class="fas fa-edit"></i> Edit</button>
@@ -30,41 +30,17 @@
                 </div>
                 <div class="card-content">
                     <div class="online-users">
-                        <h3>Online Now (3)</h3>
+                        <h3>Online Now (0)</h3>
                         <ul class="user-list">
-                            <li class="user online">
-                                <div class="user-avatar">JS</div>
-                                <span class="user-name">Jane Smith</span>
-                                <span class="user-status"></span>
-                            </li>
-                            <li class="user online">
-                                <div class="user-avatar">JD</div>
-                                <span class="user-name">John Doe</span>
-                                <span class="user-status"></span>
-                            </li>
-                            <li class="user online">
-                                <div class="user-avatar">AW</div>
-                                <span class="user-name">Alice Wang</span>
-                                <span class="user-status"></span>
-                            </li>
+                            <!-- Online users will be populated dynamically -->
+                             <li class="empty-state-small">No users online.</li>
                         </ul>
                     </div>
                     <div class="all-users">
-                        <h3>All Members (12)</h3>
+                        <h3>All Members (0)</h3>
                         <ul class="user-list">
-                            <li class="user">
-                                <div class="user-avatar">JS</div>
-                                <span class="user-name">Jane Smith</span>
-                            </li>
-                            <li class="user">
-                                <div class="user-avatar">JD</div>
-                                <span class="user-name">John Doe</span>
-                            </li>
-                            <!-- More users would be listed here -->
-                            <li class="user">
-                                <div class="user-avatar">AW</div>
-                                <span class="user-name">Alice Wang</span>
-                            </li>
+                            <!-- All users will be populated dynamically -->
+                            <li class="empty-state-small">No members in this class yet.</li>
                         </ul>
                         <button class="btn btn-text">View All Members</button>
                     </div>
@@ -80,23 +56,14 @@
                 <div class="card-content">
                     <div class="channels-list-container">
                         <ul class="channel-list">
-                            <li class="channel active" data-channel="general">
+                            <!-- Channels will be populated dynamically -->
+                            <li class="empty-state-small">No channels created yet.</li>
+                            <!-- Example of an active channel structure (to be populated) -->
+                            <!-- <li class="channel active" data-channel="general">
                                 <i class="fas fa-hashtag"></i>
                                 <span>general</span>
                                 <span class="unread-count">3</span>
-                            </li>
-                            <li class="channel" data-channel="homework-help">
-                                <i class="fas fa-hashtag"></i>
-                                <span>homework-help</span>
-                            </li>
-                            <li class="channel" data-channel="lecture-notes">
-                                <i class="fas fa-hashtag"></i>
-                                <span>lecture-notes</span>
-                            </li>
-                            <li class="channel" data-channel="study-group">
-                                <i class="fas fa-hashtag"></i>
-                                <span>study-group</span>
-                            </li>
+                            </li> -->
                         </ul>
                         <button class="btn btn-text">Create New Channel</button>
                     </div>
@@ -105,7 +72,7 @@
                     <div class="chat-display">
                         <!-- Channel Header -->
                         <div class="chat-header">
-                            <h3><i class="fas fa-hashtag"></i> <span class="current-channel">general</span></h3>
+                            <h3><i class="fas fa-hashtag"></i> <span class="current-channel">No Channel Selected</span></h3>
                             <div class="chat-actions">
                                 <button class="btn-icon"><i class="fas fa-users"></i></button>
                                 <button class="btn-icon"><i class="fas fa-cog"></i></button>
@@ -114,229 +81,15 @@
                         
                         <!-- Messages Area -->
                         <div class="messages-container">
-                            <!-- General Channel Messages -->
-                            <div class="channel-messages" data-channel="general">
-                                <div class="message-group">
-                                    <div class="message-avatar">JS</div>
-                                    <div class="message-content">
-                                        <div class="message-header">
-                                            <span class="message-author">Jane Smith</span>
-                                            <span class="message-time">10:45 AM</span>
-                                        </div>
-                                        <div class="message-text">
-                                            Hey everyone! Don't forget we have a midterm review session next week.
-                                        </div>
-                                        <div class="message-reactions">
-                                            <span class="reaction"><i class="fas fa-thumbs-up"></i> 5</span>
-                                            <span class="reaction"><i class="fas fa-heart"></i> 2</span>
-                                            <button class="btn-text btn-small">Add Reaction</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="message-group">
-                                    <div class="message-avatar">JD</div>
-                                    <div class="message-content">
-                                        <div class="message-header">
-                                            <span class="message-author">John Doe</span>
-                                            <span class="message-time">10:52 AM</span>
-                                        </div>
-                                        <div class="message-text">
-                                            Thanks for the reminder! Will the professor be posting study guides beforehand?
-                                        </div>
-                                        <div class="message-reactions">
-                                            <span class="reaction"><i class="fas fa-thumbs-up"></i> 2</span>
-                                            <button class="btn-text btn-small">Add Reaction</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="message-group">
-                                    <div class="message-avatar">AW</div>
-                                    <div class="message-content">
-                                        <div class="message-header">
-                                            <span class="message-author">Alice Wang</span>
-                                            <span class="message-time">11:03 AM</span>
-                                        </div>
-                                        <div class="message-text">
-                                            I created a summary of chapters 5-7 if anyone wants to use it for studying.
-                                        </div>
-                                        <div class="message-files">
-                                            <a href="#" class="message-file"><i class="fas fa-file-pdf"></i> Chapter_5-7_Summary.pdf</a>
-                                        </div>
-                                        <div class="message-reactions">
-                                            <span class="reaction"><i class="fas fa-thumbs-up"></i> 8</span>
-                                            <span class="reaction"><i class="fas fa-star"></i> 6</span>
-                                            <span class="reaction"><i class="fas fa-heart"></i> 4</span>
-                                            <button class="btn-text btn-small">Add Reaction</button>
-                                        </div>
-                                        
-                                        <!-- Replies -->
-                                        <div class="message-replies">
-                                            <div class="reply">
-                                                <div class="reply-avatar">JS</div>
-                                                <div class="reply-content">
-                                                    <div class="reply-header">
-                                                        <span class="reply-author">Jane Smith</span>
-                                                        <span class="reply-time">11:10 AM</span>
-                                                    </div>
-                                                    <div class="reply-text">
-                                                        This is amazing, thank you Alice!
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="reply">
-                                                <div class="reply-avatar">JD</div>
-                                                <div class="reply-content">
-                                                    <div class="reply-header">
-                                                        <span class="reply-author">John Doe</span>
-                                                        <span class="reply-time">11:15 AM</span>
-                                                    </div>
-                                                    <div class="reply-text">
-                                                        You're a lifesaver!
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <button class="btn-text show-reply-form">Reply to this thread</button>
-                                        </div>
-                                    </div>
-                                </div>
+                            <!-- Messages will be populated dynamically based on selected channel -->
+                             <div class="empty-state-large" style="min-height: 300px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-comments" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                                <p>Select a channel to view messages or start a conversation.</p>
                             </div>
-                            
-                            <!-- Homework Help Channel Messages -->
-                            <div class="channel-messages" data-channel="homework-help" style="display: none;">
-                                <div class="message-group">
-                                    <div class="message-avatar">JD</div>
-                                    <div class="message-content">
-                                        <div class="message-header">
-                                            <span class="message-author">John Doe</span>
-                                            <span class="message-time">Yesterday, 8:30 PM</span>
-                                        </div>
-                                        <div class="message-text">
-                                            I'm stuck on question 3 of the problem set. Anyone have tips on how to approach it?
-                                        </div>
-                                        <div class="message-reactions">
-                                            <span class="reaction"><i class="fas fa-question"></i> 2</span>
-                                            <button class="btn-text btn-small">Add Reaction</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="message-group">
-                                    <div class="message-avatar">AW</div>
-                                    <div class="message-content">
-                                        <div class="message-header">
-                                            <span class="message-author">Alice Wang</span>
-                                            <span class="message-time">Yesterday, 9:15 PM</span>
-                                        </div>
-                                        <div class="message-text">
-                                            Try using the formula we learned in lecture 5. I think you need to apply the second derivative.
-                                        </div>
-                                        <div class="message-reactions">
-                                            <span class="reaction"><i class="fas fa-thumbs-up"></i> 3</span>
-                                            <span class="reaction"><i class="fas fa-lightbulb"></i> 2</span>
-                                            <button class="btn-text btn-small">Add Reaction</button>
-                                        </div>
-                                        
-                                        <!-- Replies -->
-                                        <div class="message-replies">
-                                            <div class="reply">
-                                                <div class="reply-avatar">JD</div>
-                                                <div class="reply-content">
-                                                    <div class="reply-header">
-                                                        <span class="reply-author">John Doe</span>
-                                                        <span class="reply-time">Yesterday, 9:32 PM</span>
-                                                    </div>
-                                                    <div class="reply-text">
-                                                        Got it! That worked. Thanks Alice!
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <button class="btn-text show-reply-form">Reply to this thread</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Lecture Notes Channel Messages -->
-                            <div class="channel-messages" data-channel="lecture-notes" style="display: none;">
-                                <div class="message-group">
-                                    <div class="message-avatar">PJ</div>
-                                    <div class="message-content">
-                                        <div class="message-header">
-                                            <span class="message-author">Prof. Johnson</span>
-                                            <span class="message-time">Monday, 2:15 PM</span>
-                                        </div>
-                                        <div class="message-text">
-                                            Here are the slides from today's lecture. We covered sections 5.1-5.3 in the textbook.
-                                        </div>
-                                        <div class="message-files">
-                                            <a href="#" class="message-file"><i class="fas fa-file-powerpoint"></i> Lecture_15_Slides.pptx</a>
-                                            <a href="#" class="message-file"><i class="fas fa-file-pdf"></i> Chapter5_Notes.pdf</a>
-                                        </div>
-                                        <div class="message-reactions">
-                                            <span class="reaction"><i class="fas fa-thumbs-up"></i> 12</span>
-                                            <span class="reaction"><i class="fas fa-heart"></i> 5</span>
-                                            <button class="btn-text btn-small">Add Reaction</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Study Group Channel Messages -->
-                            <div class="channel-messages" data-channel="study-group" style="display: none;">
-                                <div class="message-group">
-                                    <div class="message-avatar">JS</div>
-                                    <div class="message-content">
-                                        <div class="message-header">
-                                            <span class="message-author">Jane Smith</span>
-                                            <span class="message-time">Tuesday, 3:45 PM</span>
-                                        </div>
-                                        <div class="message-text">
-                                            Who's joining the study session at the library this Friday? I've reserved a group room on the 2nd floor.
-                                        </div>
-                                        <div class="message-reactions">
-                                            <span class="reaction"><i class="fas fa-check"></i> 7</span>
-                                            <span class="reaction"><i class="fas fa-calendar-check"></i> 5</span>
-                                            <button class="btn-text btn-small">Add Reaction</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="message-group">
-                                    <div class="message-avatar">AW</div>
-                                    <div class="message-content">
-                                        <div class="message-header">
-                                            <span class="message-author">Alice Wang</span>
-                                            <span class="message-time">Tuesday, 4:12 PM</span>
-                                        </div>
-                                        <div class="message-text">
-                                            I'll be there! I'm bringing my notes from the last few lectures.
-                                        </div>
-                                        <div class="message-reactions">
-                                            <span class="reaction"><i class="fas fa-thumbs-up"></i> 3</span>
-                                            <button class="btn-text btn-small">Add Reaction</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="message-group">
-                                    <div class="message-avatar">JD</div>
-                                    <div class="message-content">
-                                        <div class="message-header">
-                                            <span class="message-author">John Doe</span>
-                                            <span class="message-time">Tuesday, 5:03 PM</span>
-                                        </div>
-                                        <div class="message-text">
-                                            I can make it too. Should we focus on reviewing the material or working on problem sets?
-                                        </div>
-                                        <div class="message-reactions">
-                                            <span class="reaction"><i class="fas fa-thumbs-up"></i> 2</span>
-                                            <button class="btn-text btn-small">Add Reaction</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <!-- Example channel message area structure (hidden by default) -->
+                            <!-- <div class="channel-messages" data-channel="general" style="display: none;"> -->
+                                <!-- Messages go here -->
+                            <!-- </div> -->
                         </div>
                         
                         <!-- Message Input Area -->
@@ -361,54 +114,13 @@
                     <button class="btn-icon"><i class="fas fa-plus"></i></button>
                 </div>
                 <div class="card-content">
-                    <div class="event">
-                        <div class="event-date">
-                            <span class="day">15</span>
-                            <span class="month">May</span>
-                        </div>
-                        <div class="event-details">
-                            <h3>Midterm Review Session</h3>
-                            <p><i class="fas fa-clock"></i> 4:00 PM - 6:00 PM</p>
-                            <p><i class="fas fa-map-marker-alt"></i> Room 301</p>
-                            <p><i class="fas fa-user"></i> Hosted by: Prof. Johnson</p>
-                        </div>
-                        <div class="event-actions">
-                            <button class="btn btn-small">RSVP</button>
-                        </div>
+                    <!-- Events will be populated dynamically -->
+                     <div class="empty-state">
+                        <i class="fas fa-calendar-check"></i>
+                        <p>No upcoming events scheduled.</p>
                     </div>
-
-                    <div class="event">
-                        <div class="event-date">
-                            <span class="day">18</span>
-                            <span class="month">May</span>
-                        </div>
-                        <div class="event-details">
-                            <h3>Group Study Session</h3>
-                            <p><i class="fas fa-clock"></i> 2:00 PM - 4:00 PM</p>
-                            <p><i class="fas fa-map-marker-alt"></i> Library, Floor 2</p>
-                            <p><i class="fas fa-user"></i> Hosted by: Jane Smith</p>
-                        </div>
-                        <div class="event-actions">
-                            <button class="btn btn-small">RSVP</button>
-                        </div>
-                    </div>
-                    
-                    <div class="event">
-                        <div class="event-date">
-                            <span class="day">22</span>
-                            <span class="month">May</span>
-                        </div>
-                        <div class="event-details">
-                            <h3>Final Exam Preparation</h3>
-                            <p><i class="fas fa-clock"></i> 3:00 PM - 5:30 PM</p>
-                            <p><i class="fas fa-map-marker-alt"></i> Learning Center</p>
-                            <p><i class="fas fa-user"></i> Hosted by: Teaching Assistants</p>
-                        </div>
-                        <div class="event-actions">
-                            <button class="btn btn-small">RSVP</button>
-                        </div>
-                    </div>
-
+                    <!-- Example Event Structure -->
+                    <!-- <div class="event"> ... </div> -->
                     <button class="btn btn-text">View All Events</button>
                 </div>
             </section>
@@ -422,41 +134,13 @@
                     <h2><i class="fas fa-tasks"></i> Upcoming Assignments</h2>
                 </div>
                 <div class="card-content">
-                    <div class="assignment urgent">
-                        <div class="assignment-status urgent"></div>
-                        <div class="assignment-details">
-                            <h3>Problem Set 5</h3>
-                            <p><i class="fas fa-calendar"></i> Due: May 16, 2024</p>
-                            <div class="progress-bar">
-                                <div class="progress" style="width: 25%"></div>
-                            </div>
-                            <p class="progress-text">25% Complete</p>
-                        </div>
+                    <!-- Assignments will be populated dynamically -->
+                     <div class="empty-state">
+                        <i class="fas fa-clipboard-check"></i>
+                        <p>No upcoming assignments.</p>
                     </div>
-
-                    <div class="assignment upcoming">
-                        <div class="assignment-status upcoming"></div>
-                        <div class="assignment-details">
-                            <h3>Research Paper</h3>
-                            <p><i class="fas fa-calendar"></i> Due: May 25, 2024</p>
-                            <div class="progress-bar">
-                                <div class="progress" style="width: 50%"></div>
-                            </div>
-                            <p class="progress-text">50% Complete</p>
-                        </div>
-                    </div>
-
-                    <div class="assignment upcoming">
-                        <div class="assignment-status upcoming"></div>
-                        <div class="assignment-details">
-                            <h3>Midterm Exam</h3>
-                            <p><i class="fas fa-calendar"></i> Date: May 20, 2024</p>
-                            <div class="progress-bar">
-                                <div class="progress" style="width: 70%"></div>
-                            </div>
-                            <p class="progress-text">70% Ready</p>
-                        </div>
-                    </div>
+                    <!-- Example Assignment Structure -->
+                    <!-- <div class="assignment urgent"> ... </div> -->
                 </div>
             </section>
 
@@ -468,8 +152,8 @@
                 <div class="card-content">
                     <div class="overall-grade">
                         <div class="grade-circle">
-                            <span class="grade-value">A-</span>
-                            <span class="grade-percentage">91%</span>
+                            <span class="grade-value">--</span>
+                            <span class="grade-percentage">--%</span>
                         </div>
                         <p class="grade-label">Current Grade</p>
                     </div>
@@ -477,25 +161,16 @@
                     <div class="recent-scores">
                         <h3>Recent Scores</h3>
                         <ul class="score-list">
-                            <li class="score">
-                                <span class="score-title">Quiz 3</span>
-                                <span class="score-value">88%</span>
-                            </li>
-                            <li class="score">
-                                <span class="score-title">Problem Set 4</span>
-                                <span class="score-value">95%</span>
-                            </li>
-                            <li class="score">
-                                <span class="score-title">Lab Report 2</span>
-                                <span class="score-value">92%</span>
-                            </li>
+                            <!-- Scores will be populated dynamically -->
+                            <li class="empty-state-small">No recent scores available.</li>
                         </ul>
                     </div>
 
                     <div class="time-distribution">
                         <h3>Time Distribution</h3>
                         <div class="chart-container">
-                            <canvas id="timeChart"></canvas>
+                             <canvas id="timeChart"></canvas>
+                             <!-- JS will populate this chart, consider adding an empty state if no data -->
                         </div>
                     </div>
                 </div>
@@ -509,20 +184,20 @@
         
         <!-- Units navigation -->
         <div class="units-navigation">
-            <button class="unit-tab active" data-unit="unit1">Unit 1: Introduction</button>
-            <button class="unit-tab" data-unit="unit2">Unit 2: Fundamentals</button>
-            <button class="unit-tab" data-unit="unit3">Unit 3: Advanced Concepts</button>
-            <button class="unit-tab" data-unit="unit4">Unit 4: Applications</button>
+             <!-- Unit tabs will be populated dynamically -->
+             <!-- Example Unit Tab Structure -->
+             <button class="unit-tab active" data-unit="unit1">Unit 1: Example Unit</button>
             <button class="unit-add-btn"><i class="fas fa-plus"></i> Add Unit</button>
         </div>
         
         <!-- Units content -->
         <div class="units-content">
-            <!-- Unit 1 -->
+            <!-- Unit content will be populated dynamically -->
+            <!-- Example Unit Structure (active) -->
             <div class="unit-content active" id="unit1">
                 <div class="unit-header">
-                    <h3 class="unit-title">Unit 1: Introduction to the Subject</h3>
-                    <p class="unit-description">This unit covers the basic principles and foundational concepts of the subject.</p>
+                    <h3 class="unit-title">Unit 1: Example Unit Title</h3>
+                    <p class="unit-description">Unit description goes here.</p>
                 </div>
                 
                 <div class="unit-tabs">
@@ -542,30 +217,12 @@
                             <button class="btn btn-primary upload-btn"><i class="fas fa-upload"></i> Upload Worksheet</button>
                             <p class="upload-info">Upload worksheets to share with the class (.pdf, .docx, .xlsx)</p>
                         </div>
-                        <div class="resource-list">
-                            <div class="resource-item worksheet-item">
-                                <div class="resource-icon"><i class="fas fa-file-alt"></i></div>
-                                <div class="resource-details">
-                                    <h3 class="resource-title">Worksheet 1.1: Basic Concepts</h3>
-                                    <p class="resource-meta">10 problems · Uploaded by Prof. Johnson · May 10, 2024</p>
-                                </div>
-                                <div class="resource-actions">
-                                    <button class="btn btn-small">View</button>
-                                    <button class="btn-icon"><i class="fas fa-download"></i></button>
-                                </div>
+                        <div class="resource-list empty-grid">
+                             <div class="empty-state">
+                                <i class="fas fa-file-alt"></i>
+                                <p>No worksheets uploaded for this unit yet.</p>
                             </div>
-                            
-                            <div class="resource-item worksheet-item">
-                                <div class="resource-icon"><i class="fas fa-file-alt"></i></div>
-                                <div class="resource-details">
-                                    <h3 class="resource-title">Worksheet 1.2: Terminology</h3>
-                                    <p class="resource-meta">8 problems · Uploaded by Alice Wang · May 5, 2024</p>
-                                </div>
-                                <div class="resource-actions">
-                                    <button class="btn btn-small">View</button>
-                                    <button class="btn-icon"><i class="fas fa-download"></i></button>
-                                </div>
-                            </div>
+                            <!-- Resource items go here -->
                         </div>
                     </div>
                     
@@ -575,18 +232,12 @@
                             <button class="btn btn-primary upload-btn"><i class="fas fa-upload"></i> Upload Study Guide</button>
                             <p class="upload-info">Upload study guides to share with the class (.pdf, .docx, .pptx)</p>
                         </div>
-                        <div class="resource-list">
-                            <div class="resource-item guide-item">
-                                <div class="resource-icon"><i class="fas fa-book"></i></div>
-                                <div class="resource-details">
-                                    <h3 class="resource-title">Unit 1 Complete Study Guide</h3>
-                                    <p class="resource-meta">Uploaded by Prof. Johnson · May 11, 2024</p>
-                                </div>
-                                <div class="resource-actions">
-                                    <button class="btn btn-small">View</button>
-                                    <button class="btn-icon"><i class="fas fa-download"></i></button>
-                                </div>
+                        <div class="resource-list empty-grid">
+                             <div class="empty-state">
+                                <i class="fas fa-book"></i>
+                                <p>No study guides uploaded for this unit yet.</p>
                             </div>
+                            <!-- Resource items go here -->
                         </div>
                     </div>
                     
@@ -596,18 +247,12 @@
                             <button class="btn btn-primary upload-btn"><i class="fas fa-link"></i> Attach Mind Web</button>
                             <p class="upload-info">Link mind maps and concept webs from your account (.pdf, .png, .jpg, .mm)</p>
                         </div>
-                        <div class="resource-list">
-                            <div class="resource-item mindweb-item">
-                                <div class="resource-icon"><i class="fas fa-project-diagram"></i></div>
-                                <div class="resource-details">
-                                    <h3 class="resource-title">Key Concepts Mind Map</h3>
-                                    <p class="resource-meta">Uploaded by John Doe · May 8, 2024</p>
-                                </div>
-                                <div class="resource-actions">
-                                    <button class="btn btn-small">Open</button>
-                                    <button class="btn-icon"><i class="fas fa-clone"></i></button>
-                                </div>
+                        <div class="resource-list empty-grid">
+                            <div class="empty-state">
+                                <i class="fas fa-project-diagram"></i>
+                                <p>No mind webs attached for this unit yet.</p>
                             </div>
+                            <!-- Resource items go here -->
                         </div>
                     </div>
                     
@@ -633,87 +278,12 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="resource-list problems-list">
-                            <div class="problem-item">
-                                <div class="problem-header">
-                                    <div class="problem-meta">
-                                        <span class="problem-id">#P1025</span>
-                                        <span class="problem-difficulty basic">Basic</span>
-                                        <span class="problem-type">Conceptual</span>
-                                        <span class="problem-skill">Terminology</span>
-                                    </div>
-                                    <div class="problem-source">
-                                        <span>Source: Worksheet 1.1</span>
-                                    </div>
-                                    <div class="problem-actions">
-                                        <button class="btn-icon problem-more-btn"><i class="fas fa-ellipsis-v"></i>
-                                            <div class="problem-actions-dropdown">
-                                                <a href="#"><i class="fas fa-project-diagram"></i> Map to Mindweb</a>
-                                                <a href="#"><i class="fas fa-pencil-alt"></i> Solve</a>
-                                                <a href="#"><i class="fas fa-lightbulb"></i> Hint</a>
-                                            </div>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="problem-content">
-                                    <p>Define the term "scientific method" and explain its importance in research.</p>
-                                </div>
+                        <div class="resource-list problems-list empty-grid">
+                            <div class="empty-state">
+                                <i class="fas fa-puzzle-piece"></i>
+                                <p>No practice problems available for this unit yet.</p>
                             </div>
-                            
-                            <div class="problem-item">
-                                <div class="problem-header">
-                                    <div class="problem-meta">
-                                        <span class="problem-id">#P1026</span>
-                                        <span class="problem-difficulty intermediate">Intermediate</span>
-                                        <span class="problem-type">Computational</span>
-                                        <span class="problem-skill">Analysis</span>
-                                    </div>
-                                    <div class="problem-source">
-                                        <span>Source: Practice Test 1.1</span>
-                                    </div>
-                                    <div class="problem-actions">
-                                        <button class="btn-icon problem-more-btn"><i class="fas fa-ellipsis-v"></i>
-                                            <div class="problem-actions-dropdown">
-                                                <a href="#"><i class="fas fa-project-diagram"></i> Map to Mindweb</a>
-                                                <a href="#"><i class="fas fa-pencil-alt"></i> Solve</a>
-                                                <a href="#"><i class="fas fa-lightbulb"></i> Hint</a>
-                                            </div>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="problem-content">
-                                    <p>Given the data set below, calculate the mean, median, and standard deviation.</p>
-                                    <div class="problem-image">
-                                        <img src="{{ url_for('static', filename='images/sample_data.png') }}" alt="Sample data set">
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="problem-item">
-                                <div class="problem-header">
-                                    <div class="problem-meta">
-                                        <span class="problem-id">#P1027</span>
-                                        <span class="problem-difficulty advanced">Advanced</span>
-                                        <span class="problem-type">Application</span>
-                                        <span class="problem-skill">Synthesis</span>
-                                    </div>
-                                    <div class="problem-source">
-                                        <span>Source: Midterm Exam 2023</span>
-                                    </div>
-                                    <div class="problem-actions">
-                                        <button class="btn-icon problem-more-btn"><i class="fas fa-ellipsis-v"></i>
-                                            <div class="problem-actions-dropdown">
-                                                <a href="#"><i class="fas fa-project-diagram"></i> Map to Mindweb</a>
-                                                <a href="#"><i class="fas fa-pencil-alt"></i> Solve</a>
-                                                <a href="#"><i class="fas fa-lightbulb"></i> Hint</a>
-                                            </div>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="problem-content">
-                                    <p>Design an experiment to test the effect of temperature on enzyme activity. Include your hypothesis, variables, control groups, and expected results.</p>
-                                </div>
-                            </div>
+                            <!-- Problem items go here -->
                         </div>
                     </div>
                     
@@ -723,145 +293,24 @@
                             <button class="btn btn-primary upload-btn"><i class="fas fa-upload"></i> Upload Practice Test</button>
                             <p class="upload-info">Upload practice tests to share with the class (.pdf, .docx)</p>
                         </div>
-                        <div class="resource-list">
-                            <div class="resource-item test-item">
-                                <div class="resource-icon"><i class="fas fa-file-signature"></i></div>
-                                <div class="resource-details">
-                                    <h3 class="resource-title">Unit 1 Quiz Practice</h3>
-                                    <p class="resource-meta">10 questions · 30 minutes · Uploaded by Prof. Johnson · May 12, 2024</p>
-                                </div>
-                                <div class="resource-actions">
-                                    <button class="btn btn-small">Start</button>
-                                    <button class="btn-icon"><i class="fas fa-download"></i></button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Unit 2 -->
-            <div class="unit-content" id="unit2">
-                <div class="unit-header">
-                    <h3 class="unit-title">Unit 2: Fundamentals</h3>
-                    <p class="unit-description">This unit explores the fundamental principles and theories of the subject.</p>
-                </div>
-                
-                <div class="unit-tabs">
-                    <div class="tabs">
-                        <button class="tab-btn active" data-tab="unit2-worksheets">Worksheets</button>
-                        <button class="tab-btn" data-tab="unit2-guides">Study Guides</button>
-                        <button class="tab-btn" data-tab="unit2-mindwebs">Mind Webs</button>
-                        <button class="tab-btn" data-tab="unit2-practice">Practice Problems</button>
-                        <button class="tab-btn" data-tab="unit2-tests">Practice Tests</button>
-                    </div>
-                </div>
-                
-                <div class="tab-content">
-                    <!-- Worksheets Tab -->
-                    <div class="tab-pane active" id="unit2-worksheets">
-                        <div class="upload-section">
-                            <button class="btn btn-primary upload-btn"><i class="fas fa-upload"></i> Upload Worksheet</button>
-                            <p class="upload-info">Upload worksheets to share with the class (.pdf, .docx, .xlsx)</p>
-                        </div>
-                        <div class="resource-list">
-                            <div class="resource-item worksheet-item">
-                                <div class="resource-icon"><i class="fas fa-file-alt"></i></div>
-                                <div class="resource-details">
-                                    <h3 class="resource-title">Worksheet 2.1: Core Principles</h3>
-                                    <p class="resource-meta">12 problems · Uploaded by Prof. Johnson · May 20, 2024</p>
-                                </div>
-                                <div class="resource-actions">
-                                    <button class="btn btn-small">View</button>
-                                    <button class="btn-icon"><i class="fas fa-download"></i></button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Other tabs would be filled with similar content -->
-                    <div class="tab-pane" id="unit2-guides">
-                        <div class="upload-section">
-                            <button class="btn btn-primary upload-btn"><i class="fas fa-upload"></i> Upload Study Guide</button>
-                            <p class="upload-info">Upload study guides to share with the class (.pdf, .docx, .pptx)</p>
-                        </div>
-                        <div class="resource-list empty-grid">
-                            <div class="empty-state">
-                                <i class="fas fa-book-open"></i>
-                                <p>No study guides have been uploaded for this unit yet.</p>
-                                <p>Be the first to contribute!</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="tab-pane" id="unit2-mindwebs">
-                        <div class="upload-section">
-                            <button class="btn btn-primary upload-btn"><i class="fas fa-upload"></i> Upload Mind Web</button>
-                            <p class="upload-info">Upload mind maps and concept webs (.pdf, .png, .jpg, .mm)</p>
-                        </div>
-                        <div class="resource-list empty-grid">
-                            <div class="empty-state">
-                                <i class="fas fa-project-diagram"></i>
-                                <p>No mind webs have been uploaded for this unit yet.</p>
-                                <p>Be the first to contribute!</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="tab-pane" id="unit2-practice">
-                        <div class="upload-section">
-                            <button class="btn btn-primary upload-btn"><i class="fas fa-upload"></i> Upload Practice Problems</button>
-                            <p class="upload-info">Upload practice problems to share with the class (.pdf, .docx)</p>
-                        </div>
-                        <div class="resource-list empty-grid">
-                            <div class="empty-state">
-                                <i class="fas fa-puzzle-piece"></i>
-                                <p>No practice problems have been uploaded for this unit yet.</p>
-                                <p>Be the first to contribute!</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="tab-pane" id="unit2-tests">
-                        <div class="upload-section">
-                            <button class="btn btn-primary upload-btn"><i class="fas fa-upload"></i> Upload Practice Test</button>
-                            <p class="upload-info">Upload practice tests to share with the class (.pdf, .docx)</p>
-                        </div>
                         <div class="resource-list empty-grid">
                             <div class="empty-state">
                                 <i class="fas fa-file-signature"></i>
-                                <p>No practice tests have been uploaded for this unit yet.</p>
-                                <p>Be the first to contribute!</p>
+                                <p>No practice tests available for this unit yet.</p>
                             </div>
+                            <!-- Resource items go here -->
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Units 3 and 4 would follow the same pattern -->
-            <div class="unit-content" id="unit3">
-                <div class="unit-header">
-                    <h3 class="unit-title">Unit 3: Advanced Concepts</h3>
-                    <p class="unit-description">This unit delves into more advanced concepts and theoretical frameworks.</p>
-                </div>
-                
+            <!-- Other units will be dynamically loaded -->
+            <!-- Example of an empty/coming soon unit state -->
+             <div class="unit-content" id="unit-placeholder" style="display: none;">
                 <div class="empty-state-large">
                     <i class="fas fa-books"></i>
-                    <h3>This unit is coming soon!</h3>
-                    <p>The instructor has not yet released content for this unit.</p>
-                </div>
-            </div>
-            
-            <div class="unit-content" id="unit4">
-                <div class="unit-header">
-                    <h3 class="unit-title">Unit 4: Applications</h3>
-                    <p class="unit-description">This unit focuses on real-world applications and case studies.</p>
-                </div>
-                
-                <div class="empty-state-large">
-                    <i class="fas fa-books"></i>
-                    <h3>This unit is coming soon!</h3>
-                    <p>The instructor has not yet released content for this unit.</p>
+                    <h3>No units available yet.</h3>
+                    <p>The instructor has not added any course units.</p>
                 </div>
             </div>
         </div>

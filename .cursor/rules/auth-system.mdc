@@ -1,0 +1,49 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Authentication System
+
+The SciWeb 3.0 application uses a combination of server-side and client-side authentication mechanisms:
+
+## Authentication Flow
+
+1. User logs in through [templates/login.html](mdc:templates/login.html) which sends credentials to the server
+2. Login form submits to the `/api/auth/login` endpoint defined in [app.py](mdc:app.py)
+3. Server authenticates against Firebase Firestore database using the 'Members' collection
+4. On successful login:
+   - Server sets session data
+   - Client stores auth info in localStorage
+   - Navbar updates to show the profile link instead of login/signup
+
+## Key Files
+
+- **Backend Authentication:**
+  - [app.py](mdc:app.py) contains API routes for `/api/auth/login`, `/api/auth/logout`, and `/api/auth/user`
+  - [firebase_routes.py](mdc:firebase_routes.py) manages data operations with Firebase
+
+- **Frontend Authentication:**
+  - [templates/login.html](mdc:templates/login.html) - Login page template
+  - [static/js/login.js](mdc:static/js/login.js) - Handles login form submission and validation
+  - [static/js/auth-nav.js](mdc:static/js/auth-nav.js) - Updates navbar based on login state
+  - [templates/base.html](mdc:templates/base.html) - Contains the navbar with conditional login/profile links
+
+- **User Profile:**
+  - [templates/profile.html](mdc:templates/profile.html) - User profile page
+  - [static/js/profile.js](mdc:static/js/profile.js) - Profile page functionality including logout
+  
+## Authentication State Management
+
+- Server-side state is managed using Flask's session
+- Client-side state uses localStorage with the following keys:
+  - `isLoggedIn`: Boolean flag indicating authentication state
+  - `userData`: JSON object containing non-sensitive user information
+  - `authToken`: For token-based authentication (when implemented)
+
+## Logout Flow
+
+1. User clicks the logout button in [templates/profile.html](mdc:templates/profile.html)
+2. The logout function in [static/js/profile.js](mdc:static/js/profile.js) clears localStorage
+3. A request is sent to `/api/auth/logout` to clear the server-side session
+4. User is redirected to the home page

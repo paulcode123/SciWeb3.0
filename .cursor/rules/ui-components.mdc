@@ -1,0 +1,98 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# UI Components & Styling
+
+SciWeb 3.0 uses a consistent UI system with reusable components and CSS variables for theming.
+
+## Styling Architecture
+
+- **CSS Variables:** Defined in [static/css/style.css](mdc:static/css/style.css) with a root scope
+- **Page-specific CSS:** Each major page has its own CSS file (login.css, profile.css, etc.)
+- **Responsive Design:** Media queries for different viewport sizes
+- **Dark/Light Mode:** Theme toggle in the navbar with `.dark-mode` class controlling appearance
+
+## Color Scheme
+
+```css
+:root {
+  --primary: #ff1a75;
+  --primary-light: #ff4d94;
+  --primary-dark: #cc0051;
+  --secondary: #3e3e3e;
+  --text-light: #f5f5f5;
+  --text-dark: #212121;
+  --bg-light: #ffffff;
+  --bg-dark: #121212;
+  --bg-light-accent: #f0f0f0;
+  --bg-dark-accent: #1e1e1e;
+}
+```
+
+## Common Components
+
+### Buttons
+
+Three main button types:
+- `.btn-primary` - Main action buttons in primary color
+- `.btn-secondary` - Secondary actions
+- `.btn-danger` - Destructive actions
+
+```html
+<button class="btn btn-primary">Primary Action</button>
+<button class="btn btn-secondary">Secondary Action</button>
+<button class="btn btn-danger">Danger Action</button>
+```
+
+### Form Elements
+
+Standard form components:
+- Text inputs
+- Password fields with toggle visibility
+- Radio buttons
+- Checkboxes
+- Dropdowns
+
+```html
+<div class="form-group">
+    <label for="field-id">Field Label</label>
+    <input type="text" id="field-id" class="form-control">
+</div>
+```
+
+### Cards
+
+Card components for content containers:
+- Login/signup cards
+- Feature cards
+- Content cards
+
+```html
+<div class="card">
+    <div class="card-header">Card Title</div>
+    <div class="card-body">Card content goes here</div>
+    <div class="card-footer">Card footer</div>
+</div>
+```
+
+### Navigation
+
+- Main navbar in [templates/base.html](mdc:templates/base.html)
+- Tab navigation patterns used in profile page
+
+## Page-specific Components
+
+- **Login/Signup:** 
+  - Form cards with animated particles background
+  - Feature cards showcasing benefits
+  
+- **Profile:**
+  - Sidebar navigation
+  - Tab-based content sections
+  - Form groups for settings
+  
+- **My Web:**
+  - Interactive visualization
+  - Node editing interface

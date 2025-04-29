@@ -1,0 +1,57 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# SciWeb 3.0 Project Structure
+
+SciWeb 3.0 is a Flask-based web application for educational knowledge mapping and academic collaboration.
+
+## Main Components
+
+- [app.py](mdc:app.py) - Main Flask application entry point with route definitions
+- [templates/](mdc:templates/) - HTML templates using Jinja2 templating system
+- [static/](mdc:static/) - Static assets (CSS, JavaScript, images)
+- [firebase_routes.py](mdc:firebase_routes.py) - API routes for Firebase database operations
+- [ai_routes.py](mdc:ai_routes.py) - AI functionality routes
+
+## Key Templates
+
+- [templates/base.html](mdc:templates/base.html) - Base template with common layout elements
+- [templates/login.html](mdc:templates/login.html) - Login page
+- [templates/signup.html](mdc:templates/signup.html) - User registration page
+- [templates/profile.html](mdc:templates/profile.html) - User profile page
+- [templates/tree.html](mdc:templates/tree.html) - Knowledge web visualization
+
+## Frontend Assets
+
+- **CSS Files:**
+  - [static/css/style.css](mdc:static/css/style.css) - Main application styles
+  - [static/css/login.css](mdc:static/css/login.css) - Login page styles
+  - [static/css/profile.css](mdc:static/css/profile.css) - Profile page styles
+
+- **JavaScript Files:**
+  - [static/js/main.js](mdc:static/js/main.js) - Main application JavaScript
+  - [static/js/login.js](mdc:static/js/login.js) - Login page functionality
+  - [static/js/auth-nav.js](mdc:static/js/auth-nav.js) - Authentication state in navigation
+  - [static/js/profile.js](mdc:static/js/profile.js) - Profile page functionality
+
+## Database
+
+SciWeb 3.0 uses Firebase Firestore as its database:
+
+- [database.md](mdc:database.md) - Database schema documentation
+- Main collections:
+  - `Members` - User account information
+  - `Trees` - User's knowledge web data
+
+## Routes Structure
+
+- `/` - Home page
+- `/login` - Login page
+- `/signup` - User registration
+- `/profile` - User profile management
+- `/tree` - Knowledge web interface
+- `/schedule` - User schedule view
+- `/api/*` - Firebase data operations
+- `/ai/*` - AI-powered features
