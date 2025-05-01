@@ -634,5 +634,9 @@ def mindweb(test_id):
     
     return render_template('mindweb.html', test_id=test_id, **test_data)
 
+@app.route('/motivation')
+def motivation_stream():
+    return render_template('motivation_stream.html')
+
 if __name__ == '__main__':
     app.run(debug=True) 

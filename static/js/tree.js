@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const connectionOverlay = document.querySelector('.connection-overlay');
   const statusMessage = document.querySelector('.status-message');
   const miniMap = document.querySelector('.mini-map');
-  const miniMapToggle = document.querySelector('.mini-map-toggle');
   const miniMapViewport = document.querySelector('.mini-map-viewport');
   const zoomControls = document.querySelector('.zoom-controls');
   const zoomInBtn = document.querySelector('.zoom-in');
@@ -21,6 +20,13 @@ document.addEventListener('DOMContentLoaded', function() {
   const aiSendBtn = document.querySelector('#ai-send-btn');
   const introOverlay = document.querySelector('.intro-overlay');
   const introButton = document.querySelector('.intro-button');
+  const voiceRecordingOverlay = document.querySelector('.voice-recording-overlay');
+  const voiceRecordBtn = document.querySelector('.btn-voice-record');
+  
+  // Add event listener to the voice record button
+  if (voiceRecordBtn) {
+    voiceRecordBtn.addEventListener('click', showVoiceRecordingOverlay);
+  }
   
   // Canvas Setup
   const ctx = treeCanvas.getContext('2d');
@@ -37,6 +43,13 @@ document.addEventListener('DOMContentLoaded', function() {
   let isDragging = false;
   let isConnecting = false;
   let miniMapVisible = false;
+  let isRecording = false;
+  let recordingTime = 0;
+  let recordingTimer = null;
+  let audioContext = null;
+  let analyser = null;
+  let dataArray = null;
+  let animationFrame = null;
   
   // Add autosave functionality
   let saveTimeout;
@@ -102,25 +115,23 @@ document.addEventListener('DOMContentLoaded', function() {
     return (y / scale) + offsetY;
   }
   
+  // Function to update the screen position of a single node based on its world coordinates
+  function updateSingleNodePosition(nodeElement) {
+    const originalLeft = parseInt(nodeElement.dataset.originalLeft || 0);
+    const originalTop = parseInt(nodeElement.dataset.originalTop || 0);
+
+    const newLeft = transformX(originalLeft);
+    const newTop = transformY(originalTop);
+
+    nodeElement.style.left = `${newLeft}px`;
+    nodeElement.style.top = `${newTop}px`;
+    nodeElement.style.transform = '';
+  }
+  
   // Update node positions based on pan and zoom
   function updateNodePositions() {
     nodes.forEach(node => {
-      const element = node.element;
-      const originalLeft = parseInt(element.dataset.originalLeft || element.style.left);
-      const originalTop = parseInt(element.dataset.originalTop || element.style.top);
-      
-      // Save original positions if not already saved
-      if (!element.dataset.originalLeft) {
-        element.dataset.originalLeft = originalLeft;
-        element.dataset.originalTop = originalTop;
-      }
-      
-      const newLeft = transformX(originalLeft);
-      const newTop = transformY(originalTop);
-      
-      element.style.left = `${newLeft}px`;
-      element.style.top = `${newTop}px`;
-      element.style.transform = `scale(${scale})`;
+      updateSingleNodePosition(node.element);
     });
     
     drawEdges();
@@ -137,36 +148,25 @@ document.addEventListener('DOMContentLoaded', function() {
   function updateMiniMap() {
     if (!miniMapVisible) return;
     
-    const worldWidth = 3000; // Estimated world size
-    const worldHeight = 3000;
+    // Get visible viewport area
+    const viewportWidth = window.innerWidth / scale;
+    const viewportHeight = window.innerHeight / scale;
+    const viewportX = offsetX * -1;
+    const viewportY = offsetY * -1;
     
-    const mapWidth = miniMap.offsetWidth;
-    const mapHeight = miniMap.offsetHeight;
+    // Scale down to mini-map size
+    const miniMapScale = 0.1;
+    const scaledWidth = viewportWidth * miniMapScale;
+    const scaledHeight = viewportHeight * miniMapScale;
+    const scaledX = viewportX * miniMapScale;
+    const scaledY = viewportY * miniMapScale;
     
-    // Calculate the viewport rectangle
-    const viewportWidth = (window.innerWidth / (worldWidth * scale)) * mapWidth;
-    const viewportHeight = (window.innerHeight / (worldHeight * scale)) * mapHeight;
-    
-    const viewportX = (offsetX / worldWidth) * mapWidth + mapWidth / 2 - viewportWidth / 2;
-    const viewportY = (offsetY / worldHeight) * mapHeight + mapHeight / 2 - viewportHeight / 2;
-    
-    // Update the viewport
+    // Update mini-map viewport representation
     miniMapViewport.style.width = `${viewportWidth}px`;
     miniMapViewport.style.height = `${viewportHeight}px`;
     miniMapViewport.style.left = `${viewportX}px`;
     miniMapViewport.style.top = `${viewportY}px`;
   }
-  
-  // Toggle minimap
-  miniMapToggle.addEventListener('click', function() {
-    miniMapVisible = !miniMapVisible;
-    miniMap.classList.toggle('visible', miniMapVisible);
-    miniMapToggle.classList.toggle('active', miniMapVisible);
-    
-    if (miniMapVisible) {
-      updateMiniMap();
-    }
-  });
   
   // Zoom controls
   zoomInBtn.addEventListener('click', function() {
@@ -240,48 +240,33 @@ document.addEventListener('DOMContentLoaded', function() {
     if (isPanning) {
       const dx = (e.clientX - panStartX) / scale;
       const dy = (e.clientY - panStartY) / scale;
-      
       offsetX -= dx;
       offsetY -= dy;
-      
       panStartX = e.clientX;
       panStartY = e.clientY;
-      
       updateNodePositions();
+      // Explicitly redraw edges during panning
+      drawEdges();
     }
-    
     if (isDragging && draggedNode) {
-      // Mark node as dragged when it actually moves
       draggedNode.dataset.wasDragged = "true";
-      
-      // Ensure hover panel stays hidden while dragging
       const nodeId = draggedNode.dataset.id;
       const nodeObj = nodes.find(n => n.id === nodeId);
       if (nodeObj && nodeObj.hoverPanel && nodeObj.hoverPanel.classList.contains('visible')) {
         nodeObj.hoverPanel.classList.remove('visible');
       }
-      
-      // Calculate new position in screen coordinates
-      const newScreenLeft = e.clientX - dragOffsetX;
-      const newScreenTop = e.clientY - dragOffsetY;
-      
-      // Convert to world coordinates
-      const newWorldLeft = untransformX(newScreenLeft);
-      const newWorldTop = untransformY(newScreenTop);
-      
-      // Update the original position
+      // Mouse position in world coordinates
+      const mouseWorldX = untransformX(e.clientX);
+      const mouseWorldY = untransformY(e.clientY);
+      // Set node's world position so the offset is preserved
+      const newWorldLeft = mouseWorldX - (draggedNode._dragWorldOffsetX || 0);
+      const newWorldTop = mouseWorldY - (draggedNode._dragWorldOffsetY || 0);
       draggedNode.dataset.originalLeft = newWorldLeft;
       draggedNode.dataset.originalTop = newWorldTop;
-      
-      // Update displayed position
-      draggedNode.style.left = `${newScreenLeft}px`;
-      draggedNode.style.top = `${newScreenTop}px`;
-      
-      // Redraw edges
+      updateSingleNodePosition(draggedNode);
       drawEdges();
       updateMiniMap();
     }
-    
     // Handle connection line drawing
     if (isConnecting && connectionStart) {
       drawEdges();
@@ -314,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     if (isDragging && draggedNode) {
-      // Remove the dragging class to restore animations
+      // Remove the dragging class to restore transitions
       draggedNode.classList.remove('dragging');
       
       // Reset z-index
@@ -381,7 +366,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Node creation function
   function createNode(type, title, left, top, content = null) {
     const node = document.createElement('div');
-    node.className = `node node-${type} appear`;
+    node.className = `node node-${type}`;
     node.dataset.id = nextNodeId++;
     node.dataset.type = type;
     
@@ -396,12 +381,55 @@ document.addEventListener('DOMContentLoaded', function() {
     // Position the node
     node.style.left = `${displayLeft}px`;
     node.style.top = `${displayTop}px`;
-    node.style.transform = `scale(${scale})`;
     
     // Add node title
     const titleEl = document.createElement('div');
     titleEl.className = 'node-title';
     titleEl.textContent = title;
+    
+    // Add node icon based on type
+    const iconEl = document.createElement('div');
+    iconEl.className = 'node-icon';
+    
+    // Choose the appropriate icon based on node type
+    let iconClass = '';
+    switch(type) {
+      case 'motivator':
+        iconClass = 'fas fa-star';
+        break;
+      case 'task':
+        iconClass = 'fas fa-tasks';
+        break;
+      case 'challenge':
+        iconClass = 'fas fa-mountain';
+        break;
+      case 'idea':
+        iconClass = 'fas fa-lightbulb';
+        break;
+      case 'class':
+        iconClass = 'fas fa-graduation-cap';
+        break;
+      case 'assignment':
+        iconClass = 'fas fa-book';
+        break;
+      case 'test':
+        iconClass = 'fas fa-clipboard-check';
+        break;
+      case 'project':
+        iconClass = 'fas fa-project-diagram';
+        break;
+      case 'essay':
+        iconClass = 'fas fa-file-alt';
+        break;
+      case 'image':
+        iconClass = 'fas fa-image';
+        break;
+    }
+    
+    iconEl.innerHTML = `<i class="${iconClass}"></i>`;
+    
+    // Add the icon element to the node
+    node.appendChild(iconEl);
     node.appendChild(titleEl);
     
     // If it's an image node, add the image
@@ -480,83 +508,131 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
     
+    // Add AI buttons for new features
+    // Challenge AI button
+    const challengeBtn = document.createElement('div');
+    challengeBtn.className = 'node-control ai-feature-btn challenge-btn';
+    challengeBtn.innerHTML = '<i class="fas fa-brain"></i>';
+    challengeBtn.title = 'AI Challenge - Test your knowledge';
+    challengeBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      showAIFeatureChat(node, hoverPanel, 'challenge');
+    });
+    controls.appendChild(challengeBtn);
+
+    // Enrich AI button
+    const enrichBtn = document.createElement('div');
+    enrichBtn.className = 'node-control ai-feature-btn enrich-btn';
+    enrichBtn.innerHTML = '<i class="fas fa-seedling"></i>';
+    enrichBtn.title = 'AI Enrich - Expand on this node';
+    enrichBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      showAIFeatureChat(node, hoverPanel, 'enrich');
+    });
+    controls.appendChild(enrichBtn);
+
+    // Explore AI button
+    const exploreBtn = document.createElement('div');
+    exploreBtn.className = 'node-control ai-feature-btn explore-btn';
+    exploreBtn.innerHTML = '<i class="fas fa-compass"></i>';
+    exploreBtn.title = 'AI Explore - Discover connections';
+    exploreBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      showAIFeatureChat(node, hoverPanel, 'explore');
+    });
+    controls.appendChild(exploreBtn);
+    
     // Add node info based on type
     const infoSection = document.createElement('div');
-    infoSection.className = 'node-info';
+    infoSection.className = 'node-info collapsed';
     
     // Add different info based on node type
     switch(type) {
       case 'motivator':
         infoSection.innerHTML = `
           <h4>Motivator</h4>
-          <p>A personal goal or motivation that drives your hard work.</p>
-          <p>The Envision page helps you visualize and feel renewed energy and drive from your motivators.</p>
+          <p>A personal goal or motivation that drives your hard work. The Envision page helps you visualize and feel renewed energy and drive from your motivators.</p>
+          <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
         `;
         break;
       case 'task':
         infoSection.innerHTML = `
           <h4>Task</h4>
-          <p>A specific actionable item that needs to be completed.</p>
-          <p>Connect tasks to classes or projects to organize your work.</p>
+          <p>A specific actionable item that needs to be completed. Connect tasks to classes or projects to organize your work.</p>
+          <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
         `;
         break;
       case 'challenge':
         infoSection.innerHTML = `
           <h4>Challenge</h4>
-          <p>A difficult problem or obstacle to overcome, or a question, dilemma, or consideration that you need to think about.</p>
-          <p>Breaking down challenges with idea nodes helps make them manageable.</p>
+          <p>A difficult problem or obstacle to overcome, or a question, dilemma, or consideration that you need to think about. Breaking down challenges with idea nodes helps make them manageable.</p>
+          <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
         `;
         break;
       case 'class':
         infoSection.innerHTML = `
           <h4>Class</h4>
-          <p>A course or subject you're studying.</p>
-          <p>The Class page contains grades, resources, chats, and practice problems.</p>
+          <p>A course or subject you're studying. The Class page contains grades, resources, chats, and practice problems.</p>
+          <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
         `;
         break;
       case 'assignment':
         infoSection.innerHTML = `
           <h4>Assignment</h4>
-          <p>Coursework that needs to be completed.</p>
-          <p>The Class page helps track your assignments and deadlines.</p>
+          <p>Coursework that needs to be completed. The Class page helps track your assignments and deadlines.</p>
+          <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
         `;
         break;
       case 'test':
         infoSection.innerHTML = `
           <h4>Test</h4>
-          <p>An exam or quiz to assess your knowledge.</p>
-          <p>The MindWeb page helps you study by mapping out and expanding on your knowledge.</p>
+          <p>An exam or quiz to assess your knowledge. The MindWeb page helps you study by mapping out and expanding on your knowledge.</p>
+          <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
         `;
         break;
       case 'project':
         infoSection.innerHTML = `
           <h4>Project</h4>
-          <p>A larger task involving multiple people and components.</p>
-          <p>The Collaboration page allows you to work with others on this project.</p>
+          <p>A larger task involving multiple people and components. The Collaboration page allows you to work with others on this project.</p>
+          <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
         `;
         break;
       case 'essay':
         infoSection.innerHTML = `
           <h4>Essay</h4>
-          <p>A written composition on a particular subject.</p>
-          <p>Connect to class nodes to organize your writing assignments.</p>
+          <p>A written composition on a particular subject. Connect to class nodes to organize your writing assignments.</p>
+          <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
         `;
         break;
       case 'image':
         infoSection.innerHTML = `
           <h4>Image</h4>
-          <p>Visual content to support your learning.</p>
-          <p>Connect images to related nodes for visual reference.</p>
+          <p>Visual content to support your learning. Connect images to related nodes for visual reference.</p>
+          <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
         `;
         break;
       case 'idea':
         infoSection.innerHTML = `
           <h4>Idea</h4>
-          <p>A concept, thought, or potential solution.</p>
-          <p>Connect ideas to challenges, tasks, or other ideas to map out your thinking.</p>
+          <p>A concept, thought, or potential solution. Connect ideas to challenges, tasks, or other ideas to map out your thinking.</p>
+          <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
         `;
         break;
     }
+    
+    // Add event listener for info toggle
+    const infoToggle = infoSection.querySelector('.node-info-toggle');
+    infoToggle.addEventListener('click', function() {
+      if (infoSection.classList.contains('collapsed')) {
+        infoSection.classList.remove('collapsed');
+        infoSection.classList.add('expanded');
+        this.innerHTML = 'Show less <i class="fas fa-chevron-up"></i>';
+      } else {
+        infoSection.classList.remove('expanded');
+        infoSection.classList.add('collapsed');
+        this.innerHTML = 'Show more <i class="fas fa-chevron-down"></i>';
+      }
+    });
     
     // Add controls and info to hover panel
     hoverPanel.appendChild(controls);
@@ -636,81 +712,57 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Make a node draggable
   function makeDraggable(node) {
-    // Track if node was actually moved during this interaction
     let wasDragged = false;
-    
+    let dragWorldOffsetX = 0;
+    let dragWorldOffsetY = 0;
+
     node.addEventListener('mousedown', function(e) {
-      if (isPanning || e.button !== 0) return; // Only left click for dragging
-      
-      // Reset drag flag at the start of potential drag
+      if (isPanning || e.button !== 0) return;
       wasDragged = false;
-      
-      // Hide any visible hover panel for this node
       const nodeId = node.dataset.id;
       const nodeObj = nodes.find(n => n.id === nodeId);
       if (nodeObj && nodeObj.hoverPanel) {
         nodeObj.hoverPanel.classList.remove('visible');
       }
-      
-      // Set a timeout to determine if this is a click or drag
+      // Calculate offset in world coordinates
+      const nodeWorldLeft = parseFloat(node.dataset.originalLeft);
+      const nodeWorldTop = parseFloat(node.dataset.originalTop);
+      const mouseWorldX = untransformX(e.clientX);
+      const mouseWorldY = untransformY(e.clientY);
+      node._dragWorldOffsetX = mouseWorldX - nodeWorldLeft;
+      node._dragWorldOffsetY = mouseWorldY - nodeWorldTop;
       const dragTimeout = setTimeout(() => {
         isDragging = true;
         draggedNode = node;
-        
-        // Suspend animations during dragging by adding a class
         node.classList.add('dragging');
-        
-        // Calculate the offset in screen coordinates
-        const rect = node.getBoundingClientRect();
-        dragOffsetX = e.clientX - rect.left;
-        dragOffsetY = e.clientY - rect.top;
-        
-        // Store current screen position to prevent jumping
-        node.dataset.dragStartLeft = rect.left;
-        node.dataset.dragStartTop = rect.top;
-        
-        // Bring to front
         node.style.zIndex = '100';
-      }, 200); // Short delay to differentiate between click and drag
-      
-      // Store the timeout ID so we can clear it
+      }, 200);
       node.dataset.dragTimeout = dragTimeout;
-      
       e.stopPropagation();
     });
-    
+
     node.addEventListener('mousemove', function(e) {
-      // If dragging has started, mark this node as having been dragged
       if (isDragging && draggedNode === node) {
         wasDragged = true;
       }
     });
-    
+
     node.addEventListener('mouseup', function(e) {
-      // Clear the timeout if this was a click rather than drag start
       const timeoutId = parseInt(node.dataset.dragTimeout);
       if (timeoutId) {
         clearTimeout(timeoutId);
         node.dataset.dragTimeout = null;
       }
-      
-      // Add data attribute to track if node was dragged
       node.dataset.wasDragged = wasDragged ? "true" : "false";
-      
-      // Reset wasDragged after short delay, so click handler can check it
       setTimeout(() => {
         wasDragged = false;
       }, 50);
     });
-    
-    // Handle click for navigation - override previous click handler
+
     node.addEventListener('click', function(e) {
-      // Only handle click if not dragging, not connecting, and node wasn't just dragged
       if (!isDragging && !isConnecting && !wasDragged && node.dataset.wasDragged !== "true") {
         const type = node.dataset.type;
         const title = node.querySelector('.node-title').textContent;
-        
-        // Different navigation based on node type
         switch (type) {
           case 'motivator':
             window.location.href = `/envision/${node.dataset.id}`;
@@ -731,10 +783,8 @@ document.addEventListener('DOMContentLoaded', function() {
             break;
         }
       }
-      
-      // Reset the dragged flag
       node.dataset.wasDragged = "false";
-    }, { capture: true }); // Use capture to ensure this runs before other click handlers
+    }, { capture: true });
   }
   
   // Handle connection overlay click
@@ -825,6 +875,10 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Draw edges between nodes
   function drawEdges() {
+    // Make sure canvas covers the entire viewport
+    treeCanvas.width = window.innerWidth;
+    treeCanvas.height = window.innerHeight;
+    
     // Clear canvas
     ctx.clearRect(0, 0, treeCanvas.width, treeCanvas.height);
     
@@ -834,11 +888,11 @@ document.addEventListener('DOMContentLoaded', function() {
       const toNode = document.querySelector(`[data-id="${edge.to}"]`);
       
       if (fromNode && toNode) {
+        // Get the visual position of each node
         const fromRect = fromNode.getBoundingClientRect();
         const toRect = toNode.getBoundingClientRect();
         
-        // Calculate center points accounting for any transformations
-        // Use the visual center of the node, not just the bounding box center
+        // Calculate center points
         const fromCenter = {
           x: fromRect.left + (fromRect.width / 2),
           y: fromRect.top + (fromRect.height / 2)
@@ -849,17 +903,27 @@ document.addEventListener('DOMContentLoaded', function() {
           y: toRect.top + (toRect.height / 2)
         };
         
-        // Draw line from center to center
+        // Get scroll position for adjustments
+        const scrollY = window.scrollY || window.pageYOffset;
+        
+        // Apply vertical adjustment based on the current pan amount
+        const verticalPanAmount = Math.abs(offsetY) * 0.05; // Small adjustment factor
+        const adjustmentY = verticalPanAmount * (offsetY < 0 ? -1 : 1);
+        
+        // Draw line from center to center with adjustment
         ctx.beginPath();
         ctx.moveTo(fromCenter.x, fromCenter.y);
-        ctx.lineTo(toCenter.x, toCenter.y);
+        ctx.lineTo(toCenter.x, toCenter.y + adjustmentY);
         
         // Get node types for line color
         const fromType = fromNode.dataset.type;
         const toType = toNode.dataset.type;
         
         // Set line style based on node types
-        const gradient = ctx.createLinearGradient(fromCenter.x, fromCenter.y, toCenter.x, toCenter.y);
+        const gradient = ctx.createLinearGradient(
+          fromCenter.x, fromCenter.y, 
+          toCenter.x, toCenter.y + adjustmentY
+        );
         
         const fromColor = getColorForType(fromType);
         const toColor = getColorForType(toType);
@@ -1582,12 +1646,954 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Add autosave to node dragging
   document.addEventListener('mouseup', function(e) {
-    if (draggedNode) {
-      scheduleAutosave();
+    if (isDragging && draggedNode && draggedNode.dataset.wasDragged === "true") {
+      scheduleAutosave(); 
     }
-    // ... existing mouseup code ...
   });
 
   // Note: The autosave functionality for showEditInterface and showDueDateInterface
   // has been incorporated directly into the original function definitions above
+
+  // Function to show AI feature chat interface
+  function showAIFeatureChat(node, hoverPanel, featureType) {
+    // Remove any existing AI chat interface
+    const existingChat = document.querySelector('.ai-feature-chat');
+    if (existingChat) {
+      existingChat.remove();
+    }
+
+    // Create new AI chat interface
+    const aiChat = document.createElement('div');
+    aiChat.className = 'ai-feature-chat';
+    aiChat.classList.add(`${featureType}-feature`);
+
+    // Create chat header
+    const chatHeader = document.createElement('div');
+    chatHeader.className = 'ai-feature-header';
+    
+    // Set header title based on feature type
+    let headerTitle = '';
+    switch(featureType) {
+      case 'challenge':
+        headerTitle = 'AI Challenge';
+        break;
+      case 'enrich':
+        headerTitle = 'AI Enrichment';
+        break;
+      case 'explore':
+        headerTitle = 'AI Explorer';
+        break;
+    }
+    
+    chatHeader.innerHTML = `
+      <h4>${headerTitle}</h4>
+      <button class="ai-feature-close"><i class="fas fa-times"></i></button>
+    `;
+    
+    // Create chat content
+    const chatContent = document.createElement('div');
+    chatContent.className = 'ai-feature-content';
+    
+    // Add welcome message based on feature type
+    let welcomeMessage = '';
+    switch(featureType) {
+      case 'challenge':
+        welcomeMessage = `I can help challenge your knowledge about "${node.querySelector('.node-title').textContent}". What would you like me to quiz you on?`;
+        break;
+      case 'enrich':
+        welcomeMessage = `I can help enrich your understanding of "${node.querySelector('.node-title').textContent}". What aspects would you like to explore further?`;
+        break;
+      case 'explore':
+        welcomeMessage = `I can help you explore connections related to "${node.querySelector('.node-title').textContent}". What type of connections are you looking for?`;
+        break;
+    }
+    
+    // Add welcome message
+    const welcomeMsg = document.createElement('div');
+    welcomeMsg.className = 'ai-feature-message';
+    welcomeMsg.textContent = welcomeMessage;
+    chatContent.appendChild(welcomeMsg);
+    
+    // Create chat input area
+    const inputArea = document.createElement('div');
+    inputArea.className = 'ai-feature-input-area';
+    inputArea.innerHTML = `
+      <input type="text" class="ai-feature-input" placeholder="Type your question...">
+      <button class="ai-feature-send"><i class="fas fa-paper-plane"></i></button>
+    `;
+    
+    // Assemble the chat interface
+    aiChat.appendChild(chatHeader);
+    aiChat.appendChild(chatContent);
+    aiChat.appendChild(inputArea);
+    
+    // Position the chat interface next to the hover panel
+    const rect = hoverPanel.getBoundingClientRect();
+    aiChat.style.top = rect.top + 'px';
+    aiChat.style.left = (rect.right + 10) + 'px';
+    
+    // Add event listener for close button
+    aiChat.querySelector('.ai-feature-close').addEventListener('click', function() {
+      aiChat.remove();
+    });
+    
+    // Add event listener for send button (no functionality, just UI)
+    aiChat.querySelector('.ai-feature-send').addEventListener('click', function() {
+      const input = aiChat.querySelector('.ai-feature-input');
+      const message = input.value.trim();
+      
+      if (message) {
+        // Add user message
+        const userMsg = document.createElement('div');
+        userMsg.className = 'ai-feature-message user-message';
+        userMsg.textContent = message;
+        chatContent.appendChild(userMsg);
+        
+        // Clear input
+        input.value = '';
+        
+        // Simulate AI thinking
+        const thinkingMsg = document.createElement('div');
+        thinkingMsg.className = 'ai-feature-message thinking';
+        thinkingMsg.textContent = 'Thinking...';
+        chatContent.appendChild(thinkingMsg);
+        
+        // Scroll to bottom
+        chatContent.scrollTop = chatContent.scrollHeight;
+        
+        // Simulate AI response after a delay
+        setTimeout(() => {
+          // Remove thinking message
+          chatContent.removeChild(thinkingMsg);
+          
+          // Add AI response
+          const aiMsg = document.createElement('div');
+          aiMsg.className = 'ai-feature-message';
+          aiMsg.textContent = `This is a UI demo. In the real app, I would provide a helpful response about ${message} related to ${node.querySelector('.node-title').textContent}!`;
+          chatContent.appendChild(aiMsg);
+          
+          // Scroll to bottom
+          chatContent.scrollTop = chatContent.scrollHeight;
+        }, 1000);
+      }
+    });
+    
+    // Add event listener for input keypress (Enter key)
+    aiChat.querySelector('.ai-feature-input').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        aiChat.querySelector('.ai-feature-send').click();
+      }
+    });
+    
+    // Add the chat interface to the DOM
+    document.body.appendChild(aiChat);
+    
+    // Focus the input
+    setTimeout(() => {
+      aiChat.querySelector('.ai-feature-input').focus();
+    }, 100);
+  }
+
+  // Voice Recording UI Functions
+  // Create voice recording overlay if it doesn't exist
+  function createVoiceRecordingOverlay() {
+    if (document.querySelector('.voice-recording-overlay')) return;
+    
+    const overlay = document.createElement('div');
+    overlay.className = 'voice-recording-overlay';
+    
+    overlay.innerHTML = `
+      <div class="voice-recording-container">
+        <div class="voice-recording-header">
+          <h3><i class="fas fa-microphone-alt"></i> Voice to Web</h3>
+          <button class="voice-close-btn"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="voice-recording-content">
+          <div class="voice-instructions">
+            <p>Speak about your ideas, tasks, or concepts. I'll create nodes automatically from your speech.</p>
+            <p class="voice-tips">Try phrases like <span>"I'm motivated by getting good grades"</span> or <span>"I have a task to finish my essay"</span></p>
+          </div>
+          <div class="voice-visualization">
+            <canvas class="voice-waveform" width="500" height="150"></canvas>
+            <div class="voice-time">00:00</div>
+          </div>
+          <div class="voice-controls">
+            <button class="voice-record-btn">
+              <i class="fas fa-microphone"></i>
+              <span>Start Recording</span>
+            </button>
+            <button class="voice-stop-btn disabled">
+              <i class="fas fa-stop"></i>
+              <span>Stop</span>
+            </button>
+          </div>
+        </div>
+        <div class="voice-processing hidden">
+          <div class="processing-animation">
+            <div class="processing-spinner"></div>
+          </div>
+          <div class="processing-text">
+            <p>Processing your ideas...</p>
+            <p class="processing-subtext">Converting speech to nodes</p>
+          </div>
+        </div>
+        <div class="voice-results hidden">
+          <h4>Here's what I understood:</h4>
+          <div class="results-nodes">
+            <!-- Dynamic content will be added here -->
+          </div>
+          <div class="results-buttons">
+            <button class="results-add-all">Add All Nodes</button>
+            <button class="results-cancel">Cancel</button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(overlay);
+    
+    // Add event listeners
+    const closeBtn = overlay.querySelector('.voice-close-btn');
+    const recordBtn = overlay.querySelector('.voice-record-btn');
+    const stopBtn = overlay.querySelector('.voice-stop-btn');
+    const resultsAddAll = overlay.querySelector('.results-add-all');
+    const resultsCancel = overlay.querySelector('.results-cancel');
+    
+    closeBtn.addEventListener('click', hideVoiceRecordingOverlay);
+    recordBtn.addEventListener('click', startRecording);
+    stopBtn.addEventListener('click', stopRecording);
+    resultsAddAll.addEventListener('click', addAllNodes);
+    resultsCancel.addEventListener('click', cancelResults);
+    
+    return overlay;
+  }
+  
+  // Show voice recording overlay
+  function showVoiceRecordingOverlay() {
+    const overlay = document.querySelector('.voice-recording-overlay') || createVoiceRecordingOverlay();
+    overlay.classList.add('visible');
+    
+    // Reset UI state
+    overlay.querySelector('.voice-recording-content').classList.remove('hidden');
+    overlay.querySelector('.voice-processing').classList.add('hidden');
+    overlay.querySelector('.voice-results').classList.add('hidden');
+    
+    overlay.querySelector('.voice-record-btn').classList.remove('disabled');
+    overlay.querySelector('.voice-record-btn span').textContent = 'Start Recording';
+    overlay.querySelector('.voice-record-btn i').className = 'fas fa-microphone';
+    
+    overlay.querySelector('.voice-stop-btn').classList.add('disabled');
+    
+    // Reset timer
+    overlay.querySelector('.voice-time').textContent = '00:00';
+    recordingTime = 0;
+  }
+  
+  // Hide voice recording overlay
+  function hideVoiceRecordingOverlay() {
+    const overlay = document.querySelector('.voice-recording-overlay');
+    if (overlay) {
+      overlay.classList.remove('visible');
+      
+      // Stop recording if active
+      if (isRecording) {
+        stopRecording();
+      }
+      
+      // Stop animation
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+        animationFrame = null;
+      }
+    }
+  }
+  
+  // Start recording simulation
+  function startRecording() {
+    if (isRecording) return;
+    
+    const overlay = document.querySelector('.voice-recording-overlay');
+    const recordBtn = overlay.querySelector('.voice-record-btn');
+    const stopBtn = overlay.querySelector('.voice-stop-btn');
+    
+    // Update UI
+    recordBtn.classList.add('disabled');
+    recordBtn.querySelector('span').textContent = 'Recording...';
+    recordBtn.querySelector('i').className = 'fas fa-microphone-slash';
+    
+    stopBtn.classList.remove('disabled');
+    
+    isRecording = true;
+    recordingTime = 0;
+    
+    // Start timer
+    recordingTimer = setInterval(() => {
+      recordingTime++;
+      const minutes = Math.floor(recordingTime / 60);
+      const seconds = recordingTime % 60;
+      overlay.querySelector('.voice-time').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }, 1000);
+    
+    // Initialize audio visualization (simulated)
+    initAudioVisualization();
+  }
+  
+  // Stop recording simulation
+  function stopRecording() {
+    if (!isRecording) return;
+    
+    const overlay = document.querySelector('.voice-recording-overlay');
+    const recordBtn = overlay.querySelector('.voice-record-btn');
+    const stopBtn = overlay.querySelector('.voice-stop-btn');
+    
+    // Update UI
+    recordBtn.classList.remove('disabled');
+    recordBtn.querySelector('span').textContent = 'Start Recording';
+    recordBtn.querySelector('i').className = 'fas fa-microphone';
+    
+    stopBtn.classList.add('disabled');
+    
+    isRecording = false;
+    
+    // Stop timer
+    clearInterval(recordingTimer);
+    recordingTimer = null;
+    
+    // Stop visualization
+    if (animationFrame) {
+      cancelAnimationFrame(animationFrame);
+      animationFrame = null;
+    }
+    
+    // Show processing UI
+    overlay.querySelector('.voice-recording-content').classList.add('hidden');
+    overlay.querySelector('.voice-processing').classList.remove('hidden');
+    
+    // Simulate processing delay
+    setTimeout(() => {
+      // Hide the overlay while showing suggestions
+      hideVoiceRecordingOverlay();
+      
+      // Show preview nodes directly on the web
+      showNodeSuggestions();
+    }, 3000);
+  }
+  
+  // Initialize audio visualization (simulated)
+  function initAudioVisualization() {
+    const canvas = document.querySelector('.voice-waveform');
+    const canvasCtx = canvas.getContext('2d');
+    
+    // Create simulated audio context and analyzer
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 256;
+    
+    const bufferLength = analyser.frequencyBinCount;
+    dataArray = new Uint8Array(bufferLength);
+    
+    // Clear canvas
+    canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw function for visualization
+    function draw() {
+      animationFrame = requestAnimationFrame(draw);
+      
+      // Simulate audio data
+      for (let i = 0; i < dataArray.length; i++) {
+        // Random values with natural wave-like pattern
+        const time = Date.now() / 1000;
+        const value = 128 + 64 * Math.sin(time * 5 + i * 0.2) + Math.random() * 30;
+        dataArray[i] = Math.min(255, Math.max(0, value));
+      }
+      
+      // Clear canvas
+      canvasCtx.fillStyle = 'rgba(30, 30, 40, 0.2)';
+      canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw visualization
+      const barWidth = (canvas.width / bufferLength) * 2.5;
+      let x = 0;
+      
+      for (let i = 0; i < bufferLength; i++) {
+        const barHeight = dataArray[i] / 2;
+        
+        // Gradient for bars
+        const gradient = canvasCtx.createLinearGradient(0, canvas.height - barHeight, 0, canvas.height);
+        gradient.addColorStop(0, '#7c4dff');
+        gradient.addColorStop(1, '#2979ff');
+        
+        canvasCtx.fillStyle = gradient;
+        canvasCtx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+        
+        x += barWidth + 1;
+      }
+    }
+    
+    draw();
+  }
+  
+  // Show processing results
+  function showProcessingResults() {
+    const overlay = document.querySelector('.voice-recording-overlay');
+    
+    // Hide processing UI
+    overlay.querySelector('.voice-processing').classList.add('hidden');
+    
+    // Populate results with sample nodes
+    const resultsContainer = overlay.querySelector('.results-nodes');
+    resultsContainer.innerHTML = '';
+    
+    // Sample detected nodes (in a real implementation, these would come from the OpenAI API)
+    const sampleNodes = [
+      { type: 'motivator', title: 'Getting good grades', confidence: 0.92 },
+      { type: 'task', title: 'Finish history essay', confidence: 0.87, dueDate: '2023-12-10' },
+      { type: 'challenge', title: 'Understanding calculus concepts', confidence: 0.79 },
+      { type: 'idea', title: 'Connect history to modern politics', confidence: 0.85 }
+    ];
+    
+    sampleNodes.forEach(node => {
+      const nodeElement = document.createElement('div');
+      nodeElement.className = `result-node result-${node.type}`;
+      
+      // Format confidence as percentage
+      const confidencePercent = Math.round(node.confidence * 100);
+      
+      let nodeContent = `
+        <div class="result-node-icon"><i class="${getIconClass(node.type)}"></i></div>
+        <div class="result-node-content">
+          <div class="result-node-title">${node.title}</div>
+          <div class="result-node-type">${capitalize(node.type)}</div>
+          ${node.dueDate ? `<div class="result-node-due">Due: ${formatDate(node.dueDate)}</div>` : ''}
+        </div>
+        <div class="result-node-confidence" title="${confidencePercent}% confidence">
+          <div class="confidence-bar">
+            <div class="confidence-fill" style="width: ${confidencePercent}%"></div>
+          </div>
+        </div>
+        <div class="result-node-actions">
+          <button class="result-edit-btn" title="Edit"><i class="fas fa-edit"></i></button>
+          <button class="result-remove-btn" title="Remove"><i class="fas fa-times"></i></button>
+        </div>
+      `;
+      
+      nodeElement.innerHTML = nodeContent;
+      resultsContainer.appendChild(nodeElement);
+      
+      // Add event listeners
+      nodeElement.querySelector('.result-edit-btn').addEventListener('click', () => editResultNode(nodeElement));
+      nodeElement.querySelector('.result-remove-btn').addEventListener('click', () => removeResultNode(nodeElement));
+    });
+    
+    // Show results UI
+    overlay.querySelector('.voice-results').classList.remove('hidden');
+  }
+  
+  // Edit result node
+  function editResultNode(nodeElement) {
+    const titleElement = nodeElement.querySelector('.result-node-title');
+    const currentTitle = titleElement.textContent;
+    
+    // Create simple inline editor
+    const editor = document.createElement('input');
+    editor.type = 'text';
+    editor.className = 'result-node-editor';
+    editor.value = currentTitle;
+    
+    // Replace title with editor
+    titleElement.innerHTML = '';
+    titleElement.appendChild(editor);
+    
+    // Focus editor
+    editor.focus();
+    editor.select();
+    
+    // Save on enter or blur
+    function saveEdit() {
+      const newTitle = editor.value.trim();
+      if (newTitle) {
+        titleElement.textContent = newTitle;
+      } else {
+        titleElement.textContent = currentTitle;
+      }
+    }
+    
+    editor.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        saveEdit();
+      } else if (e.key === 'Escape') {
+        titleElement.textContent = currentTitle;
+      }
+    });
+    
+    editor.addEventListener('blur', saveEdit);
+  }
+  
+  // Remove result node
+  function removeResultNode(nodeElement) {
+    nodeElement.classList.add('removing');
+    setTimeout(() => {
+      nodeElement.remove();
+    }, 300);
+  }
+  
+  // Add all nodes from results
+  function addAllNodes() {
+    const overlay = document.querySelector('.voice-recording-overlay');
+    const resultNodes = overlay.querySelectorAll('.result-node:not(.removing)');
+    
+    // Show processing message
+    showMessage('Adding nodes from voice recording...');
+    
+    // Get view center
+    const center = getViewCenter();
+    
+    // Calculate positions in a circle around center
+    const radius = 200;
+    const angleStep = (2 * Math.PI) / resultNodes.length;
+    
+    // Add each node
+    resultNodes.forEach((resultNode, index) => {
+      const type = resultNode.className.split('result-')[1].split(' ')[0];
+      const title = resultNode.querySelector('.result-node-title').textContent;
+      
+      // Calculate position in a circle
+      const angle = angleStep * index;
+      const x = center.x + radius * Math.cos(angle);
+      const y = center.y + radius * Math.sin(angle);
+      
+      // Create the node
+      createNode(type, title, x, y);
+    });
+    
+    // Connect the nodes in sequence if multiple nodes
+    if (resultNodes.length > 1) {
+      for (let i = 0; i < resultNodes.length - 1; i++) {
+        const fromId = (nextNodeId - resultNodes.length + i).toString();
+        const toId = (nextNodeId - resultNodes.length + i + 1).toString();
+        
+        edges.push({
+          from: fromId,
+          to: toId
+        });
+      }
+      
+      drawEdges();
+    }
+    
+    // Hide overlay
+    hideVoiceRecordingOverlay();
+    
+    // Show success message
+    showMessage(`Added ${resultNodes.length} nodes from your recording!`);
+  }
+  
+  // Cancel results
+  function cancelResults() {
+    const overlay = document.querySelector('.voice-recording-overlay');
+    
+    // Reset to recording UI
+    overlay.querySelector('.voice-results').classList.add('hidden');
+    overlay.querySelector('.voice-recording-content').classList.remove('hidden');
+    
+    // Reset timer display
+    overlay.querySelector('.voice-time').textContent = '00:00';
+    recordingTime = 0;
+  }
+  
+  // Helper functions
+  function getIconClass(type) {
+    const iconClasses = {
+      'motivator': 'fas fa-star',
+      'task': 'fas fa-tasks',
+      'challenge': 'fas fa-mountain',
+      'idea': 'fas fa-lightbulb',
+      'class': 'fas fa-graduation-cap',
+      'assignment': 'fas fa-book',
+      'test': 'fas fa-clipboard-check',
+      'project': 'fas fa-project-diagram',
+      'essay': 'fas fa-file-alt',
+      'image': 'fas fa-image'
+    };
+    
+    return iconClasses[type] || 'fas fa-circle';
+  }
+  
+  function capitalize(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
+  
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+  }
+  
+  // Sample detected nodes (in a real implementation, these would come from the OpenAI API)
+  const sampleNodes = [
+    { type: 'motivator', title: 'Getting good grades', confidence: 0.92 },
+    { type: 'task', title: 'Finish history essay', confidence: 0.87, dueDate: '2023-12-10' },
+    { type: 'challenge', title: 'Understanding calculus concepts', confidence: 0.79 },
+    { type: 'idea', title: 'Connect history to modern politics', confidence: 0.85 }
+  ];
+  
+  // Show node suggestions directly on the web
+  function showNodeSuggestions() {
+    // Get view center
+    const center = getViewCenter();
+    const tentativeNodes = [];
+    
+    // Show global approval UI
+    const approvalBar = document.createElement('div');
+    approvalBar.className = 'node-suggestions-bar';
+    approvalBar.innerHTML = `
+      <div class="suggestions-info">
+        <i class="fas fa-lightbulb"></i>
+        <span>Voice suggestions ready! Review and approve nodes.</span>
+      </div>
+      <div class="suggestions-actions">
+        <button class="approve-all-btn"><i class="fas fa-check-double"></i> Approve All</button>
+        <button class="dismiss-all-btn"><i class="fas fa-times"></i> Dismiss All</button>
+      </div>
+    `;
+    document.body.appendChild(approvalBar);
+    
+    // Add event listeners for global actions
+    approvalBar.querySelector('.approve-all-btn').addEventListener('click', () => {
+      // Approve all tentative nodes
+      document.querySelectorAll('.node-tentative').forEach(node => {
+        approveTentativeNode(node);
+      });
+      approvalBar.remove();
+    });
+    
+    approvalBar.querySelector('.dismiss-all-btn').addEventListener('click', () => {
+      // Remove all tentative nodes
+      document.querySelectorAll('.node-tentative').forEach(node => {
+        node.remove();
+      });
+      approvalBar.remove();
+      showMessage('All suggestions dismissed');
+    });
+    
+    // Calculate positions in a smart arrangement
+    // In a real implementation, OpenAI would help position them intelligently
+    const radius = 200;
+    const angleStep = (2 * Math.PI) / sampleNodes.length;
+    
+    // Create tentative nodes
+    sampleNodes.forEach((nodeData, index) => {
+      // Calculate position in a circle
+      const angle = angleStep * index;
+      const x = center.x + radius * Math.cos(angle);
+      const y = center.y + radius * Math.sin(angle);
+      
+      // Create tentative node
+      const tentativeNode = createTentativeNode(nodeData.type, nodeData.title, x, y, nodeData.confidence, nodeData.dueDate);
+      tentativeNodes.push(tentativeNode);
+    });
+    
+    // Create tentative connections between nodes if multiple
+    if (tentativeNodes.length > 1) {
+      for (let i = 0; i < tentativeNodes.length - 1; i++) {
+        const fromId = tentativeNodes[i].dataset.id;
+        const toId = tentativeNodes[i + 1].dataset.id;
+        
+        // Add tentative edge
+        edges.push({
+          from: fromId,
+          to: toId,
+          tentative: true
+        });
+      }
+      
+      // Draw all edges with new tentative ones
+      drawEdges();
+    }
+    
+    // Show success message
+    showMessage(`${tentativeNodes.length} node suggestions added from your recording`);
+  }
+  
+  // Create a tentative node that needs approval
+  function createTentativeNode(type, title, left, top, confidence, dueDate = null) {
+    // Create node but mark as tentative
+    const node = document.createElement('div');
+    node.className = `node node-${type} node-tentative`;
+    node.dataset.id = nextNodeId++;
+    node.dataset.type = type;
+    node.dataset.confidence = confidence;
+    
+    // Store original position (in world coordinates)
+    node.dataset.originalLeft = left;
+    node.dataset.originalTop = top;
+    
+    // Apply transformation for display
+    const displayLeft = transformX(left);
+    const displayTop = transformY(top);
+    
+    // Position the node
+    node.style.left = `${displayLeft}px`;
+    node.style.top = `${displayTop}px`;
+    
+    // Add node title
+    const titleEl = document.createElement('div');
+    titleEl.className = 'node-title';
+    titleEl.textContent = title;
+    
+    // Add node icon based on type
+    const iconEl = document.createElement('div');
+    iconEl.className = 'node-icon';
+    
+    // Add icon class based on type
+    iconEl.innerHTML = `<i class="${getIconClass(type)}"></i>`;
+    
+    // Add approval UI
+    const approvalUI = document.createElement('div');
+    approvalUI.className = 'node-approval';
+    
+    // Format confidence as percentage
+    const confidencePercent = Math.round(confidence * 100);
+    
+    approvalUI.innerHTML = `
+      <div class="node-confidence">
+        <div class="confidence-bar">
+          <div class="confidence-fill" style="width: ${confidencePercent}%"></div>
+        </div>
+        <span>${confidencePercent}%</span>
+      </div>
+      <div class="approval-actions">
+        <button class="approve-btn" title="Approve"><i class="fas fa-check"></i></button>
+        <button class="edit-btn" title="Edit"><i class="fas fa-edit"></i></button>
+        <button class="dismiss-btn" title="Dismiss"><i class="fas fa-times"></i></button>
+      </div>
+    `;
+    
+    // Add due date if provided
+    if (dueDate) {
+      node.dataset.dueDate = dueDate;
+      const dueDateElement = document.createElement('div');
+      dueDateElement.className = 'node-due-date';
+      dueDateElement.textContent = `Due: ${formatDate(dueDate)}`;
+      node.appendChild(dueDateElement);
+    }
+    
+    // Add elements to node
+    node.appendChild(iconEl);
+    node.appendChild(titleEl);
+    node.appendChild(approvalUI);
+    
+    // Add event listeners for approval actions
+    node.querySelector('.approve-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      approveTentativeNode(node);
+    });
+    
+    node.querySelector('.edit-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      editTentativeNode(node);
+    });
+    
+    node.querySelector('.dismiss-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      dismissTentativeNode(node);
+    });
+    
+    // Add node to the DOM
+    nodesContainer.appendChild(node);
+    
+    // Don't add to nodes array yet since it's tentative
+    
+    updateMiniMap();
+    
+    return node;
+  }
+  
+  // Approve a tentative node, making it permanent
+  function approveTentativeNode(node) {
+    // Remove approval UI
+    const approvalUI = node.querySelector('.node-approval');
+    approvalUI.remove();
+    
+    // Remove tentative class
+    node.classList.remove('node-tentative');
+    
+    // Make node draggable
+    makeDraggable(node);
+    
+    // Add to nodes array
+    nodes.push({
+      id: node.dataset.id,
+      element: node,
+      type: node.dataset.type,
+      title: node.querySelector('.node-title').textContent
+    });
+    
+    // Update any tentative edges that connect to this node
+    edges.forEach(edge => {
+      if (edge.from === node.dataset.id || edge.to === node.dataset.id) {
+        edge.tentative = false;
+      }
+    });
+    
+    drawEdges();
+    showMessage('Node approved');
+    
+    // Schedule autosave
+    scheduleAutosave();
+    
+    // Check if all nodes are approved
+    const tentativeNodes = document.querySelectorAll('.node-tentative');
+    if (tentativeNodes.length === 0) {
+      // Remove the suggestions bar if all nodes are approved
+      const suggestionsBar = document.querySelector('.node-suggestions-bar');
+      if (suggestionsBar) {
+        suggestionsBar.remove();
+      }
+    }
+  }
+  
+  // Edit a tentative node title
+  function editTentativeNode(node) {
+    const titleEl = node.querySelector('.node-title');
+    const currentTitle = titleEl.textContent;
+    
+    // Create edit field
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'node-edit-input';
+    input.value = currentTitle;
+    
+    // Replace title with input
+    titleEl.innerHTML = '';
+    titleEl.appendChild(input);
+    
+    // Focus the input
+    input.focus();
+    input.select();
+    
+    // Handle input completion
+    function saveEdit() {
+      const newTitle = input.value.trim();
+      if (newTitle) {
+        titleEl.textContent = newTitle;
+      } else {
+        titleEl.textContent = currentTitle;
+      }
+    }
+    
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        saveEdit();
+      } else if (e.key === 'Escape') {
+        titleEl.textContent = currentTitle;
+      }
+    });
+    
+    input.addEventListener('blur', saveEdit);
+  }
+  
+  // Dismiss a tentative node
+  function dismissTentativeNode(node) {
+    const nodeId = node.dataset.id;
+    
+    // Remove any tentative edges connected to this node
+    edges = edges.filter(edge => {
+      return !(edge.from === nodeId || edge.to === nodeId);
+    });
+    
+    // Remove node from DOM
+    node.classList.add('removing');
+    setTimeout(() => {
+      node.remove();
+      
+      // Check if all nodes are dismissed
+      const tentativeNodes = document.querySelectorAll('.node-tentative');
+      if (tentativeNodes.length === 0) {
+        // Remove the suggestions bar if all nodes are dismissed
+        const suggestionsBar = document.querySelector('.node-suggestions-bar');
+        if (suggestionsBar) {
+          suggestionsBar.remove();
+        }
+      }
+    }, 300);
+    
+    drawEdges();
+  }
+  
+  // Draw edges between nodes
+  function drawEdges() {
+    // Make sure canvas covers the entire viewport
+    treeCanvas.width = window.innerWidth;
+    treeCanvas.height = window.innerHeight;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, treeCanvas.width, treeCanvas.height);
+    
+    // Draw each edge
+    edges.forEach(edge => {
+      const fromNode = document.querySelector(`[data-id="${edge.from}"]`);
+      const toNode = document.querySelector(`[data-id="${edge.to}"]`);
+      
+      if (fromNode && toNode) {
+        // Get the visual position of each node
+        const fromRect = fromNode.getBoundingClientRect();
+        const toRect = toNode.getBoundingClientRect();
+        
+        // Calculate center points
+        const fromCenter = {
+          x: fromRect.left + (fromRect.width / 2),
+          y: fromRect.top + (fromRect.height / 2)
+        };
+        
+        const toCenter = {
+          x: toRect.left + (toRect.width / 2),
+          y: toRect.top + (toRect.height / 2)
+        };
+        
+        // Get scroll position for adjustments
+        const scrollY = window.scrollY || window.pageYOffset;
+        
+        // Apply enhanced vertical adjustment for edges (1.5x the normal rate)
+        const verticalPanAmount = Math.abs(offsetY) * 0; // Increased from 0.05 to 0.075 (1.5x)
+        const adjustmentY = verticalPanAmount * (offsetY < 0 ? -1 : 1);
+        
+        // Draw line from center to center with enhanced adjustment
+        ctx.beginPath();
+        ctx.moveTo(fromCenter.x, fromCenter.y);
+        ctx.lineTo(toCenter.x, toCenter.y + adjustmentY);
+        
+        // Get node types for line color
+        const fromType = fromNode.dataset.type;
+        const toType = toNode.dataset.type;
+        
+        // Set line style based on node types and if it's tentative
+        const gradient = ctx.createLinearGradient(
+          fromCenter.x, fromCenter.y, 
+          toCenter.x, toCenter.y + adjustmentY
+        );
+        
+        const fromColor = getColorForType(fromType);
+        const toColor = getColorForType(toType);
+        
+        gradient.addColorStop(0, fromColor);
+        gradient.addColorStop(1, toColor);
+        
+        ctx.strokeStyle = gradient;
+        ctx.lineWidth = 2;
+        
+        // If it's a tentative edge, use dashed line
+        if (edge.tentative) {
+          ctx.setLineDash([5, 3]);
+          ctx.globalAlpha = 0.6;
+        } else {
+          ctx.setLineDash([]);
+          ctx.globalAlpha = 1.0;
+        }
+        
+        ctx.stroke();
+        ctx.globalAlpha = 1.0;
+        ctx.setLineDash([]);
+      }
+    });
+  }
 });

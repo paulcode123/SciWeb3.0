@@ -1,0 +1,418 @@
+{% extends 'base.html' %}
+
+{% block title %}Motivation Stream - SciWeb 3.0{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/motivation_stream.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="motivation-hero">
+    <div class="hero-content">
+        <h1>Motivation Stream</h1>
+        <p>Connect, inspire, and grow with the SciWeb community</p>
+        <div class="hero-actions">
+            <button class="btn-primary" id="create-post-btn"><i class="fas fa-plus"></i> Add Your Inspiration</button>
+            <div class="filter-dropdown">
+                <button class="btn-secondary"><i class="fas fa-filter"></i> Filter</button>
+                <div class="dropdown-content">
+                    <a href="#" data-filter="all" class="active">All Posts</a>
+                    <a href="#" data-filter="popular">Most Popular</a>
+                    <a href="#" data-filter="recent">Most Recent</a>
+                    <a href="#" data-filter="academic">Academic Goals</a>
+                    <a href="#" data-filter="personal">Personal Growth</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Main Content Area -->
+<div class="motivation-container">
+    <!-- Left Sidebar -->
+    <aside class="motivation-sidebar">
+        <div class="sidebar-section">
+            <h3><i class="fas fa-fire"></i> Trending Goals</h3>
+            <ul class="trending-topics">
+                <li><a href="#">#AcademicExcellence</a></li>
+                <li><a href="#">#WorkLifeBalance</a></li>
+                <li><a href="#">#GradSchoolPrep</a></li>
+                <li><a href="#">#SelfCareRoutine</a></li>
+                <li><a href="#">#ResearchJourney</a></li>
+            </ul>
+        </div>
+        
+        <div class="sidebar-section">
+            <h3><i class="fas fa-users"></i> Communities</h3>
+            <ul class="community-list">
+                <li><a href="#">Pre-Med Students</a></li>
+                <li><a href="#">Computer Science</a></li>
+                <li><a href="#">PhD Candidates</a></li>
+                <li><a href="#">First-Year Students</a></li>
+                <li><a href="#">Research Assistants</a></li>
+            </ul>
+        </div>
+        
+        <div class="sidebar-section">
+            <h3><i class="fas fa-lightbulb"></i> Daily Inspiration</h3>
+            <div class="daily-quote">
+                "The only way to do great work is to love what you do."
+                <span class="quote-author">— Steve Jobs</span>
+            </div>
+            <button class="btn-text refresh-quote">New Quote</button>
+        </div>
+    </aside>
+
+    <!-- Main Stream Content -->
+    <main class="motivation-stream">
+        <!-- Post Creation Area -->
+        <div class="create-post" id="create-post-area" style="display: none;">
+            <h2>Share Your Inspiration</h2>
+            <form class="post-form">
+                <div class="form-group">
+                    <label for="post-title">Title</label>
+                    <input type="text" id="post-title" placeholder="Give your post a catchy title">
+                </div>
+                <div class="form-group">
+                    <label for="post-content">Content</label>
+                    <textarea id="post-content" placeholder="Share your thoughts, goals, or a motivational message..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Add Media</label>
+                    <div class="media-options">
+                        <button type="button" class="media-btn"><i class="fas fa-image"></i> Photo</button>
+                        <button type="button" class="media-btn"><i class="fas fa-video"></i> Video</button>
+                        <button type="button" class="media-btn"><i class="fas fa-link"></i> Link</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="post-tags">Tags</label>
+                    <input type="text" id="post-tags" placeholder="Add tags separated by commas (e.g., academics, motivation)">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="cancel-post">Cancel</button>
+                    <button type="submit" class="btn-primary">Post</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Motivation Posts -->
+        <div class="post-stream">
+            <!-- Post 1 -->
+            <div class="motivation-post" data-category="academic">
+                <div class="post-header">
+                    <div class="post-author">
+                        <img src="{{ url_for('static', filename='images/profile1.jpg') }}" alt="Emily Chen" class="author-avatar">
+                        <div class="author-info">
+                            <h3 class="author-name">Emily Chen</h3>
+                            <span class="post-time">2 hours ago</span>
+                        </div>
+                    </div>
+                    <div class="post-category">
+                        <span class="category-tag academic">Academic</span>
+                    </div>
+                </div>
+                <div class="post-content">
+                    <h2 class="post-title">My Journey to Medical School</h2>
+                    <p class="post-text">After 3 years of preparation, countless study hours, and a few setbacks along the way, I'm proud to announce I've been accepted to my dream medical school! Here's my vision board that kept me motivated through the tough times.</p>
+                    
+                    <div class="vision-board-preview">
+                        <div class="vision-item">
+                            <img src="{{ url_for('static', filename='images/med-school.jpg') }}" alt="Medical School">
+                        </div>
+                        <div class="vision-item">
+                            <img src="{{ url_for('static', filename='images/study-session.jpg') }}" alt="Study Session">
+                        </div>
+                        <div class="vision-item text-item">
+                            <p>"The patient's needs come first."</p>
+                        </div>
+                        <div class="vision-item">
+                            <img src="{{ url_for('static', filename='images/doctor.jpg') }}" alt="Doctor">
+                        </div>
+                    </div>
+                    
+                    <div class="milestone-preview">
+                        <h4>Key Milestones</h4>
+                        <ul class="milestone-list">
+                            <li><i class="fas fa-check-circle"></i> MCAT Score: 518</li>
+                            <li><i class="fas fa-check-circle"></i> Volunteer Hours: 450+</li>
+                            <li><i class="fas fa-check-circle"></i> Research Publication: 2</li>
+                            <li><i class="fas fa-check-circle"></i> Medical School Acceptance</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="post-actions">
+                    <button class="action-btn like-btn"><i class="far fa-heart"></i> <span>243</span></button>
+                    <button class="action-btn comment-btn"><i class="far fa-comment"></i> <span>42</span></button>
+                    <button class="action-btn share-btn"><i class="far fa-share-square"></i> <span>18</span></button>
+                    <button class="action-btn save-btn"><i class="far fa-bookmark"></i></button>
+                </div>
+                <div class="post-comments">
+                    <div class="comment">
+                        <img src="{{ url_for('static', filename='images/profile2.jpg') }}" alt="User" class="comment-avatar">
+                        <div class="comment-content">
+                            <h4>Michael Lee <span class="comment-time">45 minutes ago</span></h4>
+                            <p>This is so inspiring! I'm in my second year of pre-med and sometimes wonder if it's all worth it. Your journey gives me hope!</p>
+                            <div class="comment-actions">
+                                <button class="comment-action-btn"><i class="far fa-heart"></i> <span>24</span></button>
+                                <button class="comment-action-btn reply-btn">Reply</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="comment">
+                        <img src="{{ url_for('static', filename='images/profile3.jpg') }}" alt="User" class="comment-avatar">
+                        <div class="comment-content">
+                            <h4>Sarah Johnson <span class="comment-time">20 minutes ago</span></h4>
+                            <p>Congratulations! Would you mind sharing some tips for MCAT preparation? Your score is amazing!</p>
+                            <div class="comment-actions">
+                                <button class="comment-action-btn"><i class="far fa-heart"></i> <span>12</span></button>
+                                <button class="comment-action-btn reply-btn">Reply</button>
+                            </div>
+                        </div>
+                    </div>
+                    <form class="add-comment-form">
+                        <img src="{{ url_for('static', filename='images/default-avatar.jpg') }}" alt="Your Avatar" class="comment-avatar">
+                        <input type="text" placeholder="Add a supportive comment...">
+                        <button type="submit"><i class="fas fa-paper-plane"></i></button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Post 2 -->
+            <div class="motivation-post" data-category="personal">
+                <div class="post-header">
+                    <div class="post-author">
+                        <img src="{{ url_for('static', filename='images/profile4.jpg') }}" alt="James Wilson" class="author-avatar">
+                        <div class="author-info">
+                            <h3 class="author-name">James Wilson</h3>
+                            <span class="post-time">Yesterday</span>
+                        </div>
+                    </div>
+                    <div class="post-category">
+                        <span class="category-tag personal">Personal Growth</span>
+                    </div>
+                </div>
+                <div class="post-content">
+                    <h2 class="post-title">Learning to Code: My 100 Days Challenge</h2>
+                    <p class="post-text">I decided to learn programming after realizing how much it could help my research in cognitive psychology. Today marks day 60 of my 100-day coding challenge! Here's a glimpse of my progress.</p>
+                    
+                    <div class="video-container">
+                        <video controls poster="{{ url_for('static', filename='images/code-thumbnail.jpg') }}">
+                            <source src="{{ url_for('static', filename='videos/coding-progress.mp4') }}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    
+                    <div class="affirmations-preview">
+                        <h4>My Daily Affirmations</h4>
+                        <div class="affirmation-cards">
+                            <div class="affirmation-card">I embrace the challenges of learning to code</div>
+                            <div class="affirmation-card">Each error is a learning opportunity</div>
+                            <div class="affirmation-card">Persistence beats talent when talent doesn't persist</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="post-actions">
+                    <button class="action-btn like-btn"><i class="far fa-heart"></i> <span>156</span></button>
+                    <button class="action-btn comment-btn"><i class="far fa-comment"></i> <span>28</span></button>
+                    <button class="action-btn share-btn"><i class="far fa-share-square"></i> <span>9</span></button>
+                    <button class="action-btn save-btn"><i class="far fa-bookmark"></i></button>
+                </div>
+                <div class="post-comments">
+                    <div class="comment">
+                        <img src="{{ url_for('static', filename='images/profile5.jpg') }}" alt="User" class="comment-avatar">
+                        <div class="comment-content">
+                            <h4>Alex Thompson <span class="comment-time">12 hours ago</span></h4>
+                            <p>What resources have you been using? I'm thinking of starting a similar journey myself!</p>
+                            <div class="comment-actions">
+                                <button class="comment-action-btn"><i class="far fa-heart"></i> <span>18</span></button>
+                                <button class="comment-action-btn reply-btn">Reply</button>
+                            </div>
+                        </div>
+                    </div>
+                    <form class="add-comment-form">
+                        <img src="{{ url_for('static', filename='images/default-avatar.jpg') }}" alt="Your Avatar" class="comment-avatar">
+                        <input type="text" placeholder="Add a supportive comment...">
+                        <button type="submit"><i class="fas fa-paper-plane"></i></button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Post 3 -->
+            <div class="motivation-post" data-category="academic">
+                <div class="post-header">
+                    <div class="post-author">
+                        <img src="{{ url_for('static', filename='images/profile6.jpg') }}" alt="Madison Taylor" class="author-avatar">
+                        <div class="author-info">
+                            <h3 class="author-name">Madison Taylor</h3>
+                            <span class="post-time">3 days ago</span>
+                        </div>
+                    </div>
+                    <div class="post-category">
+                        <span class="category-tag academic">Academic</span>
+                    </div>
+                </div>
+                <div class="post-content">
+                    <h2 class="post-title">From Thesis Anxiety to Published Paper</h2>
+                    <p class="post-text">My PhD journey has been anything but smooth. After battling with imposter syndrome and anxiety, I finally published my first peer-reviewed paper! Here's how I visualized my success.</p>
+                    
+                    <div class="vision-board-preview">
+                        <div class="vision-item">
+                            <img src="{{ url_for('static', filename='images/research-lab.jpg') }}" alt="Research Lab">
+                        </div>
+                        <div class="vision-item text-item">
+                            <p>"Science is the poetry of reality."</p>
+                        </div>
+                        <div class="vision-item">
+                            <img src="{{ url_for('static', filename='images/published-paper.jpg') }}" alt="Published Paper">
+                        </div>
+                        <div class="vision-item">
+                            <img src="{{ url_for('static', filename='images/graduation.jpg') }}" alt="Graduation">
+                        </div>
+                    </div>
+                    
+                    <div class="support-network">
+                        <h4>My Support Network</h4>
+                        <div class="supporter-preview">
+                            <div class="supporter">
+                                <div class="supporter-avatar">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="supporter-details">
+                                    <h5>Dr. Rebecca Williams</h5>
+                                    <p>Mentor & Advisor</p>
+                                </div>
+                            </div>
+                            <div class="supporter">
+                                <div class="supporter-avatar">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="supporter-details">
+                                    <h5>Graduate Writing Center</h5>
+                                    <p>Writing Support</p>
+                                </div>
+                            </div>
+                            <div class="supporter">
+                                <div class="supporter-avatar">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="supporter-details">
+                                    <h5>PhD Support Group</h5>
+                                    <p>Peer Motivation</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="post-actions">
+                    <button class="action-btn like-btn"><i class="far fa-heart"></i> <span>324</span></button>
+                    <button class="action-btn comment-btn"><i class="far fa-comment"></i> <span>67</span></button>
+                    <button class="action-btn share-btn"><i class="far fa-share-square"></i> <span>32</span></button>
+                    <button class="action-btn save-btn"><i class="far fa-bookmark"></i></button>
+                </div>
+                <div class="post-comments">
+                    <div class="comment">
+                        <img src="{{ url_for('static', filename='images/profile7.jpg') }}" alt="User" class="comment-avatar">
+                        <div class="comment-content">
+                            <h4>David Park <span class="comment-time">2 days ago</span></h4>
+                            <p>This resonates so much with me. I'm in my second year of PhD and the imposter syndrome is hitting hard. Would love to hear more about how you overcame it.</p>
+                            <div class="comment-actions">
+                                <button class="comment-action-btn"><i class="far fa-heart"></i> <span>42</span></button>
+                                <button class="comment-action-btn reply-btn">Reply</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="comment">
+                        <img src="{{ url_for('static', filename='images/profile8.jpg') }}" alt="User" class="comment-avatar">
+                        <div class="comment-content">
+                            <h4>Olivia Martinez <span class="comment-time">1 day ago</span></h4>
+                            <p>Congratulations on your publication! Would you mind sharing a link to your paper?</p>
+                            <div class="comment-actions">
+                                <button class="comment-action-btn"><i class="far fa-heart"></i> <span>15</span></button>
+                                <button class="comment-action-btn reply-btn">Reply</button>
+                            </div>
+                        </div>
+                    </div>
+                    <form class="add-comment-form">
+                        <img src="{{ url_for('static', filename='images/default-avatar.jpg') }}" alt="Your Avatar" class="comment-avatar">
+                        <input type="text" placeholder="Add a supportive comment...">
+                        <button type="submit"><i class="fas fa-paper-plane"></i></button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Load More Button -->
+            <button class="load-more-btn">Load More <i class="fas fa-sync"></i></button>
+        </div>
+    </main>
+    
+    <!-- Right Sidebar - Suggested Connections -->
+    <aside class="connections-sidebar">
+        <div class="sidebar-section">
+            <h3><i class="fas fa-user-plus"></i> Suggested Connections</h3>
+            <div class="connection-cards">
+                <div class="connection-card">
+                    <img src="{{ url_for('static', filename='images/profile9.jpg') }}" alt="User" class="connection-avatar">
+                    <div class="connection-info">
+                        <h4>Ryan Thompson</h4>
+                        <p>Computer Science, Machine Learning</p>
+                        <button class="btn-secondary connect-btn"><i class="fas fa-plus"></i> Connect</button>
+                    </div>
+                </div>
+                <div class="connection-card">
+                    <img src="{{ url_for('static', filename='images/profile10.jpg') }}" alt="User" class="connection-avatar">
+                    <div class="connection-info">
+                        <h4>Aisha Patel</h4>
+                        <p>Biology, Pre-Med Track</p>
+                        <button class="btn-secondary connect-btn"><i class="fas fa-plus"></i> Connect</button>
+                    </div>
+                </div>
+                <div class="connection-card">
+                    <img src="{{ url_for('static', filename='images/profile11.jpg') }}" alt="User" class="connection-avatar">
+                    <div class="connection-info">
+                        <h4>Marcus Johnson</h4>
+                        <p>Psychology, Research Assistant</p>
+                        <button class="btn-secondary connect-btn"><i class="fas fa-plus"></i> Connect</button>
+                    </div>
+                </div>
+            </div>
+            <button class="view-all-btn">View All Suggestions</button>
+        </div>
+        
+        <div class="sidebar-section">
+            <h3><i class="fas fa-calendar-alt"></i> Upcoming Events</h3>
+            <div class="event-cards">
+                <div class="event-card">
+                    <div class="event-date">
+                        <span class="event-month">May</span>
+                        <span class="event-day">15</span>
+                    </div>
+                    <div class="event-details">
+                        <h4>Goal-Setting Workshop</h4>
+                        <p><i class="fas fa-clock"></i> 3:00 PM - 5:00 PM</p>
+                        <p><i class="fas fa-map-marker-alt"></i> Virtual</p>
+                        <button class="btn-text">RSVP</button>
+                    </div>
+                </div>
+                <div class="event-card">
+                    <div class="event-date">
+                        <span class="event-month">May</span>
+                        <span class="event-day">22</span>
+                    </div>
+                    <div class="event-details">
+                        <h4>Motivation Masterclass</h4>
+                        <p><i class="fas fa-clock"></i> 2:00 PM - 4:00 PM</p>
+                        <p><i class="fas fa-map-marker-alt"></i> Virtual</p>
+                        <button class="btn-text">RSVP</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/motivation_stream.js') }}"></script>
+{% endblock %} 
