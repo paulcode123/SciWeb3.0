@@ -15,7 +15,7 @@ def home():
 
 @app.route('/tree')
 def tree():
-    return render_template('tree.html')
+    return render_template('tree-modular.html')
 
 @app.route('/counselor')
 def counselor():
@@ -639,4 +639,4 @@ def motivation_stream():
     return render_template('motivation_stream.html')
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    app.run(debug=True, host='localhost', port=8080)

@@ -11,6 +11,9 @@
   --node-essay: linear-gradient(135deg, #F1C40F, #F9E79F);
   --node-image: linear-gradient(135deg, #3498DB, #AED6F1);
   --node-idea: linear-gradient(135deg, #00bcd4, #80deea); /* Cyan gradient for idea */
+  --node-keyidea: linear-gradient(135deg, #9c27b0, #ce93d8); /* Purple gradient for key idea */
+  --node-question: linear-gradient(135deg, #ff5722, #ffab91); /* Orange gradient for question */
+  --node-problemtype: linear-gradient(135deg, #009688, #80cbc4); /* Teal gradient for problem type */
   
   /* Node Shadows */
   --node-shadow-light: 0 10px 20px rgba(0, 0, 0, 0.1);
@@ -3095,4 +3098,182 @@
     flex: 1;
     justify-content: center;
   }
+}
+
+/* Learning Menu (similar to school menu) */
+.learning-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.btn-learning {
+  background-color: #9c27b0; /* Purple for learning */
+}
+
+.learning-menu::after {
+  content: '';
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  margin-left: -8px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid rgba(255, 255, 255, 0.95);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.learning-submenu {
+  position: absolute;
+  top: 48px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s;
+}
+
+.dark-mode .learning-submenu {
+  background: rgba(30, 30, 35, 0.95);
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.5);
+}
+
+.learning-menu:hover .learning-submenu {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: all;
+}
+
+.learning-menu:hover::after {
+  opacity: 1;
+}
+
+/* New node types */
+.node-keyidea {
+  background: var(--node-keyidea);
+}
+
+.node-question {
+  background: var(--node-question);
+}
+
+.node-problemtype {
+  background: var(--node-problemtype);
+}
+
+/* Node icons for the new types */
+.node-keyidea .node-icon {
+  color: #9c27b0;
+}
+
+.node-question .node-icon {
+  color: #ff5722;
+}
+
+.node-problemtype .node-icon {
+  color: #009688;
+}
+
+/* Button styles for the new node types */
+.btn-key-idea {
+  background-color: #9c27b0;
+}
+
+.btn-question {
+  background-color: #ff5722;
+}
+
+.btn-problem-type {
+  background-color: #009688;
+}
+
+/* Node hover panel special features for learning nodes */
+.node-keyidea .learn-more-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #9c27b0, #ce93d8);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 10px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.node-keyidea .learn-more-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+}
+
+.node-keyidea .ask-question-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #673ab7, #9575cd);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 10px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.node-keyidea .ask-question-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+}
+
+.node-question .recontextualize-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ff5722, #ffab91);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 10px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.node-question .recontextualize-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+}
+
+.node-problemtype .practice-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #009688, #80cbc4);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 10px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.node-problemtype .practice-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
 } 

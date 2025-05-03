@@ -47,6 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Store user data if needed
                     if (data.user) {
                         localStorage.setItem('userData', JSON.stringify(data.user));
+                        localStorage.setItem('userId', data.user.id);
                     }
                     
                     // Redirect to home page or dashboard

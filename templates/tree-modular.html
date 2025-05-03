@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}SciWeb - Tree{% endblock %}
+{% block title %}SciWeb - Tree (Modular Version){% endblock %}
 
 {% block head %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tree.css') }}">
@@ -102,6 +102,22 @@
                     </button>
                 </div>
             </div>
+            <div class="learning-menu">
+                <button class="tool-button btn-learning" data-tooltip="Learning Items">
+                    <i class="fas fa-brain"></i>
+                </button>
+                <div class="learning-submenu">
+                    <button class="submenu-button btn-key-idea" data-type="keyidea" data-tooltip="Key Idea">
+                        <i class="fas fa-atom"></i>
+                    </button>
+                    <button class="submenu-button btn-question" data-type="question" data-tooltip="Question">
+                        <i class="fas fa-question-circle"></i>
+                    </button>
+                    <button class="submenu-button btn-problem-type" data-type="problemtype" data-tooltip="Problem Type">
+                        <i class="fas fa-puzzle-piece"></i>
+                    </button>
+                </div>
+            </div>
             <button class="tool-button btn-image" data-tooltip="Add Image Node">
                 <i class="fas fa-image"></i>
             </button>
@@ -125,13 +141,10 @@
                 </div>
             </form>
         </div>
-        <!-- Mini-Map for Navigation -->
+        <!-- Voice Recording Button -->
         <button class="tool-button btn-voice-record" data-tooltip="Add nodes with voice">
             <i class="fas fa-microphone"></i>
         </button>
-        <div class="mini-map">
-            <div class="mini-map-viewport"></div>
-        </div>
         <!-- Zoom Controls -->
         <div class="zoom-controls">
             <button class="zoom-in"><i class="fas fa-plus"></i></button>
@@ -163,5 +176,6 @@
 {% endblock %}
 
 {% block scripts %}
-    <script src="{{ url_for('static', filename='js/tree.js') }}"></script>
+    <!-- Use the modular version of the script with ES modules -->
+    <script type="module" src="{{ url_for('static', filename='js/tree-modular.js') }}"></script>
 {% endblock %} 
