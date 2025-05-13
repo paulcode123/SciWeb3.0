@@ -14,6 +14,7 @@
   --node-keyidea: linear-gradient(135deg, #9c27b0, #ce93d8); /* Purple gradient for key idea */
   --node-question: linear-gradient(135deg, #ff5722, #ffab91); /* Orange gradient for question */
   --node-problemtype: linear-gradient(135deg, #009688, #80cbc4); /* Teal gradient for problem type */
+  --node-nhscredit: linear-gradient(135deg, #FFD700, #FFF176); /* Bright yellow gradient for NHS credit */
   
   /* Node Shadows */
   --node-shadow-light: 0 10px 20px rgba(0, 0, 0, 0.1);
@@ -3169,6 +3170,40 @@
 
 .node-problemtype {
   background: var(--node-problemtype);
+}
+
+.node-nhscredit {
+  background: var(--node-nhscredit);
+  position: relative;
+  overflow: hidden;
+}
+
+.node-nhscredit::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 20px 20px 0;
+  border-color: transparent rgba(255, 255, 255, 0.3) transparent transparent;
+  transition: all 0.3s ease;
+}
+
+.node-nhscredit:hover::after {
+  border-width: 0 30px 30px 0;
+  border-color: transparent rgba(255, 255, 255, 0.5) transparent transparent;
+}
+
+.node-nhscredit:hover {
+  transform: scale(1.05);
+  box-shadow: 0 15px 30px rgba(46, 204, 113, 0.3);
+  z-index: 10;
+}
+
+.dark-mode .node-nhscredit:hover {
+  box-shadow: 0 15px 30px rgba(46, 204, 113, 0.4);
 }
 
 /* Node icons for the new types */

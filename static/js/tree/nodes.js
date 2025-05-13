@@ -14,7 +14,7 @@ export let selectedNode = null;
 export let draggedNode = null;
 export let isDragging = false;
 export let isConnecting = false;
-export const nodeTypes = ['motivator', 'task', 'challenge', 'idea', 'class', 'assignment', 'test', 'project', 'essay', 'image', 'keyidea', 'question', 'problemtype'];
+export const nodeTypes = ['motivator', 'task', 'challenge', 'idea', 'class', 'assignment', 'test', 'project', 'essay', 'image', 'keyidea', 'question', 'problemtype', 'nhscredit'];
 
 // Function to update nextNodeId 
 export function setNextNodeId(value) {
@@ -106,6 +106,12 @@ export function setupNodeButtons() {
       elements.uploadForm.style.display = 'block';
       elements.uploadOverlay.style.display = 'block';
     }
+  });
+
+  // Add NHS credit tracker button
+  document.querySelector('.btn-nhscredit')?.addEventListener('click', function() {
+    const center = PanZoom.getViewCenter();
+    createNode('nhscredit', 'NHS credit tracker', center.x, center.y);
   });
 }
 
@@ -346,6 +352,9 @@ function makeDraggable(node) {
           break;
         case 'project':
           window.location.href = `/collab/${node.dataset.id}`;
+          break;
+        case 'nhscredit':
+          window.location.href = '/nhs';
           break;
       }
     }
@@ -744,6 +753,13 @@ function setupNodeHoverPanel(node, nodeObject) {
       infoSection.innerHTML = `
         <h4>Motivator</h4>
         <p>A higher-level goal, value, or purpose that drives your actions and decisions. Connect this to tasks, challenges, and ideas to see how they align with your core motivations.</p>
+        <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
+      `;
+      break;
+    case 'nhscredit':
+      infoSection.innerHTML = `
+        <h4>NHS Credit Tracker</h4>
+        <p>Track your National Honor Society service hours and credits. Use this node to monitor your progress towards NHS requirements.</p>
         <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
       `;
       break;

@@ -15,7 +15,8 @@ export function getColorForType(type) {
     'idea': '#00bcd4',
     'keyidea': '#9c27b0',
     'question': '#ff5722',
-    'problemtype': '#009688'
+    'problemtype': '#009688',
+    'nhscredit': '#FFD700'
   };
   
   return colors[type] || '#7f8c8d';
@@ -36,7 +37,8 @@ export function getIconClass(type) {
     'image': 'fas fa-image',
     'keyidea': 'fas fa-atom',
     'question': 'fas fa-question-circle',
-    'problemtype': 'fas fa-puzzle-piece'
+    'problemtype': 'fas fa-puzzle-piece',
+    'nhscredit': 'fas fa-clock'
   };
   
   return iconClasses[type] || 'fas fa-circle';
