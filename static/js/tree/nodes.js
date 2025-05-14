@@ -14,7 +14,7 @@ export let selectedNode = null;
 export let draggedNode = null;
 export let isDragging = false;
 export let isConnecting = false;
-export const nodeTypes = ['motivator', 'task', 'challenge', 'idea', 'class', 'assignment', 'test', 'project', 'essay', 'image', 'keyidea', 'question', 'problemtype'];
+export const nodeTypes = ['motivator', 'task', 'challenge', 'idea', 'class', 'assignment', 'test', 'project', 'essay', 'image'];
 
 // Function to update nextNodeId 
 export function setNextNodeId(value) {
@@ -46,7 +46,7 @@ export function setupNodeButtons() {
   });
   
   // School submenu event listeners
-  document.querySelectorAll('.school-menu .submenu-button').forEach(item => {
+  document.querySelectorAll('.submenu-button').forEach(item => {
     item.addEventListener('click', function(e) {
       e.stopPropagation(); // Prevent bubbling to parent button
       const nodeType = this.dataset.type;
@@ -68,32 +68,6 @@ export function setupNodeButtons() {
           break;
         default:
           nodeTitle = 'School Item';
-      }
-      
-      createNode(nodeType, nodeTitle, center.x, center.y);
-    });
-  });
-  
-  // Learning submenu event listeners
-  document.querySelectorAll('.learning-menu .submenu-button').forEach(item => {
-    item.addEventListener('click', function(e) {
-      e.stopPropagation(); // Prevent bubbling to parent button
-      const nodeType = this.dataset.type;
-      const center = PanZoom.getViewCenter();
-      
-      let nodeTitle;
-      switch(nodeType) {
-        case 'keyidea':
-          nodeTitle = 'Key Idea';
-          break;
-        case 'question':
-          nodeTitle = 'Question';
-          break;
-        case 'problemtype':
-          nodeTitle = 'Problem Type';
-          break;
-        default:
-          nodeTitle = 'Learning Item';
       }
       
       createNode(nodeType, nodeTitle, center.x, center.y);
@@ -617,7 +591,11 @@ export function updateSingleNodePosition(nodeElement) {
 
   nodeElement.style.left = `${newLeft}px`;
   nodeElement.style.top = `${newTop}px`;
-  nodeElement.style.transform = '';
+  // Scale node and font size based on zoom
+  const scale = PanZoom.scale;
+  nodeElement.style.transform = `scale(${scale})`;
+  // Adjust font size for all text inside the node
+  nodeElement.style.fontSize = `${Math.max(12, 16 * scale)}px`;
 }
 
 // Forward the scheduleAutosave function
@@ -627,130 +605,111 @@ export function scheduleAutosave() {
 
 // Set up the hover panel for a node
 function setupNodeHoverPanel(node, nodeObject) {
-  // Create hover panel
   const hoverPanel = document.createElement('div');
   hoverPanel.className = 'node-hover-panel';
-  hoverPanel.dataset.for = node.dataset.id;
-  
-  // Create controls
+
+  // Capture the node ID at the time of handler creation
+  const nodeId = node.dataset.id;
+
+  // Add node controls to hover panel
   const controls = document.createElement('div');
   controls.className = 'node-controls';
-  
-  // Default controls
-  controls.innerHTML = `
-    <button class="node-control edit-title" title="Edit Title"><i class="fas fa-edit"></i></button>
-    <button class="node-control set-due-date" title="Set Due Date"><i class="fas fa-calendar-alt"></i></button>
-    <button class="node-control connect-node" title="Connect to Another Node"><i class="fas fa-link"></i></button>
-    <button class="node-control delete-node" title="Delete Node"><i class="fas fa-trash-alt"></i></button>
-  `;
-  
-  // Add special controls based on node type
-  if (node.dataset.type === 'keyidea') {
-    const learnMoreBtn = document.createElement('button');
-    learnMoreBtn.className = 'learn-more-btn';
-    learnMoreBtn.innerHTML = '<i class="fas fa-search"></i> Learn More';
-    learnMoreBtn.addEventListener('click', function() {
-      const searchQuery = node.querySelector('.node-title').textContent;
-      window.open(`https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`, '_blank');
-    });
-    
-    const askQuestionBtn = document.createElement('button');
-    askQuestionBtn.className = 'ask-question-btn';
-    askQuestionBtn.innerHTML = '<i class="fas fa-question"></i> Ask Question';
-    askQuestionBtn.addEventListener('click', function() {
-      // Show AI chat window
-      const aiSidebar = document.querySelector('.ai-sidebar');
-      if (aiSidebar) {
-        aiSidebar.classList.add('visible');
-        const aiInput = document.getElementById('ai-input');
-        if (aiInput) {
-          const topic = node.querySelector('.node-title').textContent;
-          aiInput.value = `Tell me more about ${topic}`;
-          aiInput.focus();
-        }
-      }
-    });
-    
-    controls.appendChild(learnMoreBtn);
-    controls.appendChild(askQuestionBtn);
-  }
-  
-  if (node.dataset.type === 'question') {
-    const recontextualizeBtn = document.createElement('button');
-    recontextualizeBtn.className = 'recontextualize-btn';
-    recontextualizeBtn.innerHTML = '<i class="fas fa-sitemap"></i> Recontextualize';
-    recontextualizeBtn.addEventListener('click', function() {
-      // This would normally call AI functionality to add simpler questions
-      // For UI demo, we'll just show a message
-      showMessage('Recontextualizing question...');
-    });
-    
-    controls.appendChild(recontextualizeBtn);
-  }
-  
-  if (node.dataset.type === 'problemtype') {
-    const practiceBtn = document.createElement('button');
-    practiceBtn.className = 'practice-btn';
-    practiceBtn.innerHTML = '<i class="fas fa-graduation-cap"></i> Practice';
-    practiceBtn.addEventListener('click', function() {
-      // This would normally open a practice module
-      // For UI demo, we'll just show a message
-      showMessage('Opening practice module...');
-    });
-    
-    controls.appendChild(practiceBtn);
-  }
-  
-  // Add event listeners to controls
-  controls.querySelector('.edit-title').addEventListener('click', function() {
+
+  // Delete button
+  const deleteBtn = document.createElement('div');
+  deleteBtn.className = 'node-control';
+  deleteBtn.innerHTML = '✕';
+  deleteBtn.title = 'Delete Node';
+  deleteBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    deleteNode(nodeId);
+  });
+  controls.appendChild(deleteBtn);
+
+  // Connect button
+  const connectBtn = document.createElement('div');
+  connectBtn.className = 'node-control';
+  connectBtn.innerHTML = '↔';
+  connectBtn.title = 'Connect to Another Node';
+  connectBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    Edges.startConnection(nodeId);
+  });
+  controls.appendChild(connectBtn);
+
+  // Edit button
+  const editBtn = document.createElement('div');
+  editBtn.className = 'node-control';
+  editBtn.innerHTML = '✎';
+  editBtn.title = 'Edit Node Title';
+  editBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
     showEditInterface(node, hoverPanel);
   });
-  
-  controls.querySelector('.set-due-date').addEventListener('click', function() {
-    showDueDateInterface(node, hoverPanel);
+  controls.appendChild(editBtn);
+
+  // Due date button (only for task, assignment, test, project, essay nodes)
+  if (['task', 'assignment', 'test', 'project', 'essay'].includes(nodeObject.type)) {
+    const dueDateBtn = document.createElement('div');
+    dueDateBtn.className = 'node-control';
+    dueDateBtn.innerHTML = '📅';
+    dueDateBtn.title = 'Set Due Date';
+    dueDateBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      showDueDateInterface(node, hoverPanel);
+    });
+    controls.appendChild(dueDateBtn);
+  }
+
+  // Add AI buttons for new features
+  // Challenge AI button
+  const challengeBtn = document.createElement('div');
+  challengeBtn.className = 'node-control ai-feature-btn challenge-btn';
+  challengeBtn.innerHTML = '<i class="fas fa-brain"></i>';
+  challengeBtn.title = 'AI Challenge - Test your knowledge';
+  challengeBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    AI.showAIFeatureChat(node, hoverPanel, 'challenge');
   });
-  
-  controls.querySelector('.connect-node').addEventListener('click', function() {
-    isConnecting = true;
-    selectedNode = nodeObject;
-    
-    // Show overlay with instructions
-    const overlay = document.querySelector('.connection-overlay');
-    if (overlay) {
-      overlay.style.display = 'flex';
-      overlay.innerHTML = '<div>Select another node to connect to</div>';
-    }
-    
-    // Show message
-    showMessage('Select another node to connect to');
-    
-    // Close hover panel
-    hoverPanel.classList.remove('visible');
+  controls.appendChild(challengeBtn);
+
+  // Enrich AI button
+  const enrichBtn = document.createElement('div');
+  enrichBtn.className = 'node-control ai-feature-btn enrich-btn';
+  enrichBtn.innerHTML = '<i class="fas fa-seedling"></i>';
+  enrichBtn.title = 'AI Enrich - Expand on this node';
+  enrichBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    AI.showAIFeatureChat(node, hoverPanel, 'enrich');
   });
-  
-  controls.querySelector('.delete-node').addEventListener('click', function() {
-    const nodeId = node.dataset.id;
-    deleteNode(nodeId);
-    hoverPanel.remove();
+  controls.appendChild(enrichBtn);
+
+  // Explore AI button
+  const exploreBtn = document.createElement('div');
+  exploreBtn.className = 'node-control ai-feature-btn explore-btn';
+  exploreBtn.innerHTML = '<i class="fas fa-compass"></i>';
+  exploreBtn.title = 'AI Explore - Discover connections';
+  exploreBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    AI.showAIFeatureChat(node, hoverPanel, 'explore');
   });
-  
-  // Create info section
+  controls.appendChild(exploreBtn);
+
+  // Add node info based on type
   const infoSection = document.createElement('div');
   infoSection.className = 'node-info collapsed';
-  
-  // Add info based on node type
-  switch (node.dataset.type) {
+  switch(nodeObject.type) {
     case 'motivator':
       infoSection.innerHTML = `
         <h4>Motivator</h4>
-        <p>A higher-level goal, value, or purpose that drives your actions and decisions. Connect this to tasks, challenges, and ideas to see how they align with your core motivations.</p>
+        <p>A personal goal or motivation that drives your hard work. The Envision page helps you visualize and feel renewed energy and drive from your motivators.</p>
         <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
       `;
       break;
     case 'task':
       infoSection.innerHTML = `
         <h4>Task</h4>
-        <p>A specific action item that you need to complete. Tasks can be connected to motivators (why you're doing them) or challenges (what problems they solve).</p>
+        <p>A specific actionable item that needs to be completed. Connect tasks to classes or projects to organize your work.</p>
         <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
       `;
       break;
@@ -758,34 +717,6 @@ function setupNodeHoverPanel(node, nodeObject) {
       infoSection.innerHTML = `
         <h4>Challenge</h4>
         <p>A difficult problem or obstacle to overcome, or a question, dilemma, or consideration that you need to think about. Breaking down challenges with idea nodes helps make them manageable.</p>
-        <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
-      `;
-      break;
-    case 'idea':
-      infoSection.innerHTML = `
-        <h4>Idea</h4>
-        <p>A concept, thought, or potential solution. Connect ideas to challenges, tasks, or other ideas to map out your thinking.</p>
-        <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
-      `;
-      break;
-    case 'keyidea':
-      infoSection.innerHTML = `
-        <h4>Key Idea</h4>
-        <p>An important formula, theory, law, or established concept that forms a foundation for understanding. Use this node to document critical knowledge points.</p>
-        <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
-      `;
-      break;
-    case 'question':
-      infoSection.innerHTML = `
-        <h4>Question</h4>
-        <p>A query that probes understanding of connected concepts. Questions help identify knowledge gaps and promote deeper learning through reflection.</p>
-        <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
-      `;
-      break;
-    case 'problemtype':
-      infoSection.innerHTML = `
-        <h4>Problem Type</h4>
-        <p>A category of related problems that share solution approaches or techniques. Practice problem types to build proficiency for tests and real-world applications.</p>
         <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
       `;
       break;
@@ -828,6 +759,13 @@ function setupNodeHoverPanel(node, nodeObject) {
       infoSection.innerHTML = `
         <h4>Image</h4>
         <p>Visual content to support your learning. Connect images to related nodes for visual reference.</p>
+        <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
+      `;
+      break;
+    case 'idea':
+      infoSection.innerHTML = `
+        <h4>Idea</h4>
+        <p>A concept, thought, or potential solution. Connect ideas to challenges, tasks, or other ideas to map out your thinking.</p>
         <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
       `;
       break;
@@ -948,8 +886,8 @@ export function createCanonicalNode({ type, title, left, top, content = null, id
 export function logNodeIdState() {
   const domIds = Array.from(document.querySelectorAll('.node')).map(n => n.dataset.id);
   const arrayIds = nodes.map(n => n.id);
-  console.log('DOM IDs:', domIds);
-  console.log('Array IDs:', arrayIds);
+  // console.log('DOM IDs:', domIds);
+  // console.log('Array IDs:', arrayIds);
   // Check for duplicates in DOM
   const domDuplicates = domIds.filter((id, idx) => domIds.indexOf(id) !== idx);
   if (domDuplicates.length > 0) {
@@ -972,4 +910,36 @@ export function assertNodeState() {
       console.warn('Node element not in DOM:', n);
     }
   });
+}
+
+// Show only nodes with given IDs, hide others
+export function showOnlyNodes(nodeIds) {
+  nodes.forEach(n => {
+    if (nodeIds.includes(n.id)) {
+      n.element.style.display = '';
+    } else {
+      n.element.style.display = 'none';
+    }
+  });
+  Edges.drawEdges();
+}
+
+// Show all nodes
+export function showAllNodes() {
+  nodes.forEach(n => {
+    n.element.style.display = '';
+  });
+  Edges.drawEdges();
+}
+
+// Get node IDs within a rectangle (in world coordinates)
+export function getNodesInRect(rect) {
+  return nodes.filter(n => {
+    const x = parseFloat(n.element.dataset.originalLeft);
+    const y = parseFloat(n.element.dataset.originalTop);
+    return (
+      x >= rect.left && x <= rect.right &&
+      y >= rect.top && y <= rect.bottom
+    );
+  }).map(n => n.id);
 } 

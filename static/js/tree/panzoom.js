@@ -3,6 +3,7 @@
 import { elements, showMessage } from './dom.js';
 import * as Nodes from './nodes.js';
 import * as Edges from './edges.js';
+import { getAreaSelectState } from './main.js';
 
 // Pan and Zoom state
 export let offsetX = 0;
@@ -24,19 +25,40 @@ export function initialize() {
 
 // Set up event listeners for pan and zoom
 export function setupEventListeners() {
-  // Zoom controls
-  elements.zoomInBtn.addEventListener('click', function() {
-    scale *= 1.2;
-    scale = Math.min(Math.max(0.1, scale), 3);
-    Nodes.updateNodePositions();
-    showMessage(`Zoom: ${Math.round(scale * 100)}%`);
-  });
-  
-  elements.zoomOutBtn.addEventListener('click', function() {
-    scale *= 0.8;
-    scale = Math.min(Math.max(0.1, scale), 3);
-    Nodes.updateNodePositions();
-    showMessage(`Zoom: ${Math.round(scale * 100)}%`);
+  console.log('[PanZoom] setupEventListeners called');
+  if (!elements.zoomControls) console.warn('[PanZoom] elements.zoomControls is null!');
+  if (!elements.zoomInBtn) console.warn('[PanZoom] elements.zoomInBtn is null!');
+  if (!elements.zoomOutBtn) console.warn('[PanZoom] elements.zoomOutBtn is null!');
+
+  // Delegate click events on zoom controls to ensure they fire
+  elements.zoomControls.addEventListener('click', function(e) {
+    console.log('[ZoomControls] click event:', e, 'target:', e.target, 'currentTarget:', e.currentTarget);
+    const zoomInClicked = e.target.closest('.zoom-in');
+    const zoomOutClicked = e.target.closest('.zoom-out');
+    console.log('[ZoomControls] zoomInClicked:', zoomInClicked, 'zoomOutClicked:', zoomOutClicked);
+    if (zoomInClicked) {
+      console.log('[ZoomControls] Zoom In button clicked');
+      e.stopPropagation();
+      const center = getViewCenter();
+      scale *= 1.2;
+      scale = Math.min(Math.max(0.1, scale), 3);
+      offsetX = center.x - (window.innerWidth / 2) / scale;
+      offsetY = center.y - (window.innerHeight / 2) / scale;
+      Nodes.updateNodePositions();
+      showMessage(`Zoom: ${Math.round(scale * 100)}%`);
+    } else if (zoomOutClicked) {
+      console.log('[ZoomControls] Zoom Out button clicked');
+      e.stopPropagation();
+      const center = getViewCenter();
+      scale *= 0.8;
+      scale = Math.min(Math.max(0.1, scale), 3);
+      offsetX = center.x - (window.innerWidth / 2) / scale;
+      offsetY = center.y - (window.innerHeight / 2) / scale;
+      Nodes.updateNodePositions();
+      showMessage(`Zoom: ${Math.round(scale * 100)}%`);
+    } else {
+      console.log('[ZoomControls] Click was not on a zoom button');
+    }
   });
   
   // Add zoom with mouse wheel
@@ -71,12 +93,17 @@ export function setupEventListeners() {
   
   // Add panning with middle mouse button or spacebar + drag
   document.addEventListener('mousedown', function(e) {
-    // Check if we clicked on a node or UI element - don't start panning if so
-    if (e.target.closest('.node') || e.target.closest('.tree-toolbar') || 
+    // Prevent panning if area select mode is active
+    if (getAreaSelectState && getAreaSelectState().active) return;
+    // Ignore clicks on any button or other UI elements so we don't start panning
+    if (e.target.closest('button') ||
+        e.target.closest('.tree-toolbar') ||
         e.target.closest('.zoom-controls') ||
-        e.target.closest('.node-hover-panel') || e.target.closest('.ai-sidebar') ||
-        e.target.closest('.upload-form') || Nodes.isDragging || Nodes.isConnecting) {
-      // Click was on a node or UI element, don't start panning
+        e.target.closest('.node') ||
+        e.target.closest('.node-hover-panel') ||
+        e.target.closest('.ai-sidebar') ||
+        e.target.closest('.upload-form') ||
+        Nodes.isDragging || Nodes.isConnecting) {
       return;
     }
     
@@ -162,6 +189,16 @@ export function setupEventListeners() {
     if (e.code === 'Space' && isPanning) {
       isPanning = false;
       elements.treeCanvas.style.cursor = 'default';
+    }
+  });
+
+  // Add a fallback document-level click handler for debugging
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.zoom-in')) {
+      console.log('[Document] .zoom-in clicked');
+    }
+    if (e.target.closest('.zoom-out')) {
+      console.log('[Document] .zoom-out clicked');
     }
   });
 }

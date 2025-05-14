@@ -12,10 +12,7 @@ export function getColorForType(type) {
     'project': '#16A085',
     'essay': '#F1C40F',
     'image': '#3498DB',
-    'idea': '#00bcd4',
-    'keyidea': '#9c27b0',
-    'question': '#ff5722',
-    'problemtype': '#009688'
+    'idea': '#00bcd4'
   };
   
   return colors[type] || '#7f8c8d';
@@ -33,10 +30,7 @@ export function getIconClass(type) {
     'test': 'fas fa-clipboard-check',
     'project': 'fas fa-project-diagram',
     'essay': 'fas fa-file-alt',
-    'image': 'fas fa-image',
-    'keyidea': 'fas fa-atom',
-    'question': 'fas fa-question-circle',
-    'problemtype': 'fas fa-puzzle-piece'
+    'image': 'fas fa-image'
   };
   
   return iconClasses[type] || 'fas fa-circle';

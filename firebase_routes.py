@@ -143,6 +143,30 @@ def upload_profile_photo():
         if not file.content_type.startswith('image/'):
             return jsonify({"error": "Only image files are allowed"}), 400
         
+        # Get user document to find old profilePicUrl
+        user_ref = db.collection('Members').document(user_id)
+        user_doc = user_ref.get()
+        old_url = None
+        if user_doc.exists:
+            user_data = user_doc.to_dict()
+            old_url = user_data.get('profilePicUrl')
+        
+        # Delete old profile photo from storage if it exists and is in our bucket
+        if old_url and 'sciweb-files' in old_url:
+            from urllib.parse import urlparse, unquote
+            parsed = urlparse(old_url)
+            # Extract the object path from the URL
+            # Example: /v0/b/sciweb-files/o/profile_photos%2Fprofile_...png?alt=media
+            path = parsed.path
+            if '/o/' in path:
+                encoded_blob_path = path.split('/o/')[1]
+                # Remove any trailing parts like ?alt=media
+                encoded_blob_path = encoded_blob_path.split('?')[0]
+                blob_path_old = unquote(encoded_blob_path)
+                old_blob = bucket.blob(blob_path_old)
+                if old_blob.exists():
+                    old_blob.delete()
+
         # Generate a unique filename with timestamp
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         filename = f"profile_{user_id}_{timestamp}.{file.filename.split('.')[-1]}"
@@ -155,14 +179,11 @@ def upload_profile_photo():
         blob.upload_from_file(file, content_type=file.content_type)
         
         # Use Firebase Storage URL format
-        # For Firebase Storage, URLs are in the format:
-        # https://firebasestorage.googleapis.com/v0/b/BUCKET_NAME/o/ENCODED_OBJECT_PATH?alt=media
         import urllib.parse
         encoded_path = urllib.parse.quote(blob_path, safe='')
-        url = f"https://firebasestorage.googleapis.com/v0/b/sturdy-analyzer-381018/o/{encoded_path}?alt=media"
+        url = f"https://firebasestorage.googleapis.com/v0/b/sciweb-files/o/{encoded_path}?alt=media"
         
         # Update user document with the profile picture URL
-        user_ref = db.collection('Members').document(user_id)
         user_ref.update({
             'profilePicUrl': url,
             'updatedAt': firestore.SERVER_TIMESTAMP

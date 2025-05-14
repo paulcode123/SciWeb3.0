@@ -25,6 +25,14 @@ export function initElements() {
   elements.introButton = document.querySelector('.intro-button');
   elements.voiceRecordingOverlay = document.querySelector('.voice-recording-overlay');
   elements.voiceRecordBtn = document.querySelector('.btn-voice-record');
+  elements.areaSelectBtn = document.querySelector('.btn-area-select');
+  elements.areaSelectRect = document.querySelector('.area-select-rect');
+  elements.areaSelectBubble = document.querySelector('.area-select-bubble');
+
+  // Log zoom controls/buttons for debugging
+  console.log('[initElements] zoomControls:', elements.zoomControls);
+  console.log('[initElements] zoomInBtn:', elements.zoomInBtn);
+  console.log('[initElements] zoomOutBtn:', elements.zoomOutBtn);
 }
 
 // Set up event listeners for DOM elements

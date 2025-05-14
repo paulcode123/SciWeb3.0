@@ -350,7 +350,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.id) {
                     // Success - store user ID and redirect to onboarding
                     localStorage.setItem('userId', data.id);
-                    window.location.href = '/onboarding/usertype';
+                    window.location.href = '/onboarding';
                 } else {
                     // Handle error
                     alert('Error creating account: ' + (data.error || 'Unknown error'));

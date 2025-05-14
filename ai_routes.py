@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify
 import openai
 import json
 import os
+import tempfile
+from werkzeug.utils import secure_filename
 
 # Load OpenAI API key from api_keys.json
 with open('api_keys.json') as f:
@@ -64,4 +66,267 @@ def challenge_user():
         ai_content = response.choices[0].message.content
         return jsonify({"message": ai_content})
     except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@ai_bp.route('/voice_to_nodes', methods=['POST'])
+def voice_to_nodes():
+    """
+    Process voice recording and existing tree state to generate new nodes.
+    
+    Expects:
+      - audio file uploaded as 'audio'
+      - tree_state: JSON string with current nodes, edges, and view information
+      
+    Returns:
+      - JSON with nodes to create and edges to establish
+    """
+    try:
+        # Check if audio file is present
+        if 'audio' not in request.files:
+            return jsonify({"error": "No audio file provided"}), 400
+        
+        audio_file = request.files['audio']
+        if audio_file.filename == '':
+            return jsonify({"error": "Empty audio file name"}), 400
+        
+        # Get tree state
+        tree_state_json = request.form.get('tree_state')
+        if not tree_state_json:
+            return jsonify({"error": "No tree state provided"}), 400
+        
+        tree_state = json.loads(tree_state_json)
+        
+        # Save audio file temporarily
+        audio_filename = secure_filename(audio_file.filename)
+        temp_dir = tempfile.mkdtemp()
+        temp_audio_path = os.path.join(temp_dir, audio_filename)
+        audio_file.save(temp_audio_path)
+        
+        # Transcribe audio using OpenAI Whisper
+        with open(temp_audio_path, "rb") as audio_data:
+            transcript_response = client.audio.transcriptions.create(
+                model="whisper-1",
+                file=audio_data
+            )
+        
+        transcript = transcript_response.text
+        
+        # Define function for structured output
+        functions = [
+            {
+                "name": "generate_nodes",
+                "description": "Generate nodes and connections based on the transcript and current tree state",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "nodes": {
+                            "type": "array",
+                            "description": "List of nodes to create",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "description": "Unique identifier for the node"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "description": "Type of the node (motivator, task, challenge, idea, class, assignment, test, project, essay)",
+                                        "enum": ["motivator", "task", "challenge", "idea", "class", "assignment", "test", "project", "essay"]
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "description": "Title/content of the node"
+                                    },
+                                    
+                                    "position": {
+                                        "type": "object",
+                                        "description": "Position of the node (can't be on top of existing or newly created nodes)",
+                                        "properties": {
+                                            "x": {"type": "number"},
+                                            "y": {"type": "number"}
+                                        }
+                                    }
+                                },
+                                "required": ["id", "type", "title"]
+                            }
+                        },
+                        "edges": {
+                            "type": "array",
+                            "description": "Connections between nodes",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "from": {
+                                        "type": "string",
+                                        "description": "ID of the source node"
+                                    },
+                                    "to": {
+                                        "type": "string",
+                                        "description": "ID of the target node"
+                                    }
+                                },
+                                "required": ["from", "to"]
+                            }
+                        }
+                    },
+                    "required": ["nodes"]
+                }
+            }
+        ]
+
+        # Create system prompt
+        system_prompt = (
+            "You are an AI assistant that aims to contextualize the user's existing concept map based on their new thoughts and ideas."
+            "You will be given a transcript of the user speaking, and a current concept map."
+            "Your job is to generate new nodes and edges that connect to the existing nodes in the concept map."
+            "The concept map is a lens for you to understand the user. Use these nodes to store new information."
+            "The nodes you add should primarily be idea nodes centered around, and contextualizing, motivator, challenge, and project nodes."
+            "If the user explicitly wants to add a new motivator, challenge, or project node, do so. Otherwise, only add idea nodes that help contextualize the existing nodes."
+            "The goal of the concept map is to help the user understand their own thinking and learning. Use the concept map as a lens to understand the user's new thoughts and ideas."
+        )
+        
+        # Prepare messages for OpenAI
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": f"Here is the current tree state: {json.dumps(tree_state)}"},
+            {"role": "user", "content": (
+                f"I just recorded the following speech: '{transcript}'. "
+            )}
+        ]
+        
+        # Call OpenAI API with function calling
+        response = client.chat.completions.create(
+            model="gpt-4.1-mini",  # Using GPT-4 for better comprehension
+            messages=messages,
+            functions=functions,
+            function_call={"name": "generate_nodes"},
+            temperature=0.7
+        )
+        
+        # Extract function call result
+        function_args = json.loads(response.choices[0].message.function_call.arguments)
+        
+        # Clean up temporary files
+        os.remove(temp_audio_path)
+        os.rmdir(temp_dir)
+        
+        return jsonify(function_args)
+        
+    except Exception as e:
+        print(f"Error in voice_to_nodes: {str(e)}")
+        return jsonify({"error": str(e)}), 500 
+
+@ai_bp.route('/analyze_onboarding', methods=['POST'])
+def analyze_onboarding():
+    """
+    Process onboarding responses to generate personalized recommendations.
+    
+    Expects JSON with:
+      - responses: array of user's answers to onboarding questions
+    
+    Returns:
+      - cards: array of personalized recommendation cards
+    """
+    try:
+        data = request.get_json()
+        responses = data.get('responses', [])
+        print(responses)
+        
+        if not responses or len(responses) < 6:
+            return jsonify({"error": "Incomplete responses"}), 400
+        
+        # Extract individual responses
+        academic_success = responses[1] if len(responses) > 1 else ""
+        motivation = responses[2] if len(responses) > 2 else ""
+        challenges = responses[3] if len(responses) > 3 else ""
+        learning_style = responses[4] if len(responses) > 4 else ""
+        accountability = responses[5] if len(responses) > 5 else ""
+        
+        # Create system prompt
+        system_prompt = (
+            "You are an AI assistant analyzing a student's onboarding responses for SciWeb, "
+            "a platform that helps users build a knowledge web of their academic journey. "
+            "Based on their responses about academic success, motivation, challenges, learning style, "
+            "and desired accountability, generate 5 personalized, inspiring cards (title and content) "
+            "that explain how SciWeb's features align with their needs. "
+            "Each card should be insightful and specific to their responses, not generic. "
+            "Use an uplifting, encouraging tone that builds anticipation for using the platform."
+        )
+        
+        # User prompt with responses
+        user_prompt = f"""
+        Here are the user's responses to SciWeb's onboarding questions:
+        
+        1. Academic success definition: "{academic_success}"
+        2. Motivation: "{motivation}"
+        3. Challenges: "{challenges}"
+        4. Learning style: "{learning_style}"
+        5. Desired accountability: "{accountability}"
+        
+        Based on these responses, generate 5 personalized cards with a title and content that show how 
+        SciWeb's features will specifically help this user. Each card should have:
+        1. A title (5-7 words)
+        2. Content (40-80 words)
+        3. A suggested emoji icon that represents the card's theme
+        
+        Format your response as a JSON array of cards, with each card having 'title', 'content', and 'icon' fields.
+        """
+        
+        # Define function for structured output
+        functions = [
+            {
+                "name": "generate_personalized_cards",
+                "description": "Generate personalized cards based on the user's onboarding responses",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "cards": {
+                            "type": "array",
+                            "description": "Array of personalized cards",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "description": "Title of the card"
+                                    },
+                                    "content": {
+                                        "type": "string",
+                                        "description": "Content of the card"
+                                    },
+                                    "icon": {
+                                        "type": "string",
+                                        "description": "Emoji icon for the card"
+                                    }
+                                },
+                                "required": ["title", "content", "icon"]
+                            }
+                        }
+                    },
+                    "required": ["cards"]
+                }
+            }
+        ]
+        
+        # Call OpenAI API with function calling
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ]
+        
+        response = client.chat.completions.create(
+            model="gpt-4-1106-preview",
+            messages=messages,
+            functions=functions,
+            function_call={"name": "generate_personalized_cards"},
+            temperature=0.7
+        )
+        
+        # Extract and return the generated cards
+        function_args = json.loads(response.choices[0].message.function_call.arguments)
+        return jsonify(function_args)
+        
+    except Exception as e:
+        print(f"Error in analyze_onboarding: {str(e)}")
         return jsonify({"error": str(e)}), 500 

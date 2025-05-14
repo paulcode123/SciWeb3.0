@@ -3,6 +3,7 @@
 import { elements, showMessage } from './dom.js';
 import * as Nodes from './nodes.js';
 import * as Utils from './utils.js';
+import { getAreaSelectState } from './main.js';
 
 // AI State
 const OPENAI_API_KEY = 'sk-YOUR_SAMPLE_API_KEY_HERE'; // Replace with your actual key if using a real backend
@@ -295,34 +296,31 @@ async function aiAddNode(type, parentId, name, info) {
 }
 
 async function aiGetNodeStructure() {
-  try {
-    const nodeStructure = Nodes.nodes.map(node => {
-      return {
-        id: node.id,
-        type: node.type,
-        title: node.title
-      };
-    });
-    
-    return `Current nodes: ${JSON.stringify(nodeStructure, null, 2)}`;
-  } catch (error) {
-    console.error("Error getting node structure:", error);
-    return "Failed to get node structure due to an error.";
+  let nodeList = Nodes.nodes;
+  const areaState = getAreaSelectState ? getAreaSelectState() : { active: false };
+  if (areaState && areaState.active && areaState.selectedNodeIds) {
+    nodeList = Nodes.nodes.filter(n => areaState.selectedNodeIds.includes(n.id));
   }
+  if (nodeList.length === 0) return 'No nodes found.';
+  let structure = '<ul>';
+  nodeList.forEach(node => {
+    structure += `<li><b>${Utils.capitalize(node.type)}</b>: ${node.title} (ID: ${node.id})</li>`;
+  });
+  structure += '</ul>';
+  return structure;
 }
 
 async function aiNodeInfo(nodeId) {
-  try {
-    const node = Nodes.nodes.find(n => n.id === nodeId);
-    if (!node) {
-      return `No node found with ID ${nodeId}`;
-    }
-    
-    return `Node ${nodeId}: ${JSON.stringify(node, null, 2)}`;
-  } catch (error) {
-    console.error("Error getting node info:", error);
-    return "Failed to get node info due to an error.";
+  let nodeList = Nodes.nodes;
+  const areaState = getAreaSelectState ? getAreaSelectState() : { active: false };
+  if (areaState && areaState.active && areaState.selectedNodeIds) {
+    nodeList = Nodes.nodes.filter(n => areaState.selectedNodeIds.includes(n.id));
   }
+  const node = nodeList.find(n => String(n.id) === String(nodeId));
+  if (!node) return `Node with ID ${nodeId} not found.`;
+  let info = `<b>${Utils.capitalize(node.type)}</b>: ${node.title}<br>ID: ${node.id}`;
+  if (node.content) info += `<br>Content: ${node.content}`;
+  return info;
 }
 
 async function aiEditNode(nodeId, newTitle) {

@@ -253,3 +253,23 @@ Stores chat messages for class channels.
 | readBy | Array<String> | User IDs who have read the message |
 | mentions | Array<String> | User IDs mentioned in message |
 
+### NodeTypes
+Stores information about node types.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | String | Unique node type identifier |
+| name | String | Node type name |
+| description | String | Node type description |
+| color | String | Node type color |
+| icon | String | Node type icon |
+| features | Array<String> | Features associated with node type |
+| features[].name | String | Feature name |
+| features[].description | String | Feature description |
+| features[].icon | String | Feature icon |
+| features[].color | String | Feature color |
+
+
+
+
+

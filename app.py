@@ -516,46 +516,9 @@ def signup():
     # This will display the signup form initially and process form submission
     return render_template('signup.html')
 
-@app.route('/onboarding/<step>', methods=['GET', 'POST'])
-def onboarding(step):
-    # Step can be one of: 'usertype', 'services', 'schedule', 'classes', 'motivations', 'counselors'
-    step_templates = {
-        'usertype': 'onboarding/usertype.html',
-        'services': 'onboarding/services.html',
-        'jupiter': 'onboarding/jupiter.html',
-        'classes': 'onboarding/classes.html',
-        'grade_analysis': 'onboarding/grade_analysis.html',
-        'schedule': 'onboarding/schedule.html',
-        'motivations': 'onboarding/motivations.html',
-        'counselors': 'onboarding/counselors.html',
-        'complete': 'onboarding/complete.html'
-    }
-    
-    # Define the next step in the onboarding flow
-    next_steps = {
-        'usertype': 'services',
-        'services': 'jupiter',
-        'jupiter': 'classes',
-        'classes': 'grade_analysis',
-        'grade_analysis': 'counselors',
-        'counselors': 'motivations',
-        'motivations': 'complete'
-    }
-    
-    if step not in step_templates:
-        return redirect('/onboarding/usertype')
-    
-    # Handle form submissions for each step
-    if request.method == 'POST':
-        # Process form data here if needed
-        # For now, just redirect to the next step
-        if step in next_steps:
-            return redirect(f'/onboarding/{next_steps[step]}')
-        elif step == 'complete':
-            return redirect('/tree')  # After completion, go to Tree/MyWeb
-    
-    # For GET requests, just render the template
-    return render_template(step_templates[step])
+@app.route('/onboarding', methods=['GET', 'POST'])
+def onboarding():
+    return render_template('onboarding.html')
 
 @app.route('/verify-email/<token>')
 def verify_email(token):

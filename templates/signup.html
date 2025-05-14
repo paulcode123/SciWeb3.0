@@ -26,6 +26,12 @@
                     <div class="progress-step" id="verification-step">2</div>
                 </div>
                 <div class="form-section active" id="account-section">
+                    <div class="welcome-animation" id="welcome-animation" style="display: none;">
+                        <div class="welcome-message">
+                            <i class="fas fa-hand-wave"></i>
+                            <h2>Hello, <span id="welcome-name">there</span>!</h2>
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label for="first-name">First Name</label>
                         <input type="text" id="first-name" name="first_name" required>
@@ -50,22 +56,6 @@
                                 <i class="fa fa-eye"></i>
                             </button>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="grade">Grade</label>
-                        <select id="grade" name="grade" required>
-                            <option value="" disabled selected>Select your grade</option>
-                            <option value="6">6th Grade</option>
-                            <option value="7">7th Grade</option>
-                            <option value="8">8th Grade</option>
-                            <option value="9">9th Grade (Freshman)</option>
-                            <option value="10">10th Grade (Sophomore)</option>
-                            <option value="11">11th Grade (Junior)</option>
-                            <option value="12">12th Grade (Senior)</option>
-                            <option value="college">College</option>
-                            <option value="graduate">Graduate School</option>
-                            <option value="professional">Professional</option>
-                        </select>
                     </div>
                     <div class="form-actions">
                         <button type="button" id="next-btn" class="btn btn-primary">Next</button>
@@ -126,4 +116,85 @@
 
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/signup.js') }}"></script>
+    <script>
+        // Animation for the welcome message
+        document.addEventListener('DOMContentLoaded', function() {
+            const firstNameInput = document.getElementById('first-name');
+            const welcomeAnimation = document.getElementById('welcome-animation');
+            const welcomeName = document.getElementById('welcome-name');
+            
+            firstNameInput.addEventListener('input', function() {
+                if (this.value.trim() !== '') {
+                    welcomeName.textContent = this.value;
+                    welcomeAnimation.style.display = 'block';
+                    welcomeAnimation.classList.add('fade-in');
+                    
+                    // Trigger the animation
+                    setTimeout(() => {
+                        welcomeAnimation.classList.remove('fade-in');
+                        welcomeAnimation.classList.add('bounce');
+                    }, 300);
+                } else {
+                    welcomeAnimation.style.display = 'none';
+                    welcomeAnimation.classList.remove('bounce');
+                }
+            });
+        });
+    </script>
+    <style>
+        .welcome-animation {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(66, 133, 244, 0.1), rgba(66, 133, 244, 0.05));
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .welcome-message {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .welcome-message i {
+            font-size: 24px;
+            color: #4285F4;
+        }
+        
+        .welcome-message h2 {
+            margin: 0;
+            color: #4285F4;
+            font-weight: 600;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        .bounce {
+            animation: bounce 0.6s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .particles-container {
+            animation: floatParticles 20s infinite linear;
+        }
+        
+        @keyframes floatParticles {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 100%; }
+        }
+    </style>
 {% endblock %} 

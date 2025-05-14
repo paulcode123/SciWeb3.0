@@ -3,7 +3,6 @@
 import { showMessage } from './dom.js';
 import * as Nodes from './nodes.js';
 import * as Edges from './edges.js';
-import * as Utils from './utils.js';
 
 // Autosave state
 let saveTimeout;
@@ -143,7 +142,7 @@ export async function loadTreeState() {
     if (actualTreeData.nodes && actualTreeData.nodes.length > 0) {
       let maxId = 0;
       actualTreeData.nodes.forEach(nodeData => {
-        const nodeObject = Nodes.createNode(
+        const node = Nodes.createNode(
           nodeData.type,
           nodeData.title,
           nodeData.position.x,
@@ -152,26 +151,18 @@ export async function loadTreeState() {
           nodeData.id // pass the saved id
         );
         
-        // Set due date if it exists in the saved data
-        if (nodeData.dueDate) {
-          const nodeElement = nodeObject.element;
-          nodeElement.dataset.dueDate = nodeData.dueDate;
-          let dueDateElement = nodeElement.querySelector('.node-due-date');
-          if (!dueDateElement) {
-            dueDateElement = document.createElement('div');
-            dueDateElement.className = 'node-due-date';
-            nodeElement.appendChild(dueDateElement);
-          }
-          dueDateElement.textContent = `Due: ${Utils.formatDate(nodeData.dueDate)}`;
+        // Update nodes array entry id
+        const nodeEntry = Nodes.nodes.find(n => n.element === node);
+        if (nodeEntry) {
+          nodeEntry.id = nodeData.id;
         }
-        
         const idNum = parseInt(nodeData.id, 10);
         if (!isNaN(idNum) && idNum > maxId) {
           maxId = idNum;
         }
       });
-      // Set nextNodeId to avoid ID collisions
-      Nodes.setNextNodeId(maxId + 1);
+      // Setting nextNodeId may throw in ES modules, disable for now
+      // try { Nodes.setNextNodeId(maxId + 1); } catch (e) { console.warn('nextNodeId setter error:', e); }
     }
 
     // Recreate edges if they exist
@@ -180,10 +171,8 @@ export async function loadTreeState() {
       actualTreeData.edges.forEach(edge => {
         Edges.addEdge(edge);
       });
+      Edges.drawEdges();
     }
-
-    // Always draw edges after loading nodes and edges (or lack thereof)
-    Edges.drawEdges();
 
   } catch (error) {
     console.error('Error loading tree state:', error);

@@ -467,14 +467,18 @@ function loadUserSettings() {
             console.log('Set profile picture src attribute to:', user.profilePicUrl);
             
             // Add error handling for image loading
-            profilePicture.onerror = function() {
+            profilePicture.onerror = function(event) {
                 console.error('Failed to load profile image from URL:', user.profilePicUrl);
+                console.error('Image element src at error time:', this.src);
+                console.error('Event object:', event);
                 // Reset to default if there's an error
-                this.src = '/static/images/default-avatar.png';
+                this.src = '/static/images/default-avatar-1.png';
             };
             
-            profilePicture.onload = function() {
+            profilePicture.onload = function(event) {
                 console.log('Profile image successfully loaded from URL:', user.profilePicUrl);
+                console.log('Image element src at load time:', this.src);
+                console.log('Event object:', event);
             };
         } else {
             console.log('No profile picture URL found in user data');
@@ -599,17 +603,22 @@ function uploadProfilePicture(file) {
         return response.json();
     })
     .then(data => {
+        console.log('Upload response data:', data);
         if (data.success) {
             console.log('Profile photo uploaded successfully. URL:', data.url);
             
             // Update stored user data with new profile pic URL
             userData.profilePicUrl = data.url;
             localStorage.setItem('userData', JSON.stringify(userData));
+            console.log('Updated localStorage userData with new profilePicUrl:', userData.profilePicUrl);
             
             // Explicitly update the image again to ensure it's visible
             const profilePicture = document.getElementById('profile-picture');
             profilePicture.setAttribute('src', data.url);
             console.log('Updated profile picture element with new URL');
+            
+            // Log that the backend should have updated the database as well
+            console.log('Assuming backend updated the user profilePicUrl in the database.');
             
             showSuccessMessage('Profile picture updated successfully');
         } else {
@@ -625,6 +634,10 @@ function uploadProfilePicture(file) {
 
 // Load user's classes on page load
 function loadUserClasses() {
+    // Fix: define classList here
+    const classList = document.querySelector('.class-list');
+    // ... existing code ...
+    
     // Get user ID from stored data
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
     const userId = userData.id;

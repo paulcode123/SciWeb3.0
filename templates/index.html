@@ -8,28 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<<<<<<< HEAD
-</head>
-<body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="logo-container">
-            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="logo">
-            <div class="logo-text">SciWeb</div>
-        </div>
-        <ul class="nav-links">
-            <li><a href="/" class="active">Home</a></li>
-            <li><a href="/tree">Tree</a></li>
-            <li><a href="/schedule">Schedule</a></li>
-            <li><a href="/counselor">Counselor</a></li>
-            <li><a href="/nhs">NHS</a></li>
-            <li><a href="/signup">Sign Up</a></li>
-        </ul>
-        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
-    </nav>
-=======
 {% endblock %}
->>>>>>> 4329ea81ac17fdb415b6a1fc1cb23a3e89449347
 
 {% block content %}
     <!-- Hero Section -->
@@ -37,10 +16,10 @@
         <div class="particles"></div>
         <div class="hero-content">
             <h1 class="hero-title">Academic Excellence for All</h1>
-            <p class="hero-subtitle">SciWeb uses AI to provide structured learning, organizes your academic journey, and connects you with a community of learners.</p>
+            <p class="hero-subtitle">SciWeb uses AI to organize your academic journey, enrich your understanding of yourself and your world, and connect you with a community of learners and achievers.</p>
             <div class="hero-buttons">
-                <a href="/tree" class="btn btn-primary">Get Started</a>
-                <a href="#" class="btn btn-secondary">Learn More</a>
+                <a href="/signup" class="btn btn-primary">Get Started</a>
+                <a href="/tree" class="btn btn-secondary">My Web</a>
             </div>
         </div>
     </section>
@@ -49,7 +28,7 @@
     <section class="mission">
         <h2 class="section-title">Our Mission</h2>
         <div class="mission-content">
-            <p class="mission-statement scroll-animation">To build a platform that makes academic excellence universally accessible.</p>
+            <p class="mission-statement scroll-animation">To build a platform that makes ingenuity universally accessible.</p>
             <div class="floating-element floating scroll-animation">
                 <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Icon" style="width: 100px; height: 100px;">
             </div>
@@ -62,11 +41,11 @@
         <div class="values-grid">
             <div class="value-card scroll-animation">
                 <h3 class="value-title">Excellence</h3>
-                <p class="value-description">SciWeb uses structured AI to provide the highest quality of support for students.</p>
+                <p class="value-description">SciWeb provides the structure that allows you to explore, challenge, and enrich your own ideas in a way that fosters true understanding.</p>
             </div>
             <div class="value-card scroll-animation">
                 <h3 class="value-title">Accessibility</h3>
-                <p class="value-description">SciWeb is a free, open-source, and community-driven platform that is accessible to all students.</p>
+                <p class="value-description">SciWeb is a free, open-source, and community-driven platform that is accessible to all students. It's plasticity and customization allows it to be used for any academic pursuit.</p>
             </div>
             <div class="value-card scroll-animation">
                 <h3 class="value-title">Discovery</h3>
@@ -141,12 +120,12 @@
         <h2 class="section-title">Our Innovations</h2>
         <div class="mission-content">
             <div class="value-card scroll-animation" style="max-width: 800px;">
-                <h3 class="value-title">Structured AI</h3>
+                <h3 class="value-title">State-Space AI</h3>
                 <p class="value-description">SciWeb exploits structured, decentralized AI to combine the accessibility of AI with the precision and organization of human instruction and guidance.</p>
             </div>
             <div class="value-card scroll-animation" style="max-width: 800px;">
-                <h3 class="value-title">Motivational Design</h3>
-                <p class="value-description">SciWeb plays into the motivational and reward structures of the human brain by linking everything you do to your personal goals and aspirations.</p>
+                <h3 class="value-title">Strategic Enrichment</h3>
+                <p class="value-description">SciWeb provides targeted AI options to enrich your learning experience.</p>
             </div>
         </div>
     </section>

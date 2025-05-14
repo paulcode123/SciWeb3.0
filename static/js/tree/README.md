@@ -62,30 +62,9 @@ Below is a reference guide for what code is in which file:
 - AI feature chat for nodes (challenge, enrich, explore)
 
 ### voice.js
-- Voice recording overlay
-- Recording visualization
-- Speech processing interface
-- Node suggestion functionality
+- Minimalist voice recording button
+- Recording wave animation inside the button
+- (Optional) Speech-to-node functionality
 
 ### utils.js
-- `getColorForType()` function
-- `getIconClass()` function
-- `capitalize()` function
-- `formatDate()` function
-
-## How to Use
-
-The modular version of the tree application can be loaded by including the tree-modular.js file in your HTML:
-
-```html
-<script type="module" src="static/js/tree-modular.js"></script>
-```
-
-## Development
-
-When extending or modifying functionality:
-
-1. Identify which module the functionality belongs to.
-2. Make changes to the appropriate module.
-3. If creating new shared functionality, consider adding it to utils.js.
-4. Update this README if needed to reflect significant changes to the module structure. 
+- `getColorForType()`

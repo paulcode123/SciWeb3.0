@@ -1,0 +1,1148 @@
+{% extends 'base.html' %}
+{% block title %}Begin Your Journey | SciWeb{% endblock %}
+{% block head %}
+<style>
+    body {
+        background: linear-gradient(135deg, #040b36 0%, #0c1d4f 100%);
+        overflow-x: hidden;
+        position: relative;
+    }
+    
+    /* Neural Network Animation Background */
+    .neural-network {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        opacity: 0.15;
+    }
+    .node {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: #fff;
+        border-radius: 50%;
+    }
+    .connection {
+        position: absolute;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.3);
+        transform-origin: 0 0;
+    }
+    
+    /* Main container styling */
+    .onboarding-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 80vh;
+        width: 100%;
+        position: relative;
+        z-index: 2;
+        perspective: 1000px;
+    }
+    
+    /* Card styling with glass morphism */
+    .onboarding-card {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        border-radius: 2rem;
+        padding: 3rem 2.5rem 2.5rem 2.5rem;
+        width: 100%;
+        max-width: 460px;
+        min-height: 460px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        opacity: 0;
+        transform: translateY(80px) rotateX(10deg) scale(0.95);
+        transition: all 0.8s cubic-bezier(.23,1,.32,1);
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        translate: -50% -50%;
+        z-index: 2;
+    }
+    .onboarding-card.active {
+        opacity: 1;
+        transform: translateY(0) rotateX(0) scale(1);
+        z-index: 2;
+        pointer-events: auto;
+    }
+    .onboarding-card.inactive {
+        opacity: 0;
+        transform: translateY(40px) rotateX(-10deg) scale(0.9);
+        pointer-events: none;
+        z-index: 1;
+    }
+    
+    /* Content styling */
+    .onboarding-title {
+        font-size: 2.4rem;
+        font-weight: 700;
+        margin-bottom: 1.2rem;
+        color: #fff;
+        text-align: center;
+        font-family: 'Montserrat', 'Poppins', sans-serif;
+        background: linear-gradient(135deg, #ffffff 0%, #c0dfff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+    }
+    .onboarding-question {
+        font-size: 1.15rem;
+        margin-bottom: 2.5rem;
+        color: rgba(255, 255, 255, 0.9);
+        text-align: center;
+        font-family: 'Poppins', sans-serif;
+        line-height: 1.5;
+    }
+    .onboarding-input-container {
+        position: relative;
+        width: 100%;
+        margin-bottom: 2.2rem;
+    }
+    .onboarding-input {
+        width: 100%;
+        padding: 1.2rem 1.5rem;
+        font-size: 1.1rem;
+        color: #fff;
+        border: 2px solid rgba(255, 255, 255, 0.12);
+        border-radius: 1rem;
+        outline: none;
+        transition: all 0.3s;
+        background: rgba(255, 255, 255, 0.05);
+        position: relative;
+        font-family: 'Poppins', sans-serif;
+        min-height: 100px;
+        resize: vertical;
+    }
+    .onboarding-input:focus {
+        border: 2px solid rgba(99, 102, 241, 0.6);
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+    }
+    .onboarding-input::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+    }
+    
+    /* Text input for Jupiter credentials */
+    .jupiter-input {
+        width: 100%;
+        padding: 1.2rem 1.5rem;
+        font-size: 1.1rem;
+        color: #fff;
+        border: 2px solid rgba(255, 255, 255, 0.12);
+        border-radius: 1rem;
+        outline: none;
+        transition: all 0.3s;
+        background: rgba(255, 255, 255, 0.05);
+        position: relative;
+        font-family: 'Poppins', sans-serif;
+        margin-bottom: 1.5rem;
+        height: auto;
+    }
+    .jupiter-input:focus {
+        border: 2px solid rgba(99, 102, 241, 0.6);
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+    }
+    .jupiter-input::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+    }
+    
+    .blinking-cursor {
+        position: absolute;
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #6366f1;
+        opacity: 0.7;
+        animation: blink 1s steps(2, start) infinite;
+        margin-left: 2px;
+    }
+    @keyframes blink {
+        to {
+            opacity: 0;
+        }
+    }
+    
+    /* Interactive Button */
+    .onboarding-icon-btn {
+        background: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
+        border: none;
+        border-radius: 50%;
+        width: 72px;
+        height: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.2rem;
+        color: #fff;
+        box-shadow: 0 0 20px rgba(99,102,241,0.3), 0 0 60px rgba(99,102,241,0.1);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+        transition: all 0.4s;
+        z-index: 1;
+    }
+    .onboarding-icon-btn:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0 30px rgba(99,102,241,0.4), 0 0 100px rgba(99,102,241,0.2);
+    }
+    .onboarding-icon-btn:active {
+        transform: scale(0.92);
+    }
+    .onboarding-icon-btn::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(45deg, #6366f1, #06b6d4, #6366f1, #06b6d4);
+        background-size: 400%;
+        border-radius: 50%;
+        z-index: -1;
+        animation: glowing 20s linear infinite;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .onboarding-icon-btn:hover::before {
+        opacity: 1;
+    }
+    @keyframes glowing {
+        0% { background-position: 0 0; }
+        50% { background-position: 400% 0; }
+        100% { background-position: 0 0; }
+    }
+    
+    /* Enhanced Ripple Effect */
+    .ripple {
+        position: absolute;
+        border-radius: 50%;
+        transform: scale(0);
+        animation: ripple 0.8s cubic-bezier(.23,1,.32,1);
+        background: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 100%);
+        pointer-events: none;
+    }
+    @keyframes ripple {
+        to {
+            transform: scale(3);
+            opacity: 0;
+        }
+    }
+    
+    /* Progress Indicator */
+    .onboarding-progress-container {
+        margin-top: 1.5rem;
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+    }
+    .progress-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transition: all 0.3s;
+    }
+    .progress-dot.active {
+        background: #6366f1;
+        box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+    }
+    
+    /* Particle Effects */
+    .particles {
+        position: absolute;
+        left: 50%;
+        top: 80%;
+        pointer-events: none;
+        z-index: 10;
+    }
+    .particle {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #fbbf24 0%, #f87171 100%);
+        opacity: 0.7;
+        animation: particle-blast 0.8s forwards cubic-bezier(.23,1,.32,1);
+    }
+    @keyframes particle-blast {
+        to {
+            transform: translateY(60px) scale(0);
+            opacity: 0;
+        }
+    }
+    
+    /* Icon Float Animation */
+    .float-icon {
+        position: absolute;
+        font-size: 1.8rem;
+        color: rgba(255, 255, 255, 0.15);
+        animation: float-up 12s linear infinite;
+        z-index: 0;
+    }
+    @keyframes float-up {
+        0% {
+            transform: translateY(100vh) rotate(0deg);
+            opacity: 0;
+        }
+        10% {
+            opacity: 0.15;
+        }
+        90% {
+            opacity: 0.15;
+        }
+        100% {
+            transform: translateY(-20vh) rotate(360deg);
+            opacity: 0;
+        }
+    }
+    
+    /* Loader spin animation */
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    /* Lock icon animation */
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 0.7; }
+        50% { transform: scale(1.15); opacity: 1; }
+        100% { transform: scale(1); opacity: 0.7; }
+    }
+    .lock-icon {
+        color: #6366f1;
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+        animation: pulse 2s infinite;
+        background: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+    }
+    
+    /* Security badge animation */
+    .security-badge {
+        position: absolute;
+        top: -15px;
+        right: -15px;
+        background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+        color: white;
+        padding: 6px 10px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        animation: badgePulse 3s infinite;
+    }
+    @keyframes badgePulse {
+        0% { transform: scale(1); }
+        5% { transform: scale(1.1); }
+        10% { transform: scale(1); }
+        15% { transform: scale(1.05); }
+        20% { transform: scale(1); }
+        100% { transform: scale(1); }
+    }
+    
+    /* Data flow animation */
+    .data-flow {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 40px;
+        overflow: hidden;
+        opacity: 0.2;
+    }
+    .data-bit {
+        position: absolute;
+        width: 25px;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #6366f1, transparent);
+        animation: dataFlow 2s linear infinite;
+    }
+    @keyframes dataFlow {
+        0% { transform: translateX(-100px); }
+        100% { transform: translateX(500px); }
+    }
+</style>
+{% endblock %}
+{% block content %}
+<!-- High-tech Canvas Background -->
+<canvas id="bg-canvas" style="z-index:0;position:fixed;top:0;left:0;width:100vw;height:100vh;"></canvas>
+
+<!-- Floating Icons -->
+<div id="floating-icons"></div>
+
+<div class="onboarding-container">
+    <!-- Step 1: Welcome -->
+    <div class="onboarding-card active" id="step-0">
+        <div class="onboarding-title">Welcome to SciWeb</div>
+        <div class="onboarding-question">Let's map your journey to academic brilliance. With SciWeb, your ideas, goals, and knowledge become a living, visual ecosystem.</div>
+        <p style="color: rgba(255, 255, 255, 0.8); font-family: 'Poppins', sans-serif; text-align: center; margin-bottom: 2rem; font-size: 0.95rem;">Answer these broad, open-ended questions with as much detail as you'd like.</p>
+        <button class="onboarding-icon-btn" id="next-0" title="Begin Your Journey">
+            <span id="rocket-emoji">🚀</span>
+        </button>
+        <div class="onboarding-progress-container">
+            <div class="progress-dot active"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+        </div>
+        <div class="particles" id="rocket-particles"></div>
+    </div>
+    
+    <!-- Step 2: Foundations -->
+    <div class="onboarding-card inactive" id="step-1">
+        <div class="onboarding-title">Foundations</div>
+        <div class="onboarding-question">In your own words, what does academic success mean to you?</div>
+        <div class="onboarding-input-container">
+            <textarea class="onboarding-input" id="input-1" placeholder="Type your answer..." rows="4"></textarea>
+            <span class="blinking-cursor" id="cursor-1">|</span>
+        </div>
+        <button class="onboarding-icon-btn" id="next-1" title="Build Your Foundation">
+            <span>🧱</span>
+        </button>
+        <div class="onboarding-progress-container">
+            <div class="progress-dot"></div>
+            <div class="progress-dot active"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+        </div>
+    </div>
+    
+    <!-- Step 3: Motivation -->
+    <div class="onboarding-card inactive" id="step-2">
+        <div class="onboarding-title">Motivation</div>
+        <div class="onboarding-question">What drives you toward this vision of success?</div>
+        <div class="onboarding-input-container">
+            <textarea class="onboarding-input" id="input-2" placeholder="Type your answer..." rows="4"></textarea>
+            <span class="blinking-cursor" id="cursor-2">|</span>
+        </div>
+        <button class="onboarding-icon-btn" id="next-2" title="Ignite Your Motivation">
+            <span>⭐</span>
+        </button>
+        <div class="onboarding-progress-container">
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot active"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+        </div>
+    </div>
+    
+    <!-- Step 4: Challenges -->
+    <div class="onboarding-card inactive" id="step-3">
+        <div class="onboarding-title">Challenges</div>
+        <div class="onboarding-question">What obstacles have you encountered on your path?</div>
+        <div class="onboarding-input-container">
+            <textarea class="onboarding-input" id="input-3" placeholder="Type your answer..." rows="4"></textarea>
+            <span class="blinking-cursor" id="cursor-3">|</span>
+        </div>
+        <button class="onboarding-icon-btn" id="next-3" title="Overcome Your Challenges">
+            <span>🏔️</span>
+        </button>
+        <div class="onboarding-progress-container">
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot active"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+        </div>
+    </div>
+    
+    <!-- Step 5: Learning -->
+    <div class="onboarding-card inactive" id="step-4">
+        <div class="onboarding-title">Learning</div>
+        <div class="onboarding-question">How do you learn most effectively? SciWeb adapts to your unique learning style and preferences.</div>
+        <div class="onboarding-input-container">
+            <textarea class="onboarding-input" id="input-4" placeholder="Type your answer..." rows="4"></textarea>
+            <span class="blinking-cursor" id="cursor-4">|</span>
+        </div>
+        <button class="onboarding-icon-btn" id="next-4" title="Amplify Your Learning">
+            <span>📚</span>
+        </button>
+        <div class="onboarding-progress-container">
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot active"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+        </div>
+    </div>
+    
+    <!-- Step 6: Guidance -->
+    <div class="onboarding-card inactive" id="step-5">
+        <div class="onboarding-title">Guidance</div>
+        <div class="onboarding-question">How can SciWeb help you stay accountable to your goals? Your answer will shape your AI counselor.</div>
+        <div class="onboarding-input-container">
+            <textarea class="onboarding-input" id="input-5" placeholder="Type your answer..." rows="4"></textarea>
+            <span class="blinking-cursor" id="cursor-5">|</span>
+        </div>
+        <button class="onboarding-icon-btn" id="next-5" title="Complete Your Journey">
+            <span>🏃‍♂️</span>
+        </button>
+        <div class="onboarding-progress-container">
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot active"></div>
+            <div class="progress-dot"></div>
+        </div>
+    </div>
+    
+    <!-- New Step 7: Jupiter Credentials -->
+    <div class="onboarding-card inactive" id="step-6">
+        <div class="security-badge"><i class="fas fa-shield-alt"></i> Secure</div>
+        <i class="fas fa-lock lock-icon"></i>
+        <div class="onboarding-title">Connect Your Data</div>
+        <div class="onboarding-question">We need your Jupiter credentials to pull your classes and connect with friends. Your login and grades are never stored in our system.</div>
+        
+        <div class="onboarding-input-container" style="margin-bottom: 1.2rem;">
+            <input type="text" class="jupiter-input" id="fullname-input" placeholder="Your Full Name" />
+        </div>
+        
+        <div class="onboarding-input-container">
+            <input type="password" class="jupiter-input" id="jupiter-password" placeholder="Jupiter Password" />
+            <div class="data-flow">
+                <div class="data-bit" style="top: 5px; animation-delay: 0s;"></div>
+                <div class="data-bit" style="top: 12px; animation-delay: 0.3s;"></div>
+                <div class="data-bit" style="top: 20px; animation-delay: 0.7s;"></div>
+                <div class="data-bit" style="top: 28px; animation-delay: 1.1s;"></div>
+            </div>
+        </div>
+        
+        <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.85rem; text-align: center; margin-bottom: 1.5rem;">
+            <i class="fas fa-info-circle"></i> We only use this information to enhance your experience with relevant course data.
+        </p>
+        
+        <button class="onboarding-icon-btn" id="next-6" title="Connect Your Data">
+            <span>🔗</span>
+        </button>
+        <div class="onboarding-progress-container">
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot active"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/tree/onboarding_processing.js') }}"></script>
+<script>
+// --- High-tech Interactive Neural Net/Particle Canvas ---
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let width = window.innerWidth;
+let height = window.innerHeight;
+canvas.width = width;
+canvas.height = height;
+canvas.style.position = 'fixed';
+canvas.style.top = '0';
+canvas.style.left = '0';
+canvas.style.width = '100vw';
+canvas.style.height = '100vh';
+canvas.style.zIndex = '0';
+canvas.style.pointerEvents = 'none';
+
+let mouse = { x: width/2, y: height/2 };
+window.addEventListener('mousemove', e => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+});
+window.addEventListener('resize', () => {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+});
+
+const NODE_COUNT = Math.floor((width * height) / 9000);
+const nodes = [];
+for (let i = 0; i < NODE_COUNT; i++) {
+    nodes.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        r: 2 + Math.random() * 2,
+        color: `rgba(99,102,241,${0.5 + Math.random() * 0.5})`
+    });
+}
+
+function drawNet() {
+    ctx.clearRect(0, 0, width, height);
+    // Draw connections
+    for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+            const a = nodes[i], b = nodes[j];
+            const dx = a.x - b.x, dy = a.y - b.y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < 120) {
+                let alpha = 0.15 + 0.25 * (1 - dist/120);
+                ctx.strokeStyle = `rgba(99,102,241,${alpha})`;
+                ctx.beginPath();
+                ctx.moveTo(a.x, a.y);
+                ctx.lineTo(b.x, b.y);
+                ctx.stroke();
+            }
+        }
+    }
+    // Draw nodes
+    for (let node of nodes) {
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.r, 0, 2 * Math.PI);
+        ctx.fillStyle = node.color;
+        ctx.shadowColor = '#6366f1';
+        ctx.shadowBlur = 8;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+    }
+}
+
+function updateNet() {
+    for (let node of nodes) {
+        // Parallax effect
+        let dx = (mouse.x - width/2) * 0.0002;
+        let dy = (mouse.y - height/2) * 0.0002;
+        node.x += node.vx + dx * (node.x - width/2);
+        node.y += node.vy + dy * (node.y - height/2);
+        // Bounce off edges
+        if (node.x < 0 || node.x > width) node.vx *= -1;
+        if (node.y < 0 || node.y > height) node.vy *= -1;
+    }
+}
+
+function animateNet() {
+    updateNet();
+    drawNet();
+    requestAnimationFrame(animateNet);
+}
+animateNet();
+
+// --- Floating Icons Animation ---
+const createFloatingIcons = () => {
+    const container = document.getElementById('floating-icons');
+    const icons = ['🧠', '💡', '🎯', '📝', '🔍', '📊', '🌐', '⚡', '🔄'];
+    for (let i = 0; i < 15; i++) {
+        const icon = document.createElement('div');
+        icon.className = 'float-icon';
+        icon.textContent = icons[Math.floor(Math.random() * icons.length)];
+        icon.style.left = `${Math.random() * 100}vw`;
+        icon.style.animationDelay = `${Math.random() * 12}s`;
+        icon.style.fontSize = `${Math.random() * 1.2 + 1}rem`;
+        container.appendChild(icon);
+    }
+};
+
+// --- Initialize Animations ---
+document.addEventListener('DOMContentLoaded', () => {
+    createFloatingIcons();
+    setTimeout(() => cards[0].classList.add('active'), 200);
+});
+
+// --- State Management ---
+let currentStep = 0;
+const totalSteps = 7;
+const answers = [];
+const cards = Array.from(document.querySelectorAll('.onboarding-card'));
+const nextBtns = Array.from(document.querySelectorAll('.onboarding-icon-btn'));
+const inputs = Array.from(document.querySelectorAll('.onboarding-input'));
+const cursors = Array.from(document.querySelectorAll('.blinking-cursor'));
+const progressDots = Array.from(document.querySelectorAll('.progress-dot'));
+const cardIcons = [
+    document.getElementById('rocket-emoji'),
+    ...Array.from(document.querySelectorAll('#next-1 span, #next-2 span, #next-3 span, #next-4 span, #next-5 span, #next-6 span'))
+];
+
+// --- Typewriter/Reveal Animation for Questions ---
+function typewriterEffect(element, text, speed = 18, cb) {
+    element.textContent = '';
+    let i = 0;
+    function type() {
+        if (i < text.length) {
+            element.textContent += text[i++];
+            setTimeout(type, speed + Math.random()*30);
+        } else if (cb) {
+            cb();
+        }
+    }
+    type();
+}
+
+// --- Icon Entry Particle Effect ---
+function iconEntryParticles(iconEl) {
+    const card = iconEl.closest('.onboarding-card');
+    const iconRect = iconEl.getBoundingClientRect();
+    const cardRect = card.getBoundingClientRect();
+    const offsetX = iconRect.left - cardRect.left + iconRect.width/2;
+    const offsetY = iconRect.top - cardRect.top + iconRect.height/2;
+    for (let i = 0; i < 16; i++) {
+        const p = document.createElement('div');
+        p.style.position = 'absolute';
+        p.style.left = offsetX + 'px';
+        p.style.top = offsetY + 'px';
+        const size = 6 + Math.random() * 6;
+        p.style.width = size + 'px';
+        p.style.height = size + 'px';
+        p.style.borderRadius = '50%';
+        p.style.background = 'rgba(255,255,255,0.8)';
+        p.style.pointerEvents = 'none';
+        p.style.opacity = '0.8';
+        p.style.zIndex = '110';
+        card.appendChild(p);
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 24 + Math.random() * 16;
+        const dx = Math.cos(angle) * dist;
+        const dy = Math.sin(angle) * dist;
+        setTimeout(() => {
+            p.style.transition = 'transform 0.6s ease-out, opacity 0.6s ease-out';
+            p.style.transform = `translate(${dx}px, ${dy}px) scale(0.3)`;
+            p.style.opacity = '0';
+        }, 10);
+        setTimeout(() => p.remove(), 700);
+    }
+}
+
+// --- Subtle Background Particles on Card Entry ---
+function cardBackgroundParticles(idx) {
+    const card = cards[idx];
+    const rect = card.getBoundingClientRect();
+    for (let i = 0; i < 30; i++) {
+        const p = document.createElement('div');
+        p.style.position = 'absolute';
+        const x = Math.random() * rect.width;
+        const y = Math.random() * rect.height;
+        p.style.left = x + 'px';
+        p.style.top = y + 'px';
+        const size = 4 + Math.random() * 6;
+        p.style.width = size + 'px';
+        p.style.height = size + 'px';
+        p.style.borderRadius = '50%';
+        p.style.background = 'rgba(255,255,255,0.3)';
+        p.style.pointerEvents = 'none';
+        p.style.zIndex = 2;
+        card.appendChild(p);
+        // Animate outward and fade
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 20 + Math.random() * 20;
+        const dx = Math.cos(angle) * dist;
+        const dy = Math.sin(angle) * dist;
+        setTimeout(() => {
+            p.style.transition = 'transform 1.3s ease-out, opacity 1.3s ease-out';
+            p.style.transform = `translate(${dx}px, ${dy}px)`;
+            p.style.opacity = '0';
+        }, 10);
+        setTimeout(() => p.remove(), 1400);
+    }
+}
+
+// --- Animate Card In ---
+function animateCardIn(idx) {
+    const card = cards[idx];
+    // Background particles for entry
+    cardBackgroundParticles(idx);
+    card.style.transform = 'translateY(80px) rotateX(10deg) scale(0.95)';
+    card.style.opacity = '0';
+    card.classList.add('active');
+    setTimeout(() => {
+        card.style.transition = 'all 0.8s cubic-bezier(.23,1,.32,1)';
+        card.style.transform = 'translateY(0) rotateX(0) scale(1)';
+        card.style.opacity = '1';
+    }, 10);
+    // Staggered content
+    const title = card.querySelector('.onboarding-title');
+    const question = card.querySelector('.onboarding-question');
+    const btn = card.querySelector('.onboarding-icon-btn');
+    title.style.opacity = '0';
+    question.style.opacity = '0';
+    btn.style.opacity = '0';
+    setTimeout(() => { title.style.opacity = '1'; title.style.transform = 'translateY(-10px)'; }, 200);
+    setTimeout(() => {
+        // Typewriter effect for question
+        question.style.opacity = '1';
+        question.style.transform = 'none';
+        typewriterEffect(question, question.getAttribute('data-full') || question.textContent);
+    }, 500);
+    setTimeout(() => { btn.style.opacity = '1'; btn.style.transform = 'scale(1.1)'; setTimeout(()=>btn.style.transform='scale(1)', 200); }, 1100);
+    // Icon animation
+    const icon = cardIcons[idx];
+    if (icon) {
+        icon.style.transition = 'none';
+        icon.style.transform = 'scale(0.7)';
+        setTimeout(() => {
+            icon.style.transition = 'transform 0.5s cubic-bezier(.23,1,.32,1)';
+            icon.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                icon.style.transform = 'scale(1)';
+                // Entry particles around icon
+                iconEntryParticles(icon);
+            }, 400);
+        }, 900);
+    }
+    
+    // For the Jupiter credentials card, add special effects for the secure badge
+    if (idx === 6) {
+        const badge = card.querySelector('.security-badge');
+        if (badge) {
+            setTimeout(() => {
+                const badgeParticles = document.createElement('div');
+                badgeParticles.style.position = 'absolute';
+                badgeParticles.style.top = '0';
+                badgeParticles.style.right = '0';
+                badgeParticles.style.zIndex = '5';
+                card.appendChild(badgeParticles);
+                
+                for (let i = 0; i < 8; i++) {
+                    const p = document.createElement('div');
+                    p.style.position = 'absolute';
+                    p.style.right = '10px';
+                    p.style.top = '10px';
+                    const size = 4 + Math.random() * 3;
+                    p.style.width = size + 'px';
+                    p.style.height = size + 'px';
+                    p.style.borderRadius = '50%';
+                    p.style.background = '#10b981';
+                    p.style.boxShadow = '0 0 10px #10b981';
+                    
+                    const angle = Math.random() * Math.PI;
+                    const distance = 20 + Math.random() * 15;
+                    const dx = Math.cos(angle) * distance;
+                    const dy = Math.sin(angle) * distance;
+                    
+                    p.style.transition = 'all 1s cubic-bezier(.23,1,.32,1)';
+                    p.style.transform = `translate(${dx}px, ${dy}px)`;
+                    p.style.opacity = '0';
+                    
+                    badgeParticles.appendChild(p);
+                    setTimeout(() => p.remove(), 1000);
+                }
+            }, 300);
+        }
+        
+        // Animate data bits
+        const dataBits = card.querySelectorAll('.data-bit');
+        dataBits.forEach(bit => {
+            bit.style.animationPlayState = 'running';
+        });
+    }
+}
+
+// --- Animate Card Out ---
+function animateCardOut(idx, direction = 1) {
+    const card = cards[idx];
+    card.style.transition = 'all 0.7s cubic-bezier(.77,0,.18,1)';
+    card.style.transform = `translateY(${direction*60}px) rotateX(${-direction*12}deg) scale(0.92)`;
+    card.style.opacity = '0';
+    setTimeout(() => card.classList.remove('active'), 700);
+}
+
+// --- Animate Progress Dots ---
+function popProgressDot(idx) {
+    const dot = progressDots[idx];
+    dot.style.transition = 'transform 0.3s cubic-bezier(.23,1,.32,1), box-shadow 0.3s';
+    dot.style.transform = 'scale(1.7)';
+    dot.style.boxShadow = '0 0 18px #6366f1, 0 0 30px #6366f1';
+    setTimeout(() => {
+        dot.style.transform = 'scale(1)';
+        dot.style.boxShadow = '';
+    }, 300);
+}
+
+// --- Rocket Blast Off Animation ---
+function rocketBlastOff() {
+    const rocket = document.getElementById('rocket-emoji');
+    const particles = document.getElementById('rocket-particles');
+    const card = cards[0];
+    // Card shake
+    card.style.transition = 'transform 0.2s';
+    card.style.transform += ' translateX(-8px)';
+    setTimeout(() => card.style.transform = card.style.transform.replace(' translateX(-8px)', ''), 120);
+    // Shockwave
+    const shock = document.createElement('div');
+    shock.style.position = 'absolute';
+    shock.style.left = '50%';
+    shock.style.top = '60%';
+    shock.style.transform = 'translate(-50%, -50%)';
+    shock.style.width = '0px';
+    shock.style.height = '0px';
+    shock.style.borderRadius = '50%';
+    shock.style.background = 'radial-gradient(circle, #fff 0%, #6366f1 60%, transparent 100%)';
+    shock.style.opacity = '0.5';
+    shock.style.zIndex = '20';
+    card.appendChild(shock);
+    setTimeout(() => {
+        shock.style.transition = 'all 0.7s cubic-bezier(.23,1,.32,1)';
+        shock.style.width = '180px';
+        shock.style.height = '180px';
+        shock.style.opacity = '0';
+    }, 10);
+    setTimeout(() => shock.remove(), 800);
+    // Rocket trail
+    rocket.style.transition = 'transform 1s cubic-bezier(.23,1,.32,1)';
+    rocket.style.transform = 'translateY(-150px) scale(1.5) rotate(-25deg)';
+    for(let i=0; i<24; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        const angle = (i/24) * Math.PI * 2;
+        const distance = 10 + Math.random() * 20;
+        p.style.left = (32 + Math.cos(angle) * distance) + 'px';
+        p.style.top = (48 + Math.sin(angle) * distance) + 'px';
+        p.style.transform = `scale(${0.5 + Math.random()})`;
+        p.style.opacity = 0.3 + Math.random() * 0.7;
+        particles.appendChild(p);
+        setTimeout(()=>p.remove(), 900);
+    }
+}
+
+// --- Cursor Positioning ---
+inputs.forEach((input, idx) => {
+    const cursor = cursors[idx];
+    cursor.style.display = 'none';
+    const updateCursorPosition = () => {
+        const isAtBeginning = !input.value.length;
+        if (isAtBeginning) {
+            cursor.style.left = '16px';
+            cursor.style.top = '1.5rem';
+            cursor.style.transform = 'none';
+        } else {
+            cursor.style.display = 'none';
+        }
+    };
+    input.addEventListener('focus', () => {
+        if (!input.value.length) {
+            cursor.style.display = 'inline';
+            updateCursorPosition();
+        } else {
+            cursor.style.display = 'none';
+        }
+    });
+    input.addEventListener('blur', () => {
+        cursor.style.display = 'none';
+    });
+    input.addEventListener('input', updateCursorPosition);
+});
+
+// --- Jupiter Credentials Form Animation ---
+const fullnameInput = document.getElementById('fullname-input');
+const jupiterPasswordInput = document.getElementById('jupiter-password');
+
+if (fullnameInput && jupiterPasswordInput) {
+    // Add focus effects
+    [fullnameInput, jupiterPasswordInput].forEach(input => {
+        input.addEventListener('focus', () => {
+            input.style.boxShadow = '0 0 20px rgba(99, 102, 241, 0.3)';
+            input.style.transform = 'translateY(-2px)';
+            input.style.transition = 'all 0.3s cubic-bezier(.23,1,.32,1)';
+        });
+        
+        input.addEventListener('blur', () => {
+            input.style.boxShadow = '';
+            input.style.transform = '';
+        });
+    });
+    
+    // Connect animation when both fields are filled
+    jupiterPasswordInput.addEventListener('input', () => {
+        const connectBtn = document.getElementById('next-6');
+        if (fullnameInput.value && jupiterPasswordInput.value) {
+            connectBtn.style.boxShadow = '0 0 30px rgba(99,102,241,0.5), 0 0 60px rgba(99,102,241,0.2)';
+            connectBtn.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                connectBtn.style.transform = 'scale(1)';
+            }, 300);
+        }
+    });
+}
+
+// --- Super Cool Card Close Out Animation ---
+function cardParticleBurst(idx, onComplete) {
+    const card = cards[idx];
+    // Create overlay for particles
+    const burst = document.createElement('div');
+    burst.style.position = 'absolute';
+    burst.style.left = 0;
+    burst.style.top = 0;
+    burst.style.width = '100%';
+    burst.style.height = '100%';
+    burst.style.pointerEvents = 'none';
+    burst.style.overflow = 'visible';
+    burst.style.zIndex = 100;
+    card.appendChild(burst);
+    // Animate card shrink/fade
+    card.style.transition = 'transform 0.7s cubic-bezier(.77,0,.18,1), opacity 0.7s cubic-bezier(.77,0,.18,1)';
+    card.style.transform += ' scale(0.7) rotateZ(12deg)';
+    card.style.opacity = '0.12';
+    // Particle burst (more, bigger, longer)
+    const rect = card.getBoundingClientRect();
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    for (let i = 0; i < 60; i++) {
+        const p = document.createElement('div');
+        p.style.position = 'absolute';
+        p.style.left = centerX + 'px';
+        p.style.top = centerY + 'px';
+        p.style.width = 16 + Math.random() * 12 + 'px';
+        p.style.height = p.style.width;
+        p.style.borderRadius = '50%';
+        p.style.background = 'linear-gradient(135deg, #6366f1, #06b6d4, #fbbf24, #f87171)';
+        p.style.opacity = 0.8 + Math.random() * 0.2;
+        p.style.boxShadow = '0 0 24px #6366f1, 0 0 40px #fbbf24';
+        burst.appendChild(p);
+        // Animate particle
+        const angle = (i / 60) * Math.PI * 2 + (Math.random() - 0.5) * 0.3;
+        const dist = 120 + Math.random() * 100;
+        const dx = Math.cos(angle) * dist;
+        const dy = Math.sin(angle) * dist;
+        setTimeout(() => {
+            p.style.transition = 'all 1.1s cubic-bezier(.23,1,.32,1)';
+            p.style.transform = `translate(${dx}px, ${dy}px) scale(${0.7 + Math.random() * 1.2})`;
+            p.style.opacity = 0;
+        }, 10);
+        setTimeout(() => p.remove(), 1200);
+    }
+    // Shockwave/flash effect
+    const shock = document.createElement('div');
+    shock.style.position = 'absolute';
+    shock.style.left = '50%';
+    shock.style.top = '60%';
+    shock.style.transform = 'translate(-50%, -50%)';
+    shock.style.width = '0px';
+    shock.style.height = '0px';
+    shock.style.borderRadius = '50%';
+    shock.style.background = 'radial-gradient(circle, #fff 0%, #6366f1 60%, transparent 100%)';
+    shock.style.opacity = '0.6';
+    shock.style.zIndex = '120';
+    card.appendChild(shock);
+    setTimeout(() => {
+        shock.style.transition = 'all 0.8s cubic-bezier(.23,1,.32,1)';
+        shock.style.width = '260px';
+        shock.style.height = '260px';
+        shock.style.opacity = '0';
+    }, 10);
+    setTimeout(() => shock.remove(), 900);
+    setTimeout(() => {
+        burst.remove();
+        card.classList.remove('active');
+        card.style.transform = '';
+        card.style.opacity = '';
+        if (onComplete) onComplete();
+    }, 1000);
+}
+
+// --- Enhanced Transitions & Animations ---
+nextBtns.forEach((btn, idx) => {
+    btn.addEventListener('click', function(e) {
+        // Advanced Ripple Effect
+        const ripple = document.createElement('span');
+        ripple.className = 'ripple';
+        const diameter = Math.max(btn.clientWidth, btn.clientHeight);
+        ripple.style.width = ripple.style.height = `${diameter}px`;
+        ripple.style.left = `${e.offsetX - diameter/2}px`;
+        ripple.style.top = `${e.offsetY - diameter/2}px`;
+        btn.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 800);
+        // Special rocket blast-off effect for step 0
+        if(idx === 0) rocketBlastOff();
+        // Save answer for steps 1-5 by querying the input inside the current card
+        if (idx >= 1 && idx <= 5) {
+            const currentCard = cards[idx];
+            const inputEl = currentCard.querySelector('.onboarding-input');
+            answers[idx] = inputEl ? inputEl.value.trim() : '';
+        }
+        // Save Jupiter credentials for step 6
+        if (idx === 6) {
+            const fullname = document.getElementById('fullname-input')?.value || '';
+            const jupiterPassword = document.getElementById('jupiter-password')?.value || '';
+            answers[6] = { fullname, jupiterPassword };
+        }
+        // Animate progress dot
+        popProgressDot(idx);
+        // Super cool close out animation, then next card
+        cardParticleBurst(idx, () => {
+            // Animate in next card
+            if (idx + 1 < totalSteps) {
+                cards[idx + 1].classList.remove('inactive');
+                animateCardIn(idx + 1);
+                if (inputs[idx + 1]) {
+                    setTimeout(() => inputs[idx + 1].focus(), 600);
+                } else if (idx + 1 === 6) { // If moving to Jupiter credentials page
+                    setTimeout(() => document.getElementById('fullname-input')?.focus(), 600);
+                }
+            } else {
+                // Enhanced finale animation with personalized cards
+                setTimeout(() => {
+                    const container = document.querySelector('.onboarding-container');
+                    container.innerHTML = '';
+                    const finale = document.createElement('div');
+                    finale.className = 'finale-container';
+                    finale.style.cssText = `
+                        position: absolute;
+                        left: 50%;
+                        top: 50%;
+                        transform: translate(-50%, -50%);
+                        text-align: center;
+                        opacity: 0;
+                        transition: opacity 1s, transform 1.5s cubic-bezier(.23,1,.32,1);
+                        width: 90%;
+                        max-width: 600px;
+                    `;
+                    finale.innerHTML = `
+                        <h1 style=\"font-size: 3rem; color: #fff; margin-bottom: 1rem; font-family: 'Montserrat', sans-serif;\">Your Journey Begins</h1>
+                        <p style=\"font-size: 1.2rem; color: rgba(255,255,255,0.8); margin-bottom: 2rem; font-family: 'Poppins', sans-serif;\">We're building your personalized knowledge web...</p>
+                        <div class=\"loader\" style=\"width: 60px; height: 60px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #6366f1; animation: spin 1s linear infinite; margin: 0 auto;\"></div>
+                    `;
+                    container.appendChild(finale);
+                    
+                    // Show and animate finale
+                    setTimeout(() => {
+                        finale.style.opacity = '1';
+                        finale.style.transform = 'translate(-50%, -50%) scale(1)';
+                        
+                        // Process user responses and display personalized cards
+                        setTimeout(() => {
+                            processUserResponses(answers);
+                            
+                            // Note: Redirection now happens when user clicks the proceed button, not automatically
+                        }, 1500);
+                    }, 100);
+                }, 900);
+            }
+        });
+    });
+});
+// Animate first card in on load
+window.addEventListener('DOMContentLoaded', ()=>{
+    animateCardIn(0);
+});
+</script>
+{% endblock %}

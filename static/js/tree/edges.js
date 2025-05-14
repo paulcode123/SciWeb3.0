@@ -29,19 +29,26 @@ export function addEdge(edge) {
 
 // Resize canvas
 export function resizeCanvas() {
-  elements.treeCanvas.width = window.innerWidth;
-  elements.treeCanvas.height = window.innerHeight;
+  // Match canvas buffer size to its CSS display size
+  const width = elements.treeCanvas.clientWidth;
+  const height = elements.treeCanvas.clientHeight;
+  elements.treeCanvas.width = width;
+  elements.treeCanvas.height = height;
   drawEdges();
 }
 
 // Draw edges between nodes
 export function drawEdges() {
-  // Make sure canvas covers the entire viewport
-  elements.treeCanvas.width = window.innerWidth;
-  elements.treeCanvas.height = window.innerHeight;
+  // Ensure the canvas buffer matches its CSS size
+  const width = elements.treeCanvas.clientWidth;
+  const height = elements.treeCanvas.clientHeight;
+  if (elements.treeCanvas.width !== width || elements.treeCanvas.height !== height) {
+    elements.treeCanvas.width = width;
+    elements.treeCanvas.height = height;
+  }
   
   // Clear canvas
-  ctx.clearRect(0, 0, elements.treeCanvas.width, elements.treeCanvas.height);
+  ctx.clearRect(0, 0, width, height);
   
   // Draw each edge
   edges.forEach(edge => {
@@ -57,7 +64,7 @@ export function drawEdges() {
       const toCenterX   = toRect.left   + toRect.width / 2;
       const toCenterY   = toRect.top    + toRect.height / 2;
       // Compute extra vertical offset 5% of the vertical length of the edge
-      const extraY = toCenterY/10;
+      const extraY = 0;
       const fromY = fromCenterY;
       const toY   = toCenterY + extraY;
       // Draw line from adjusted centers

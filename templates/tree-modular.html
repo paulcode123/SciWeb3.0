@@ -102,24 +102,11 @@
                     </button>
                 </div>
             </div>
-            <div class="learning-menu">
-                <button class="tool-button btn-learning" data-tooltip="Learning Items">
-                    <i class="fas fa-brain"></i>
-                </button>
-                <div class="learning-submenu">
-                    <button class="submenu-button btn-key-idea" data-type="keyidea" data-tooltip="Key Idea">
-                        <i class="fas fa-atom"></i>
-                    </button>
-                    <button class="submenu-button btn-question" data-type="question" data-tooltip="Question">
-                        <i class="fas fa-question-circle"></i>
-                    </button>
-                    <button class="submenu-button btn-problem-type" data-type="problemtype" data-tooltip="Problem Type">
-                        <i class="fas fa-puzzle-piece"></i>
-                    </button>
-                </div>
-            </div>
             <button class="tool-button btn-image" data-tooltip="Add Image Node">
                 <i class="fas fa-image"></i>
+            </button>
+            <button class="tool-button btn-area-select" data-tooltip="Select Area">
+                <i class="fas fa-object-group"></i>
             </button>
         </div>
         <!-- Status Message -->
@@ -172,6 +159,10 @@
         <button class="ai-toggle-btn">
             <i class="fas fa-robot"></i>
         </button>
+        <!-- Overlay for area selection rectangle -->
+        <div class="area-select-rect" style="display:none;"></div>
+        <!-- Bubble to exit area select mode -->
+        <div class="area-select-bubble" style="display:none;">Show All Nodes</div>
     </div>
 {% endblock %}
 
