@@ -7,25 +7,33 @@ from urllib.parse import urlparse, parse_qs
 
 # Try to import from our initialization module
 try:
-    from db_init import db
+    from db_init import db, is_firebase_available
 except ImportError:
-    # If import fails, initialize Firebase here
-    if not firebase_admin._apps:
-        cred = credentials.Certificate('service_key.json')
-        firebase_admin.initialize_app(cred, {
-            'projectId': 'sturdy-analyzer-381018',
-            'storageBucket': 'sciweb-files'
-        })
-    db = firestore.client()
-    # Explicitly specify the database name using internal method
-    db._database_string_internal = "projects/sturdy-analyzer-381018/databases/sciwebdb"
+    # Fall back to a local initialization if import fails
+    is_firebase_available = lambda: False
+    db = None
 
-# Get Firebase Storage bucket
-bucket = storage.bucket('sciweb-files')
+# Get Firebase Storage bucket if Firebase is available
+bucket = None
+if is_firebase_available():
+    try:
+        bucket = storage.bucket('sciweb-files')
+    except Exception as e:
+        print(f"Error getting Firebase Storage bucket: {str(e)}")
 
 firebase_routes = Blueprint('firebase_routes', __name__)
 
+# Helper to check Firebase availability for routes
+def firebase_required(f):
+    def decorated_function(*args, **kwargs):
+        if not is_firebase_available():
+            return jsonify({"error": "Firebase functionality is not available. Please set up your service_key3.json file."}), 503
+        return f(*args, **kwargs)
+    decorated_function.__name__ = f.__name__
+    return decorated_function
+
 @firebase_routes.route('/<collection>', methods=['GET'])
+@firebase_required
 def get_all(collection):
     """Get all documents from a collection"""
     try:
@@ -36,6 +44,7 @@ def get_all(collection):
         return jsonify({"error": str(e)}), 500
 
 @firebase_routes.route('/<collection>/<document_id>', methods=['GET'])
+@firebase_required
 def get_one(collection, document_id):
     """Get a specific document from a collection"""
     try:
@@ -47,6 +56,7 @@ def get_one(collection, document_id):
         return jsonify({"error": str(e)}), 500
 
 @firebase_routes.route('/<collection>', methods=['POST'])
+@firebase_required
 def create(collection):
     """Create a new document in a collection"""
     try:
@@ -70,6 +80,7 @@ def create(collection):
         return jsonify({"error": str(e)}), 500
 
 @firebase_routes.route('/<collection>/<document_id>', methods=['PUT', 'PATCH'])
+@firebase_required
 def update(collection, document_id):
     """Update a document in a collection"""
     try:
@@ -103,6 +114,7 @@ def update(collection, document_id):
         return jsonify({"error": str(e)}), 500
 
 @firebase_routes.route('/<collection>/<document_id>', methods=['DELETE'])
+@firebase_required
 def delete(collection, document_id):
     """Delete a document from a collection"""
     try:
@@ -120,6 +132,7 @@ def delete(collection, document_id):
 
 
 @firebase_routes.route('/profile-photo', methods=['POST'])
+@firebase_required
 def upload_profile_photo():
     """
     Upload a profile photo to Firebase Storage and update the user's profile
@@ -196,6 +209,7 @@ def upload_profile_photo():
 
 # User profile related endpoints
 @firebase_routes.route('/Members/<user_id>', methods=['GET'])
+@firebase_required
 def get_user_profile(user_id):
     """Get a user's profile data with settings"""
     try:
