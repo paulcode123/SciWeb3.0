@@ -8,10 +8,16 @@ from werkzeug.utils import secure_filename
 # Load OpenAI API key from api_keys.json
 with open('api_keys.json') as f:
     api_keys = json.load(f)
-OPENAI_API_KEY = api_keys.get('OpenAiAPIKey')
+OPENAI_API_KEY = api_keys.get('OpenAiAPIKey') or os.environ.get('OPENAI_API_KEY')
 
-# Use the new OpenAI client (openai>=1.0.0)
-client = openai.OpenAI(api_key=OPENAI_API_KEY)
+# Only initialize the OpenAI client if we have an API key
+client = None
+if OPENAI_API_KEY:
+    client = openai.OpenAI(api_key=OPENAI_API_KEY)
+
+# Add a helper function to check if AI features are available
+def is_ai_available():
+    return client is not None
 
 ai_bp = Blueprint('ai', __name__)
 
@@ -25,6 +31,10 @@ def challenge_user():
     Returns:
       - message: a single AI-generated Socratic, constructivist message (plain text)
     """
+    # Check if AI features are available
+    if not is_ai_available():
+        return jsonify({"message": "AI features are currently unavailable. Please set up your OpenAI API key."}), 503
+        
     data = request.get_json()
     chat_history = data.get('chat_history', [])
     concept_map = data.get('concept_map', [])
@@ -80,6 +90,10 @@ def voice_to_nodes():
     Returns:
       - JSON with nodes to create and edges to establish
     """
+    # Check if AI features are available
+    if not is_ai_available():
+        return jsonify({"error": "AI features are currently unavailable. Please set up your OpenAI API key."}), 503
+        
     try:
         # Check if audio file is present
         if 'audio' not in request.files:
@@ -228,6 +242,10 @@ def analyze_onboarding():
     Returns:
       - cards: array of personalized recommendation cards
     """
+    # Check if AI features are available
+    if not is_ai_available():
+        return jsonify({"error": "AI features are currently unavailable. Please set up your OpenAI API key."}), 503
+        
     try:
         data = request.get_json()
         responses = data.get('responses', [])
