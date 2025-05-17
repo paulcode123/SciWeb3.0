@@ -7,6 +7,7 @@ import * as Autosave from './autosave.js';
 import * as AI from './ai.js';
 import * as Voice from './voice.js';
 import * as Utils from './utils.js';
+import './node_editor.js';
 
 document.addEventListener('DOMContentLoaded', function() {
   // Initialize DOM elements

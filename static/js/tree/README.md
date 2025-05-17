@@ -13,6 +13,7 @@ This directory contains the modular version of the tree.js application, which ha
 - **ai.js**: AI assistant features, sidebar, and chat.
 - **voice.js**: Voice recording and speech-to-node functionality.
 - **utils.js**: Shared utility functions like color mapping, formatting, etc.
+- **node_editor.js**: Provides a full-screen overlay for editing the node type library and lineup.
 
 ## Cursor Rule
 
@@ -68,3 +69,22 @@ Below is a reference guide for what code is in which file:
 
 ### utils.js
 - `getColorForType()`
+
+## node_editor.js
+
+- Provides a full-screen overlay for editing the node type library and lineup.
+- Accessed via a plus (+) icon in the left toolbar under the area select button.
+- Features:
+  - Hardcoded node type library (Motivator, Task, Challenge, Idea, Image, etc.).
+  - Drag node types from the library into the lineup.
+  - Create new node types and edit existing ones (name, color, icon, features, etc.).
+  - Select any FontAwesome icon by name.
+  - Edit features (name, description, icon, color, AI prompt) for each node type.
+  - Save changes to the database by clicking the Save button.
+  - Overlay blocks all interaction with the main tree page while open.
+
+**How to use:**
+- Click the plus (+) icon in the toolbar to open the node editor.
+- Drag node types into the lineup or create new ones.
+- Click a node type to edit its properties and features.
+- Click Save to persist changes, or Cancel to discard.

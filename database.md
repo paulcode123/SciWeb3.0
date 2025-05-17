@@ -61,12 +61,29 @@ Stores user's tree data including nodes and connections.
 | nodes[].position.x | Number | X coordinate |
 | nodes[].position.y | Number | Y coordinate |
 | nodes[].dueDate | Timestamp | Optional due date for task-like nodes |
-| nodes[].content | String | Optional content (e.g., image URL) |
+| nodes[].content | String | Optional content (e.g., image URL, file code, etc.) |
+| nodes[].otherData | Array<Object> | Optional other data (e.g., counselor pic, conversation, etc.) |
 | edges | Array<Object> | Array of edge objects connecting nodes |
 | edges[].from | String | Source node ID |
 | edges[].to | String | Target node ID |
 | createdAt | Timestamp | Tree creation timestamp |
 | updatedAt | Timestamp | Last tree update timestamp |
+| nodeTypes | Array<Object> | Array of node type objects |
+| nodeTypes[].id | String | Unique node type identifier |
+| nodeTypes[].name | String | Node type name |
+| nodeTypes[].description | String | Node type description |
+| nodeTypes[].color | String | Node type color |
+| nodeTypes[].icon | String | Node type icon |
+| nodeTypes[].features | Array<Object> | AI prompts for node features |
+| nodeTypes[].features[].name | String | Feature name |
+| nodeTypes[].features[].description | String | Feature description |
+| nodeTypes[].features[].icon | String | Feature icon |
+| nodeTypes[].features[].color | String | Feature color |
+| nodeTypes[].features[].prompt | String | AI prompt for feature |
+
+
+
+
 
 ### FriendConnections
 Stores friend relationships between users.
@@ -253,21 +270,7 @@ Stores chat messages for class channels.
 | readBy | Array<String> | User IDs who have read the message |
 | mentions | Array<String> | User IDs mentioned in message |
 
-### NodeTypes
-Stores information about node types.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| id | String | Unique node type identifier |
-| name | String | Node type name |
-| description | String | Node type description |
-| color | String | Node type color |
-| icon | String | Node type icon |
-| features | Array<String> | Features associated with node type |
-| features[].name | String | Feature name |
-| features[].description | String | Feature description |
-| features[].icon | String | Feature icon |
-| features[].color | String | Feature color |
 
 
 

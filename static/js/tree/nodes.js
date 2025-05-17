@@ -864,6 +864,10 @@ export function createCanonicalNode({ type, title, left, top, content = null, id
     node.appendChild(img);
   }
   elements.nodesContainer.appendChild(node);
+  // Apply correct scale and font size immediately
+  const scale = PanZoom.scale;
+  node.style.transform = `scale(${scale})`;
+  node.style.fontSize = `${Math.max(12, 16 * scale)}px`;
   makeDraggable(node);
   const nodeObject = {
     id: newId,

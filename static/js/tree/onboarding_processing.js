@@ -4,8 +4,53 @@
  * on the loading screen before redirecting to the tree page.
  */
 
+// Global storage for onboarding answers including Jupiter credentials
+let onboardingAnswersGlobal = [];
+
+// Fetch and store current user ID for later tree initialization
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        const resp = await fetch('/api/auth/user');
+        if (resp.ok) {
+            const data = await resp.json();
+            if (data.user && data.user.id) {
+                localStorage.setItem('userId', data.user.id);
+                console.log('Fetched userId:', data.user.id);
+            } else {
+                console.error('Authenticated user data missing');
+            }
+        } else {
+            console.error('Failed to get current user:', resp.status);
+        }
+    } catch (err) {
+        console.error('Error fetching current user:', err);
+    }
+});
+
 // Process user answers and generate personalized cards
 async function processUserResponses(answers) {
+    // Store answers globally for later use (e.g., Jupiter credentials)
+    onboardingAnswersGlobal = answers;
+    
+    // Immediately fetch user's Jupiter classes
+    const creds = answers[6] || {};
+    if (creds.fullname && creds.jupiterPassword) {
+        fetch('/ai/fetch_jupiter_data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ osis: creds.fullname, password: creds.jupiterPassword })
+        })
+        .then(resp => {
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            return resp.json();
+        })
+        .then(data => {
+            console.log('Fetched classes:', data.classes);
+            localStorage.setItem('classes', JSON.stringify(data.classes));
+        })
+        .catch(err => console.error('Error fetching Jupiter classes:', err));
+    }
+    
     // The answers array contains responses for each question
     // [0]: (empty - welcome screen)
     // [1]: Academic success definition
@@ -425,7 +470,7 @@ function showProceedButton(container) {
     document.head.appendChild(style);
     
     // Add button click event
-    proceedButton.addEventListener('click', function(e) {
+    proceedButton.addEventListener('click', async function(e) {
         // Ripple effect on click
         const ripple = document.createElement('span');
         ripple.style.cssText = `
@@ -450,7 +495,50 @@ function showProceedButton(container) {
         proceedButton.style.opacity = '0.7';
         proceedButton.textContent = 'Loading...';
         
-        // Add a short delay for the effect, then redirect
+        // Fetch classes from Jupiter API before redirecting
+        let classes = [];
+        try {
+            const creds = onboardingAnswersGlobal[6] || {};
+            const resp = await fetch('/ai/fetch_jupiter_data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ osis: creds.fullname, password: creds.jupiterPassword })
+            });
+            if (resp.ok) {
+                const data = await resp.json();
+                console.log('Fetched classes:', data.classes);
+                classes = data.classes;
+                localStorage.setItem('classes', JSON.stringify(classes));
+            } else {
+                console.error('Failed to fetch classes:', resp.status, await resp.text());
+            }
+        } catch (err) {
+            console.error('Error fetching Jupiter classes:', err);
+        }
+        
+        // Initialize the user's tree in the database
+        try {
+            const initResp = await fetch('/ai/initialize_tree', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: localStorage.getItem('userId'),
+                    responses: onboardingAnswersGlobal,
+                    classes: classes
+                })
+            });
+            if (initResp.ok) {
+                const initData = await initResp.json();
+                console.log('Initialized tree:', initData);
+                localStorage.setItem('treeId', initData.id);
+            } else {
+                console.error('Failed to initialize tree:', initResp.status, await initResp.text());
+            }
+        } catch (err) {
+            console.error('Error initializing tree:', err);
+        }
+        
+        // Redirect after a short delay to allow background tasks to complete
         setTimeout(() => {
             window.location.href = '/tree';
         }, 500);

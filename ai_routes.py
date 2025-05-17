@@ -5,6 +5,12 @@ import os
 import tempfile
 from werkzeug.utils import secure_filename
 
+import urllib.request
+import urllib.error
+import urllib.parse
+from db_init import db
+from firebase_admin import firestore
+
 # Load OpenAI API key from api_keys.json
 with open('api_keys.json') as f:
     api_keys = json.load(f)
@@ -347,4 +353,228 @@ def analyze_onboarding():
         
     except Exception as e:
         print(f"Error in analyze_onboarding: {str(e)}")
+        return jsonify({"error": str(e)}), 500 
+
+@ai_bp.route('/fetch_jupiter_data', methods=['POST'])
+def fetch_jupiter_data():
+    data = request.get_json()
+    osis = data.get('osis')
+    password = data.get('password')
+    if not osis or not password:
+        return jsonify({"error": "Missing credentials"}), 400
+    # Attempt to fetch from remote Jupiter API; fallback to sample.txt if it fails
+    # URL-encode credentials to safely include spaces and special characters
+    params = urllib.parse.urlencode({'osis': osis, 'password': password})
+    cloud_run_url = f'https://jupiterapi-xz43fty7fq-pd.a.run.app/fetchData?{params}'
+    try:
+        with urllib.request.urlopen(cloud_run_url) as resp:
+            resp_data = resp.read().decode('utf-8')
+        result = json.loads(resp_data)
+    except Exception as e:
+        print(f"fetch_jupiter_data: remote fetch error: {e}, falling back to sample.txt")
+        try:
+            # Load sample response for local development
+            with open('sample.txt') as f:
+                result = json.load(f)
+        except Exception as e2:
+            print(f"fetch_jupiter_data: sample.txt load error: {e2}")
+            return jsonify({"error": "Failed to fetch Jupiter data", "details": str(e2)}), 500
+    nested_str = result.get('data')
+    if not nested_str:
+        return jsonify({"error": "Malformed response from Jupiter API"}), 500
+    nested = json.loads(nested_str)
+    courses = nested.get('courses', [])
+    classes_list = []
+    for c in courses:
+        name = c.get('name')
+        teacher = c.get('teacher')
+        schedule = c.get('schedule', '')
+        period = schedule.split(',')[0] if ',' in schedule else schedule
+        classes_list.append({"name": name, "teacher": teacher, "period": period})
+    return jsonify({"classes": classes_list}) 
+
+@ai_bp.route('/initialize_tree', methods=['POST'])
+def initialize_tree():
+    data = request.get_json()
+    user_id = data.get('userId')
+    responses = data.get('responses')
+    classes = data.get('classes')
+    if not user_id or not isinstance(responses, list) or classes is None:
+        return jsonify({"error": "Missing initialization data"}), 400
+    # Load platform plan for context
+    try:
+        with open('SciWebPlan31.md') as f:
+            plan_content = f.read()
+    except Exception:
+        plan_content = ""
+    system_prompt = (
+        f"Use the platform plan for context:\n{plan_content}\n"
+        "Generate initial nodes and edges for a new knowledge web. "
+        "Include motivation nodes based on user's responses, "
+        "challenge nodes if any obstacles were mentioned, "
+        "and class nodes for each class. "
+        "Each node must have an 'id', 'type', 'title', optional 'content', and 'position' with 'x' and 'y'. "
+        "Return JSON via function 'generate_initial_tree'."
+    )
+    functions = [
+        {
+            "name": "generate_initial_tree",
+            "description": "Generate initial nodes and edges for a new user's knowledge web",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "nodes": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {"type": "string"},
+                                "type": {"type": "string"},
+                                "title": {"type": "string"},
+                                "content": {"type": "string"},
+                                "position": {
+                                    "type": "object",
+                                    "properties": {
+                                        "x": {"type": "number"},
+                                        "y": {"type": "number"}
+                                    },
+                                    "required": ["x", "y"]
+                                }
+                            },
+                            "required": ["id", "type", "title", "position"]
+                        }
+                    },
+                    "edges": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "from": {"type": "string"},
+                                "to": {"type": "string"}
+                            },
+                            "required": ["from", "to"]
+                        }
+                    }
+                },
+                "required": ["nodes"]
+            }
+        }
+    ]
+    # Call OpenAI to generate the tree
+    try:
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": f"User responses: {json.dumps(responses)}"},
+            {"role": "user", "content": f"User classes: {json.dumps(classes)}"}
+        ]
+        response = client.chat.completions.create(
+            model="gpt-4.1-mini",
+            messages=messages,
+            functions=functions,
+            function_call={"name": "generate_initial_tree"},
+            temperature=0.7
+        )
+        tree_args = json.loads(response.choices[0].message.function_call.arguments)
+        nodes = tree_args.get("nodes", [])
+        edges = tree_args.get("edges", [])
+    except Exception as e:
+        print(f"initialize_tree AI error: {e}")
+        return jsonify({"error": str(e)}), 500
+    # Save to Firestore
+    try:
+        doc_ref = db.collection("Trees").document()
+        tree_data = {
+            "userId": user_id,
+            "nodes": nodes,
+            "edges": edges,
+            "createdAt": firestore.SERVER_TIMESTAMP,
+            "updatedAt": firestore.SERVER_TIMESTAMP
+        }
+        doc_ref.set(tree_data)
+        print(f"initialize_tree: tree_data: {tree_data}")
+    except Exception as e:
+        print(f"initialize_tree DB error: {e}")
+        return jsonify({"error": "Failed to save tree", "details": str(e)}), 500
+    return jsonify({"id": doc_ref.id, "nodes": nodes, "edges": edges}), 201 
+
+@ai_bp.route('/get_realtime_token', methods=['POST'])
+def get_realtime_token():
+    """
+    Generate a token for OpenAI's Realtime API WebRTC connection.
+    
+    Returns:
+        - token: Bearer token for Realtime API
+        - peer_id: ID for WebRTC connection
+    """
+    try:
+        import requests
+        import logging
+
+        # Get the model to use for realtime API
+        model = "gpt-4o-mini-realtime-preview"  # Use the correct model name
+        
+        logging.info(f"Requesting OpenAI Realtime token for model: {model}")
+        
+        # Make request to OpenAI API to get a WebRTC token using the updated endpoint
+        response = requests.post(
+            "https://api.openai.com/v1/realtime/sessions",
+            headers={
+                "Authorization": f"Bearer {OPENAI_API_KEY}",
+                "Content-Type": "application/json",
+                "OpenAI-Beta": "realtime=v1"
+            },
+            json={
+                "model": model,
+                "voice": "alloy"  # Default voice option
+            }
+        )
+        
+        logging.info(f"OpenAI Realtime token response status: {response.status_code}")
+        
+        if response.status_code != 200:
+            logging.error(f"Failed to get OpenAI token: {response.text}")
+            raise Exception(f"Failed to get token: {response.text}")
+        
+        token_data = response.json()
+        
+        # Extract token from the new response format
+        # Debug the actual response structure
+        print(f"Response data structure: {json.dumps(token_data, indent=2)}")
+        
+        # Check if client_secret is a dictionary with a value field
+        if isinstance(token_data.get("client_secret"), dict) and "value" in token_data["client_secret"]:
+            token = token_data["client_secret"]["value"]
+        else:
+            # Fallback in case structure is different
+            token = token_data.get("client_secret", "")
+            
+        # The peer_id might not be present in newer API versions
+        # Just return the token which is sufficient for WebRTC connection
+        return jsonify({
+            "token": token
+        })
+    except Exception as e:
+        print(f"Error generating realtime token: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@ai_bp.route('/get_openai_key', methods=['GET'])
+def get_openai_key():
+    """
+    Provide the OpenAI API key to authorized clients.
+    This is needed since browsers can't set headers for WebSocket connections.
+    
+    WARNING: In a production environment, you should use a more secure method
+    such as generating short-lived tokens with limited scopes.
+    
+    Returns:
+        - key: OpenAI API key 
+    """
+    try:
+        # In a real production system, this should use proper auth
+        # and generate a limited scope/time token
+        return jsonify({
+            "key": OPENAI_API_KEY
+        })
+    except Exception as e:
+        print(f"Error providing API key: {str(e)}")
         return jsonify({"error": str(e)}), 500 
