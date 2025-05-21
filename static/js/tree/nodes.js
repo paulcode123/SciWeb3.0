@@ -81,6 +81,12 @@ export function setupNodeButtons() {
       elements.uploadOverlay.style.display = 'block';
     }
   });
+
+  // Add NHS credit tracker button
+  document.querySelector('.btn-nhscredit')?.addEventListener('click', function() {
+    const center = PanZoom.getViewCenter();
+    createNode('nhscredit', 'NHS credit tracker', center.x, center.y);
+  });
 }
 
 // Node creation function (refactored to use createCanonicalNode)
@@ -320,6 +326,9 @@ function makeDraggable(node) {
           break;
         case 'project':
           window.location.href = `/collab/${node.dataset.id}`;
+          break;
+        case 'nhscredit':
+          window.location.href = '/nhs';
           break;
       }
     }
@@ -703,6 +712,13 @@ function setupNodeHoverPanel(node, nodeObject) {
       infoSection.innerHTML = `
         <h4>Motivator</h4>
         <p>A personal goal or motivation that drives your hard work. The Envision page helps you visualize and feel renewed energy and drive from your motivators.</p>
+        <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
+      `;
+      break;
+    case 'nhscredit':
+      infoSection.innerHTML = `
+        <h4>NHS Credit Tracker</h4>
+        <p>Track your National Honor Society service hours and credits. Use this node to monitor your progress towards NHS requirements.</p>
         <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
       `;
       break;

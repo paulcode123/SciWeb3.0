@@ -11,6 +11,11 @@
   --node-essay: linear-gradient(135deg, #F1C40F, #F9E79F);
   --node-image: linear-gradient(135deg, #3498DB, #AED6F1);
   --node-idea: linear-gradient(135deg, #00bcd4, #80deea); /* Cyan gradient for idea */
+  --node-keyidea: linear-gradient(135deg, #9c27b0, #ce93d8); /* Purple gradient for key idea */
+  --node-question: linear-gradient(135deg, #ff5722, #ffab91); /* Orange gradient for question */
+  --node-problemtype: linear-gradient(135deg, #009688, #80cbc4); /* Teal gradient for problem type */
+  --node-nhscredit: linear-gradient(135deg, #FFD700, #FFF176); /* Bright yellow gradient for NHS credit */
+  --node-learningObjective: linear-gradient(135deg, #3F51B5, #7986CB); /* Indigo gradient for learning objective */
   
   /* Node Shadows */
   --node-shadow-light: 0 10px 20px rgba(0, 0, 0, 0.1);
@@ -961,6 +966,10 @@
 
 .btn-idea {
   background: var(--node-idea);
+}
+
+.btn-learningObjective {
+  background: var(--node-learningObjective);
 }
 
 .btn-clear {
@@ -3155,24 +3164,127 @@
   border: 2px dashed #4285F4;
   background: rgba(66, 133, 244, 0.12);
   pointer-events: none;
-  border-radius: 6px;
-  transition: box-shadow 0.2s;
-  box-shadow: 0 2px 12px rgba(66,133,244,0.08);
+  transition: opacity 0.3s;
 }
 
 /* Area Select Exit Bubble */
 .area-select-bubble {
   position: absolute;
-  z-index: 1100;
-  top: 20px;
-  right: 40px;
-  background: #fff;
-  color: #4285F4;
-  border-radius: 20px;
-  padding: 8px 18px;
-  box-shadow: 0 2px 8px rgba(66,133,244,0.10);
-  font-size: 1em;
-  font-weight: 500;
+  top: 48px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s;
+}
+
+.dark-mode .learning-submenu {
+  background: rgba(30, 30, 35, 0.95);
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.5);
+}
+
+.learning-menu:hover .learning-submenu {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: all;
+}
+
+.learning-menu:hover::after {
+  opacity: 1;
+}
+
+/* New node types */
+.node-keyidea {
+  background: var(--node-keyidea);
+}
+
+.node-question {
+  background: var(--node-question);
+}
+
+.node-problemtype {
+  background: var(--node-problemtype);
+}
+
+.node-nhscredit {
+  background: var(--node-nhscredit);
+  position: relative;
+  overflow: hidden;
+}
+
+.node-nhscredit::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 20px 20px 0;
+  border-color: transparent rgba(255, 255, 255, 0.3) transparent transparent;
+  transition: all 0.3s ease;
+}
+
+.node-nhscredit:hover::after {
+  border-width: 0 30px 30px 0;
+  border-color: transparent rgba(255, 255, 255, 0.5) transparent transparent;
+}
+
+.node-nhscredit:hover {
+  transform: scale(1.05);
+  box-shadow: 0 15px 30px rgba(46, 204, 113, 0.3);
+  z-index: 10;
+}
+
+.dark-mode .node-nhscredit:hover {
+  box-shadow: 0 15px 30px rgba(46, 204, 113, 0.4);
+}
+
+/* Node icons for the new types */
+.node-keyidea .node-icon {
+  color: #9c27b0;
+}
+
+.node-question .node-icon {
+  color: #ff5722;
+}
+
+.node-problemtype .node-icon {
+  color: #009688;
+}
+
+/* Button styles for the new node types */
+.btn-key-idea {
+  background-color: #9c27b0;
+}
+
+.btn-question {
+  background-color: #ff5722;
+}
+
+.btn-problem-type {
+  background-color: #009688;
+}
+
+/* Node hover panel special features for learning nodes */
+.node-keyidea .learn-more-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #9c27b0, #ce93d8);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 10px;
+  margin-top: 10px;
+>>>>>>> b489811433f2ce2eb98d5abd8f2b991a3ea7d051
   cursor: pointer;
   border: 1px solid #e0e0e0;
   opacity: 0.97;
