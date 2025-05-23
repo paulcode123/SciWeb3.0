@@ -132,6 +132,7 @@
             <section class="dashboard-card assignments-card">
                 <div class="card-header">
                     <h2><i class="fas fa-tasks"></i> Upcoming Assignments</h2>
+                    <button class="btn-icon"><i class="fas fa-plus"></i></button>
                 </div>
                 <div class="card-content">
                     <!-- Assignments will be populated dynamically -->
@@ -148,16 +149,15 @@
             <section class="dashboard-card grades-card">
                 <div class="card-header">
                     <h2><i class="fas fa-chart-line"></i> Grades & Scores</h2>
+                    <button class="btn btn-primary pull-grades-btn"><i class="fas fa-sync-alt"></i> Pull Grades</button>
                 </div>
                 <div class="card-content">
-                    <div class="overall-grade">
-                        <div class="grade-circle">
-                            <span class="grade-value">--</span>
-                            <span class="grade-percentage">--%</span>
-                        </div>
-                        <p class="grade-label">Current Grade</p>
+                    <!-- Remove grade circle, show just grade and percent -->
+                    <div class="overall-grade-simple">
+                        <span class="grade-label">Current Grade:</span>
+                        <span class="grade-value">--</span>
+                        <span class="grade-percentage">--%</span>
                     </div>
-
                     <div class="recent-scores">
                         <h3>Recent Scores</h3>
                         <ul class="score-list">
@@ -165,13 +165,9 @@
                             <li class="empty-state-small">No recent scores available.</li>
                         </ul>
                     </div>
-
-                    <div class="time-distribution">
-                        <h3>Time Distribution</h3>
-                        <div class="chart-container">
-                             <canvas id="timeChart"></canvas>
-                             <!-- JS will populate this chart, consider adding an empty state if no data -->
-                        </div>
+                    <!-- Multi-chart area -->
+                    <div class="grades-charts-area">
+                        <!-- Dynamic chart canvases will be inserted here by JS -->
                     </div>
                 </div>
             </section>
@@ -315,6 +311,209 @@
             </div>
         </div>
     </section>
+
+    <!-- Pull Grades Modal -->
+    <div id="pull-grades-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Pull Grades from Jupiter</h2>
+            <form id="pull-grades-form">
+                <div class="form-group">
+                    <label for="jupiter-fullname">Full Name</label>
+                    <input type="text" id="jupiter-fullname" name="jupiter-fullname" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="jupiter-password">Jupiter Password</label>
+                    <input type="password" id="jupiter-password" name="jupiter-password" placeholder="Enter your Jupiter password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Fetch Grades</button>
+            </form>
+            <div class="modal-status" style="margin-top:1rem;"></div>
+        </div>
+    </div>
+    <!-- Event Creation Modal -->
+    <div id="event-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Create Event</h2>
+            <form id="event-form">
+                <div class="form-group">
+                    <label for="event-title">Title</label>
+                    <input type="text" id="event-title" name="title" required maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label for="event-description">Description</label>
+                    <textarea id="event-description" name="description" rows="2" maxlength="500"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="event-type">Type</label>
+                    <select id="event-type" name="type" required>
+                        <option value="review_session">Review Session</option>
+                        <option value="study_group">Study Group</option>
+                        <option value="exam">Exam</option>
+                        <option value="lab">Lab</option>
+                        <option value="field_trip">Field Trip</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="event-icon">Icon</label>
+                    <input type="text" id="event-icon" name="icon" maxlength="2" placeholder="e.g. 🎉">
+                    <span style="font-size:1.5rem; margin-left:0.5rem;" id="icon-preview"></span>
+                </div>
+                <div class="form-group">
+                    <label for="event-color">Color</label>
+                    <input type="color" id="event-color" name="color" value="#2196f3">
+                </div>
+                <div class="form-group">
+                    <label for="event-location">Location</label>
+                    <input type="text" id="event-location" name="location" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label for="event-start">Start</label>
+                    <input type="datetime-local" id="event-start" name="startDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="event-end">End</label>
+                    <input type="datetime-local" id="event-end" name="endDate">
+                </div>
+                <div class="form-group">
+                    <label for="event-host">Host</label>
+                    <input type="text" id="event-host" name="hostName" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label for="event-recurrence">Recurrence</label>
+                    <select id="event-recurrence" name="recurrencePattern">
+                        <option value="none">None</option>
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="event-attachments">Attachments</label>
+                    <input type="file" id="event-attachments" name="attachments" multiple>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Create Event</button>
+            </form>
+            <div class="modal-status" style="margin-top:1rem;"></div>
+        </div>
+    </div>
+    <!-- Channel Creation/Edit Modal -->
+    <div id="channel-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="channel-modal-title">Create Channel</h2>
+            <form id="channel-form">
+                <div class="form-group">
+                    <label for="channel-name">Name</label>
+                    <input type="text" id="channel-name" name="name" required maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label for="channel-description">Description</label>
+                    <textarea id="channel-description" name="description" rows="2" maxlength="200"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="channel-type">Type</label>
+                    <select id="channel-type" name="type" required>
+                        <option value="general">General</option>
+                        <option value="announcement">Announcement</option>
+                        <option value="help">Help</option>
+                        <option value="group">Group</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="channel-privacy">Privacy</label>
+                    <select id="channel-privacy" name="privacy" required>
+                        <option value="public">Public</option>
+                        <option value="private">Private</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="channel-members">Allowed Members (comma-separated user IDs)</label>
+                    <input type="text" id="channel-members" name="allowedMembers" placeholder="e.g. user1,user2">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Save Channel</button>
+            </form>
+            <div class="modal-status" style="margin-top:1rem;"></div>
+        </div>
+    </div>
+    <!-- Emoji Picker Modal for Reactions -->
+    <div id="emoji-picker-modal" class="modal" style="display:none;">
+        <div class="modal-content" style="max-width:320px;">
+            <span class="close-modal">&times;</span>
+            <h3>Pick a Reaction</h3>
+            <div class="emoji-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:0.5rem;">
+                <span class="emoji">👍</span><span class="emoji">❤️</span><span class="emoji">😂</span><span class="emoji">🎉</span><span class="emoji">👏</span><span class="emoji">🔥</span>
+                <span class="emoji">😮</span><span class="emoji">😢</span><span class="emoji">😎</span><span class="emoji">🤔</span><span class="emoji">🙌</span><span class="emoji">⭐</span>
+            </div>
+        </div>
+    </div>
+    <!-- Reply Input Template (hidden, for JS cloning) -->
+    <div id="reply-input-template" style="display:none;">
+        <div class="reply-form">
+            <textarea class="reply-input" rows="1" placeholder="Type your reply..."></textarea>
+            <div class="reply-actions">
+                <button class="btn btn-text cancel-reply">Cancel</button>
+                <button class="btn btn-primary send-reply-btn">Reply</button>
+            </div>
+        </div>
+    </div>
+    <!-- Assignment Creation Modal -->
+    <div id="assignment-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Create Assignment</h2>
+            <form id="assignment-form">
+                <div class="form-group">
+                    <label for="assignment-title">Title</label>
+                    <input type="text" id="assignment-title" name="title" required maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label for="assignment-description">Description</label>
+                    <textarea id="assignment-description" name="description" rows="2" maxlength="500"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="assignment-type">Type</label>
+                    <select id="assignment-type" name="type" required>
+                        <option value="problem_set">Problem Set</option>
+                        <option value="essay">Essay</option>
+                        <option value="project">Project</option>
+                        <option value="exam">Exam</option>
+                        <option value="quiz">Quiz</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="assignment-due">Due Date</label>
+                    <input type="datetime-local" id="assignment-due" name="dueDate">
+                </div>
+                <div class="form-group">
+                    <label for="assignment-points">Points</label>
+                    <input type="number" id="assignment-points" name="points" min="0" step="1">
+                </div>
+                <div class="form-group">
+                    <label for="assignment-status">Status</label>
+                    <select id="assignment-status" name="status">
+                        <option value="draft">Draft</option>
+                        <option value="published" selected>Published</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="assignment-unit">Unit</label>
+                    <select id="assignment-unit" name="unitId">
+                        <option value="">None</option>
+                        <!-- Units will be populated dynamically -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="assignment-file">File (optional)</label>
+                    <input type="file" id="assignment-file" name="file">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Create Assignment</button>
+            </form>
+            <div class="modal-status" style="margin-top:1rem;"></div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block scripts %}

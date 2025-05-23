@@ -81,10 +81,6 @@ Stores user's tree data including nodes and connections.
 | nodeTypes[].features[].color | String | Feature color |
 | nodeTypes[].features[].prompt | String | AI prompt for feature |
 
-
-
-
-
 ### FriendConnections
 Stores friend relationships between users.
 
@@ -108,11 +104,17 @@ Stores information about classes, their members, channels, and units.
 | description | String | Class description |
 | teacherId | String | Reference to teacher in Members collection |
 | teacherName | String | Name of the teacher |
+| teacherEmail | String | Email of the teacher |
+| teacherProfilePic | String | URL to teacher's profile picture |
+| teacherOfficeHours | Array<String> | Teacher's office hours |
 | period | String | Class period |
 | yearGroup | String | Academic year group |
 | subject | String | Subject area |
+| studentCount | Number | Number of students in the class |
 | createdAt | Timestamp | Class creation timestamp |
 | updatedAt | Timestamp | Last class update timestamp |
+| syllabus | String | Class syllabus text |
+| syllabusFileUrl | String | URL to syllabus file |
 | members | Array<Object> | Array of class members |
 | members[].userId | String | User ID (reference to Members) |
 | members[].role | String | Role in class ("teacher", "student", "ta", "observer") |
@@ -135,12 +137,28 @@ Stores information about classes, their members, channels, and units.
 | units[].status | String | Unit status ("draft", "active", "archived") |
 | units[].startDate | Timestamp | Unit start date |
 | units[].endDate | Timestamp | Unit end date |
+| units[].progress | Number | Progress percentage for the unit |
+| units[].topics | Array<String> | Topics covered in the unit |
+| units[].current_topic | String | Current topic being covered |
 | units[].associatedFiles | Array<String> | References to ClassFiles collection |
 | units[].associatedProblems | Array<String> | References to Problems collection |
 | settings | Object | Class settings |
 | settings.joinCode | String | Code for students to join class |
 | settings.visibility | String | Class visibility ("public", "school", "private") |
 | settings.gradingSystem | Object | Class grading system configuration |
+| recentActivities | Array<Object> | Recent class activities |
+| recentActivities[].id | String | Unique activity identifier |
+| recentActivities[].text | String | Activity description |
+| recentActivities[].time | String | Human-readable time (e.g., "2 hours ago") |
+| recentActivities[].timestamp | Timestamp | Actual timestamp of activity |
+| recentActivities[].icon | String | Icon class (e.g., "fas fa-flask") |
+| recentActivities[].type | String | Activity type (e.g., "grade", "resource", "assignment") |
+| recentActivities[].userId | String | User ID who performed the activity |
+| stats | Object | Class statistics |
+| stats.assignments | Number | Total number of assignments |
+| stats.resources | Number | Total number of resources |
+| stats.discussions | Number | Total number of discussion messages |
+| stats.average_grade | String | Average class grade |
 
 ### ClassFiles
 Stores files associated with classes like practice tests, worksheets, and study guides.
@@ -165,6 +183,9 @@ Stores files associated with classes like practice tests, worksheets, and study 
 | allowedUsers | Array<String> | Users with access (if restricted) |
 | views | Number | View count |
 | downloads | Number | Download count |
+| thumbnail | String | URL to thumbnail image |
+| duration | String | Duration for video resources |
+| date_added | String | Human-readable date added |
 
 ### Assignments
 Stores information about class assignments.
@@ -176,16 +197,21 @@ Stores information about class assignments.
 | unitId | String | Reference to specific unit (optional) |
 | title | String | Assignment title |
 | description | String | Assignment description |
-| type | String | Assignment type ("problem_set", "essay", "project", "exam", "quiz") |
+| type | String | Assignment type ("problem_set", "essay", "project", "exam", "quiz", "homework", "analysis", "paper") |
 | fileUrl | String | URL to assignment file (if applicable) |
 | createdBy | String | User ID who created (reference to Members) |
 | createdAt | Timestamp | Creation timestamp |
 | dueDate | Timestamp | Assignment due date |
+| due_date | String | Human-readable due date |
+| time_left | String | Human-readable time left (e.g., "5 days left") |
 | points | Number | Total possible points |
 | weight | Number | Assignment weight in grading |
-| status | String | Assignment status ("draft", "published", "expired") |
+| status | String | Assignment status ("not_started", "in_progress", "completed", "late", "graded") |
 | visibleToStudents | Boolean | Whether assignment is visible to students |
 | associatedFiles | Array<String> | References to ClassFiles collection |
+| resources | Array<String> | Resources related to the assignment |
+| allowed_formats | String | Allowed file formats for submission |
+| time_limit | String | Time limit for timed assignments |
 | submissions | Object | Student submission tracking |
 | submissions.count | Number | Number of submissions received |
 | submissions.graded | Number | Number of graded submissions |
@@ -200,8 +226,10 @@ Stores information about class events such as review sessions, study groups, etc
 | classId | String | Reference to Classes collection |
 | title | String | Event title |
 | description | String | Event description |
-| type | String | Event type ("review_session", "study_group", "exam", "lab", "field_trip") |
+| type | String | Event type ("lab", "quiz", "exam", "review", "study_group", "lecture") |
 | location | String | Event location |
+| date | String | Human-readable date (e.g., "Tomorrow", "Friday") |
+| time | String | Event time (e.g., "2:30 PM - 4:00 PM") |
 | startDate | Timestamp | Event start date and time |
 | endDate | Timestamp | Event end date and time |
 | createdBy | String | User ID who created (reference to Members) |
@@ -216,6 +244,8 @@ Stores information about class events such as review sessions, study groups, etc
 | attendees[].responseTime | Timestamp | When response was recorded |
 | reminderSent | Boolean | Whether reminders were sent |
 | attachments | Array<String> | References to ClassFiles collection |
+| icon | String | Event icon (emoji or icon code) |
+| color | String | Event color (hex or color name) |
 
 ### Problems
 Stores information about academic problems for practice and assessment.
@@ -250,8 +280,12 @@ Stores chat messages for class channels.
 | classId | String | Reference to Classes collection |
 | channelId | String | Reference to channel in Classes.channels |
 | senderId | String | User ID of sender (reference to Members) |
+| senderName | String | Name of the sender |
+| senderProfilePic | String | URL to sender's profile picture |
 | content | String | Message text content |
 | sentAt | Timestamp | Message sent timestamp |
+| time | String | Human-readable time (e.g., "2:30 PM") |
+| date | String | Human-readable date (e.g., "Today", "Yesterday") |
 | edited | Boolean | Whether message was edited |
 | editedAt | Timestamp | Last edit timestamp |
 | attachments | Array<Object> | Message attachments |
@@ -269,6 +303,83 @@ Stores chat messages for class channels.
 | isThreadParent | Boolean | Whether message is a thread parent |
 | readBy | Array<String> | User IDs who have read the message |
 | mentions | Array<String> | User IDs mentioned in message |
+
+### Resources
+Stores educational resources for classes.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | String | Unique resource identifier |
+| classId | String | Reference to Classes collection |
+| unitId | String | Reference to specific unit (optional) |
+| title | String | Resource title |
+| description | String | Resource description |
+| type | String | Resource type ("slides", "videos", "handouts", "readings", "practice") |
+| fileUrl | String | URL to resource file (if applicable) |
+| file_type | String | File type (e.g., "PDF") |
+| file_size | String | Human-readable file size (e.g., "2.4 MB") |
+| date_added | String | Human-readable date added |
+| duration | String | Duration for video resources |
+| thumbnail | String | URL to thumbnail image |
+| createdBy | String | User ID who created (reference to Members) |
+| createdAt | Timestamp | Creation timestamp |
+| updatedAt | Timestamp | Last update timestamp |
+| tags | Array<String> | Categorization tags |
+| visibility | String | Who can see the resource |
+| views | Number | View count |
+| downloads | Number | Download count |
+
+### Grades
+Stores student grades for assignments.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | String | Unique grade identifier |
+| classId | String | Reference to Classes collection |
+| assignmentId | String | Reference to Assignments collection |
+| studentId | String | Reference to Members collection (student) |
+| score | Number | Numerical score |
+| possible | Number | Total possible points |
+| percentage | Number | Score as percentage |
+| letterGrade | String | Letter grade (if applicable) |
+| submittedAt | Timestamp | When assignment was submitted |
+| gradedAt | Timestamp | When assignment was graded |
+| gradedBy | String | User ID of grader (reference to Members) |
+| feedback | String | Feedback comments |
+| status | String | Status ("submitted", "late", "graded", "missing") |
+| isLate | Boolean | Whether submission was late |
+| daysLate | Number | Number of days late (if applicable) |
+| penaltyApplied | Number | Point deduction for late submission |
+
+### ClassMindWebs
+Stores mind web data for classes.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | String | Unique mind web identifier |
+| classId | String | Reference to Classes collection |
+| unitId | String | Reference to specific unit (optional) |
+| title | String | Mind web title |
+| description | String | Mind web description |
+| nodes | Array<Object> | Array of node objects |
+| nodes[].id | String | Unique node identifier |
+| nodes[].label | String | Node label/name |
+| nodes[].type | String | Node type |
+| nodes[].description | String | Node description |
+| nodes[].position | Object | Position coordinates |
+| nodes[].position.x | Number | X coordinate |
+| nodes[].position.y | Number | Y coordinate |
+| edges | Array<Object> | Array of edge objects |
+| edges[].id | String | Unique edge identifier |
+| edges[].source | String | Source node ID |
+| edges[].target | String | Target node ID |
+| edges[].label | String | Edge label (if any) |
+| createdBy | String | User ID who created (reference to Members) |
+| createdAt | Timestamp | Creation timestamp |
+| updatedAt | Timestamp | Last update timestamp |
+| lastModifiedBy | String | User ID who last modified |
+| isPublic | Boolean | Whether mind web is public |
+| collaborators | Array<String> | User IDs of collaborators |
 
 
 

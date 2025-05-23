@@ -6,6 +6,7 @@ import * as Edges from './edges.js';
 import * as AI from './ai.js';
 import * as Autosave from './autosave.js';
 import * as Utils from './utils.js';
+import * as Voice from './voice.js'; // Import voice module
 
 // Node state
 export let nodes = [];
@@ -14,38 +15,37 @@ export let selectedNode = null;
 export let draggedNode = null;
 export let isDragging = false;
 export let isConnecting = false;
-export const nodeTypes = ['motivator', 'task', 'challenge', 'idea', 'class', 'assignment', 'test', 'project', 'essay', 'image'];
+export const nodeTypes = ['motivator', 'task', 'challenge', 'idea', 'class', 'assignment', 'test', 'project', 'essay', 'image', 'learningObjective', 'keyidea', 'question', 'problemtype', 'nhscredit'];
 
 // Function to update nextNodeId 
 export function setNextNodeId(value) {
   nextNodeId = value;
 }
 
-// Set up node buttons
+// Set up node buttons - REFACTORED to use nodeTypes array
 export function setupNodeButtons() {
-  // Button event listeners for creating nodes
-  document.querySelector('.btn-motivator')?.addEventListener('click', function() {
-    const center = PanZoom.getViewCenter();
-    createNode('motivator', 'Motivation', center.x, center.y);
+  // Unified setup for all node add buttons using nodeTypes
+  nodeTypes.forEach(type => {
+    // Main toolbar button
+    const btn = document.querySelector(`.btn-${type}`);
+    if (btn) {
+      // Icon is set in HTML/CSS, background is handled by CSS
+      btn.addEventListener('click', function() {
+        const center = PanZoom.getViewCenter();
+        // Generate a default title (e.g., 'Learning Objective' from 'learningObjective')
+        const title = type.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+        createNode(type, title, center.x, center.y);
+      });
+    }
+
+    // School submenu buttons (existing logic - keep as is if it works)
+    // If school submenu items should also be part of nodeTypes and handled here,
+    // this section might need adjustment or integration into the loop above.
+    // For now, assuming .btn-class, .btn-assignment etc. are distinct from the main toolbar buttons
+    // and this existing logic for submenu-button is separate.
   });
-  
-  document.querySelector('.btn-task')?.addEventListener('click', function() {
-    const center = PanZoom.getViewCenter();
-    createNode('task', 'Task', center.x, center.y);
-  });
-  
-  document.querySelector('.btn-challenge')?.addEventListener('click', function() {
-    const center = PanZoom.getViewCenter();
-    createNode('challenge', 'Challenge', center.x, center.y);
-  });
-  
-  // Add listener for the idea button
-  document.querySelector('.btn-idea')?.addEventListener('click', function() {
-    const center = PanZoom.getViewCenter();
-    createNode('idea', 'Idea', center.x, center.y);
-  });
-  
-  // School submenu event listeners
+
+  // School submenu event listeners (keep this separate if it's a different UI pattern)
   document.querySelectorAll('.submenu-button').forEach(item => {
     item.addEventListener('click', function(e) {
       e.stopPropagation(); // Prevent bubbling to parent button
@@ -54,6 +54,7 @@ export function setupNodeButtons() {
       
       let nodeTitle;
       switch(nodeType) {
+        // Keep existing title logic for submenu items
         case 'assignment':
           nodeTitle = 'Assignment';
           break;
@@ -66,15 +67,16 @@ export function setupNodeButtons() {
         case 'essay':
           nodeTitle = 'Essay';
           break;
+        // Add cases for any other submenu specific types if necessary
         default:
-          nodeTitle = 'School Item';
+          // Use a generic title if type from submenu isn't specifically handled
+          nodeTitle = nodeType.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
       }
-      
       createNode(nodeType, nodeTitle, center.x, center.y);
     });
   });
   
-  // Open image upload form
+  // Open image upload form (keep existing logic)
   document.querySelector('.btn-image')?.addEventListener('click', function() {
     if (elements.uploadForm && elements.uploadOverlay) {
       elements.uploadForm.style.display = 'block';
@@ -82,11 +84,9 @@ export function setupNodeButtons() {
     }
   });
 
-  // Add NHS credit tracker button
-  document.querySelector('.btn-nhscredit')?.addEventListener('click', function() {
-    const center = PanZoom.getViewCenter();
-    createNode('nhscredit', 'NHS credit tracker', center.x, center.y);
-  });
+  // Note: The .btn-nhscredit will be handled by the main nodeTypes.forEach loop
+  // if it's intended as a main toolbar button. If it was special, adjust as needed.
+  // The original separate listener for .btn-nhscredit is removed as it's now covered.
 }
 
 // Node creation function (refactored to use createCanonicalNode)
@@ -254,7 +254,7 @@ export function dismissTentativeNode(node) {
 }
 
 // Make a node draggable
-function makeDraggable(node) {
+function makeDraggable(node, skipClickHandler = false) {
   let mouseMoveHandler, mouseUpHandler;
   let offsetWorldX = 0, offsetWorldY = 0, wasDragged = false;
   node.addEventListener('mousedown', function(e) {
@@ -306,34 +306,40 @@ function makeDraggable(node) {
     document.addEventListener('mousemove', mouseMoveHandler);
     document.addEventListener('mouseup', mouseUpHandler);
   });
-  // Click behavior when not dragging
-  node.addEventListener('click', function(e) {
-    if (!isDragging && !isConnecting && node.dataset.wasDragged !== 'true') {
-      const type = node.dataset.type;
-      const title = node.querySelector('.node-title').textContent;
-      switch (type) {
-        case 'motivator':
-          window.location.href = `/envision/${node.dataset.id}`;
-          break;
-        case 'class':
-          window.location.href = `/class/${encodeURIComponent(title)}`;
-          break;
-        case 'assignment':
-          window.location.href = `/class/${encodeURIComponent(title)}`;
-          break;
-        case 'test':
-          window.location.href = `/mindweb/${node.dataset.id}`;
-          break;
-        case 'project':
-          window.location.href = `/collab/${node.dataset.id}`;
-          break;
-        case 'nhscredit':
-          window.location.href = '/nhs';
-          break;
+
+  // Conditionally add the generic click handler
+  if (!skipClickHandler) {
+    node.addEventListener('click', function(e) {
+      if (!isDragging && !isConnecting && node.dataset.wasDragged !== 'true') {
+        const type = node.dataset.type;
+        const title = node.querySelector('.node-title').textContent;
+        // Existing switch for other node types
+        switch (type) {
+          case 'motivator':
+            window.location.href = `/envision/${node.dataset.id}`;
+            break;
+          case 'class':
+            window.location.href = `/class/${encodeURIComponent(title)}`;
+            break;
+          case 'assignment':
+            window.location.href = `/class/${encodeURIComponent(title)}`;
+            break;
+          case 'test':
+            window.location.href = `/mindweb/${node.dataset.id}`;
+            break;
+          case 'project':
+            window.location.href = `/collab/${node.dataset.id}`;
+            break;
+          case 'nhscredit':
+            window.location.href = '/nhs';
+            break;
+        }
       }
-    }
-    node.dataset.wasDragged = 'false';
-  }, { capture: true });
+      // Reset wasDragged flag if it wasn't reset by mousedown/mouseup (e.g. programmatic click)
+      // However, our LO click handler above also does this, so this might be redundant here if LO is the only one skipping.
+      if (node.dataset.wasDragged === 'true') node.dataset.wasDragged = 'false'; 
+    }, { capture: true }); // Keep capture true if other logic depends on it.
+  }
 }
 
 // Delete a node
@@ -785,21 +791,60 @@ function setupNodeHoverPanel(node, nodeObject) {
         <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
       `;
       break;
+    case 'learningObjective':
+      infoSection.innerHTML = `
+        <h4>Learning Objective</h4>
+        <p>A specific learning goal. Click to activate voice mode that helps probe your current understanding and expand upon it through AI-guided questioning.</p>
+        <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
+      `;
+      break;
+    case 'keyidea':
+      infoSection.innerHTML = `
+        <h4>Key Idea</h4>
+        <p>A core concept or piece of information related to a learning objective.</p>
+        <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
+      `;
+      break;
+    case 'question':
+      infoSection.innerHTML = `
+        <h4>Question</h4>
+        <p>A question to explore or answer, often related to a learning objective or challenge.</p>
+        <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
+      `;
+      break;
+    case 'problemtype':
+      infoSection.innerHTML = `
+        <h4>Problem Type</h4>
+        <p>A category of problems to practice or understand.</p>
+        <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
+      `;
+      break;
+    default:
+      infoSection.innerHTML = `
+        <h4>${Utils.capitalize(nodeObject.type || 'Node')}</h4>
+        <p>No specific information available for this node type.</p>
+      `;
+      break;
   }
 
-  // Add event listener for info toggle
+  // Add event listener for info toggle IF IT EXISTS
   const infoToggle = infoSection.querySelector('.node-info-toggle');
-  infoToggle.addEventListener('click', function() {
-    if (infoSection.classList.contains('collapsed')) {
-      infoSection.classList.remove('collapsed');
-      infoSection.classList.add('expanded');
-      this.innerHTML = 'Show less <i class="fas fa-chevron-up"></i>';
-    } else {
-      infoSection.classList.remove('expanded');
-      infoSection.classList.add('collapsed');
-      this.innerHTML = 'Show more <i class="fas fa-chevron-down"></i>';
-    }
-  });
+  if (infoToggle) {
+    infoToggle.addEventListener('click', function() {
+      if (infoSection.classList.contains('collapsed')) {
+        infoSection.classList.remove('collapsed');
+        infoSection.classList.add('expanded');
+        this.innerHTML = 'Show less <i class="fas fa-chevron-up"></i>';
+      } else {
+        infoSection.classList.remove('expanded');
+        infoSection.classList.add('collapsed');
+        this.innerHTML = 'Show more <i class="fas fa-chevron-down"></i>';
+      }
+    });
+  } else {
+    // Optional: log if a toggle wasn't found for a type expected to have one
+    // console.warn(`Node info toggle not found for type: ${nodeObject.type}`);
+  }
 
   // Add controls and info to hover panel
   hoverPanel.appendChild(controls);
@@ -846,7 +891,6 @@ export function createCanonicalNode({ type, title, left, top, content = null, id
   if (id) {
     newId = Utils.normalizeId(id);
   } else {
-    // Find the next unused numeric ID
     do {
       newId = Utils.normalizeId(nextNodeId++);
     } while (nodes.some(n => Utils.normalizeId(n.id) === newId) || document.querySelector(`[data-id="${newId}"]`));
@@ -873,6 +917,39 @@ export function createCanonicalNode({ type, title, left, top, content = null, id
   iconEl.innerHTML = `<i class="${Utils.getIconClass(type)}"></i>`;
   node.appendChild(iconEl);
   node.appendChild(titleEl);
+
+  // Learning Objective specific enhancements
+  if (type === 'learningObjective') {
+    // Add microphone status indicator
+    const micStatusEl = document.createElement('div');
+    micStatusEl.className = 'learning-objective-status';
+    micStatusEl.innerHTML = '<i class="fas fa-microphone-slash"></i>'; // Initial state: voice off
+    node.appendChild(micStatusEl);
+
+    // Add click listener to toggle Learning Objective voice mode
+    // Ensure this listener does not interfere with drag or other general node clicks
+    node.addEventListener('click', function(e) {
+      // Prevent click from propagating if it was part of a drag operation
+      if (node.dataset.wasDragged === 'true') {
+        node.dataset.wasDragged = 'false'; // Reset for next click
+        return;
+      }
+      // Also, don't trigger if a control inside the hover panel was clicked or if connecting
+      if (e.target.closest('.node-control') || isConnecting) {
+        return;
+      }
+
+      e.stopPropagation(); // Stop propagation to prevent other general click handlers like makeDraggable's
+      
+      const isActive = node.classList.contains('voice-active');
+      Voice.toggleLearningObjectiveVoice(node, !isActive);
+      
+      // Update mic icon based on new state
+      micStatusEl.innerHTML = !isActive ? '<i class="fas fa-microphone"></i>' : '<i class="fas fa-microphone-slash"></i>';
+      node.classList.toggle('voice-active', !isActive);
+    }, false); // Use non-capture phase to ensure it runs after drag check but can be stopped.
+  }
+
   if (type === 'image' && content) {
     const img = document.createElement('img');
     img.src = content;
@@ -880,11 +957,13 @@ export function createCanonicalNode({ type, title, left, top, content = null, id
     node.appendChild(img);
   }
   elements.nodesContainer.appendChild(node);
-  // Apply correct scale and font size immediately
   const scale = PanZoom.scale;
   node.style.transform = `scale(${scale})`;
   node.style.fontSize = `${Math.max(12, 16 * scale)}px`;
-  makeDraggable(node);
+  
+  // Modify makeDraggable to NOT handle click for learningObjective, as it has its own.
+  makeDraggable(node, type === 'learningObjective'); 
+
   const nodeObject = {
     id: newId,
     element: node,

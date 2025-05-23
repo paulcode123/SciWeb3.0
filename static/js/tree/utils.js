@@ -36,14 +36,14 @@ export function getIconClass(type) {
     'project': 'fas fa-project-diagram',
     'essay': 'fas fa-file-alt',
     'image': 'fas fa-image',
-    'keyidea': 'fas fa-atom',
+    'nhscredit': 'fas fa-hands-helping',
+    'learningObjective': 'fas fa-bullseye',
+    'keyidea': 'fas fa-key',
     'question': 'fas fa-question-circle',
-    'problemtype': 'fas fa-puzzle-piece',
-    'nhscredit': 'fas fa-clock',
-    'learningObjective': 'fas fa-bullseye'
+    'problemtype': 'fas fa-puzzle-piece'
   };
   
-  return iconClasses[type] || 'fas fa-circle';
+  return iconClasses[type] || 'fas fa-question';
 }
 
 // Capitalize a string

@@ -202,35 +202,32 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // === Channel Related Functionality ===
     const channelsList = document.querySelector('.channel-list');
-    const createChannelBtn = document.querySelector('.chats-card .card-content .btn-text'); // Assuming this is the create button
     const addChannelIconBtn = document.querySelector('.chats-card .card-header .btn-icon'); // Assuming this is the plus icon button
     const channelMessagesContainers = document.querySelectorAll('.channel-messages');
     const currentChannelHeaderElement = document.querySelector('.current-channel');
     const messagesContainerParent = document.querySelector('.messages-container'); // Container for all channel message divs
 
     function activateChannel(channelElement) {
-         if (!channelElement) return;
-         
+        if (!channelElement) return;
         // Remove active class from all channels
         document.querySelectorAll('.channel.active').forEach(ch => ch.classList.remove('active'));
-        
         // Add active class to clicked channel
         channelElement.classList.add('active');
-        
         // Get channel details
         const channelId = channelElement.getAttribute('data-channel');
         const channelName = channelElement.querySelector('span').textContent;
-        
         // Update channel name in header
         if (currentChannelHeaderElement) {
             currentChannelHeaderElement.textContent = channelName;
         }
-        
-        // Hide all message threads
+        // --- Clear messages area before showing new channel's messages ---
+        if (messagesContainerParent) {
+            messagesContainerParent.innerHTML = '';
+        }
+        // Hide all message threads (not needed after above, but keep for safety)
         channelMessagesContainers.forEach(messages => {
             messages.style.display = 'none';
         });
-        
         // Show the selected channel's messages (or create if doesn't exist)
         let selectedMessages = messagesContainerParent.querySelector(`.channel-messages[data-channel="${channelId}"]`);
         if (!selectedMessages) {
@@ -239,15 +236,13 @@ document.addEventListener('DOMContentLoaded', function() {
             selectedMessages.className = 'channel-messages';
             selectedMessages.setAttribute('data-channel', channelId);
             selectedMessages.style.display = 'flex'; // Show it immediately
-            selectedMessages.innerHTML = '<div class="empty-state-large" style="min-height: 300px; display: flex; align-items: center; justify-content: center;"><i class="fas fa-comments" style="font-size: 3rem; margin-bottom: 1rem;"></i><p>No messages in this channel yet.</p></div>'; // Add empty state
+            selectedMessages.innerHTML = '<div class="empty-state-large" style="min-height: 300px; display: flex; align-items: center; justify-content: center;"><i class="fas fa-comments" style="font-size: 3rem; margin-bottom: 1rem;"></i><p>No messages in this channel yet.</p></div>';
             messagesContainerParent.appendChild(selectedMessages);
         } else {
             selectedMessages.style.display = 'flex';
         }
-        
         // Load messages for the activated channel
         loadMessagesForChannel(channelId);
-        
         // Remove unread count for this channel if it exists
         const unreadCount = channelElement.querySelector('.unread-count');
         if (unreadCount) {
@@ -408,10 +403,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Add listeners for channel creation
-    if (createChannelBtn) {
-        createChannelBtn.addEventListener('click', handleCreateChannel);
-    }
-     if (addChannelIconBtn) {
+    if (addChannelIconBtn) {
         addChannelIconBtn.addEventListener('click', handleCreateChannel);
     }
 
@@ -927,246 +919,79 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // --- Load Functions --- 
-    
-    async function loadAssignments() {
-        try {
-            const response = await fetch(`/api/Assignments?classId=${classId}`);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            const assignments = await response.json();
-            renderAssignments(assignments);
-        } catch (error) {
-            console.error("Error loading assignments:", error);
-             if (assignmentsContainer) assignmentsContainer.innerHTML = '<div class="error-state">Error loading assignments.</div>';
-        }
-    }
-    
-    async function loadEvents() {
-        try {
-            const response = await fetch(`/api/Events?classId=${classId}`);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            const events = await response.json();
-            renderEvents(events);
-        } catch (error) {
-             console.error("Error loading events:", error);
-             if (eventsContainer) eventsContainer.innerHTML = '<div class="error-state">Error loading events.</div>';
-        }
-    }
+    // === Assignment Modal Logic ===
+    const assignmentModal = document.getElementById('assignment-modal');
+    const assignmentForm = document.getElementById('assignment-form');
+    const assignmentModalStatus = assignmentModal ? assignmentModal.querySelector('.modal-status') : null;
+    const closeAssignmentModalBtn = assignmentModal ? assignmentModal.querySelector('.close-modal') : null;
 
-    // --- Render Functions --- 
-    
-    function renderUnits(units) {
-        if (!unitsNavContainer || !unitsContentContainer) return;
-        
-        // Clear existing units (keep the 'Add Unit' button if it's inside nav container)
-        unitsNavContainer.querySelectorAll('.unit-tab').forEach(tab => tab.remove());
-        unitsContentContainer.innerHTML = ''; // Clear all content
-
-        if (units.length === 0) {
-            // Find the add button (might be outside the loop)
-            const addUnitBtnEl = unitsNavContainer.querySelector('.unit-add-btn');
-            unitsNavContainer.innerHTML = ''; // Clear completely first
-            if (addUnitBtnEl) unitsNavContainer.appendChild(addUnitBtnEl); // Re-add button
-            unitsNavContainer.insertAdjacentHTML('afterbegin', '<span class="empty-state-small">No units created.</span>');
-            unitsContentContainer.innerHTML = '<div class="empty-state-large"><i class="fas fa-books"></i><h3>No units available yet.</h3><p>Create a unit to add resources.</p></div>';
-        } else {
-             // Sort units by position or title if needed
-             // units.sort((a, b) => (a.position || 0) - (b.position || 0));
-
-            units.forEach((unit, index) => {
-                const isActive = index === 0; // Make the first unit active by default
-                
-                // Create Unit Tab Button
-                const unitTab = document.createElement('button');
-                unitTab.className = `unit-tab ${isActive ? 'active' : ''}`;
-                unitTab.setAttribute('data-unit', unit.id);
-                unitTab.textContent = unit.title || 'Untitled Unit';
-                // Insert before the 'Add Unit' button if it exists
-                const addBtn = unitsNavContainer.querySelector('.unit-add-btn');
-                if(addBtn) {
-                    unitsNavContainer.insertBefore(unitTab, addBtn);
-                } else {
-                    unitsNavContainer.appendChild(unitTab);
-                }
-
-                // Create Unit Content Div
-                const unitContent = document.createElement('div');
-                unitContent.className = `unit-content ${isActive ? 'active' : ''}`;
-                unitContent.id = unit.id;
-                unitContent.innerHTML = `
-                    <div class="unit-header">
-                        <h3 class="unit-title">${unit.title || 'Untitled Unit'}</h3>
-                        <p class="unit-description">${unit.description || 'No description.'}</p>
-                         <!-- Add Edit/Delete buttons here if needed -->
-                    </div>
-                    <div class="unit-tabs">
-                        <div class="tabs">
-                            <button class="tab-btn active" data-tab="${unit.id}-worksheets">Worksheets</button>
-                            <button class="tab-btn" data-tab="${unit.id}-guides">Study Guides</button>
-                            <button class="tab-btn" data-tab="${unit.id}-mindwebs">Mind Webs</button>
-                            <button class="tab-btn" data-tab="${unit.id}-practice">Practice Problems</button>
-                            <button class="tab-btn" data-tab="${unit.id}-tests">Practice Tests</button>
-                        </div>
-                    </div>
-                    <div class="tab-content">
-                        <div class="tab-pane active" id="${unit.id}-worksheets"></div>
-                        <div class="tab-pane" id="${unit.id}-guides"></div>
-                        <div class="tab-pane" id="${unit.id}-mindwebs"></div>
-                        <div class="tab-pane" id="${unit.id}-practice"></div>
-                        <div class="tab-pane" id="${unit.id}-tests"></div>
-                    </div>
-                `;
-                // TODO: Populate tab-panes with actual resources (ClassFiles, Problems)
-                unitsContentContainer.appendChild(unitContent);
-
-                // Add listeners for the new unit's tabs
-                unitContent.querySelectorAll('.tab-btn').forEach(button => {
-                    button.addEventListener('click', handleTabSwitch);
+    function openAssignmentModal() {
+        if (!assignmentModal) return;
+        assignmentModal.style.display = 'flex';
+        assignmentModalStatus.textContent = '';
+        assignmentForm.reset();
+        // Populate units dropdown
+        const unitSelect = document.getElementById('assignment-unit');
+        if (unitSelect) {
+            unitSelect.innerHTML = '<option value="">None</option>';
+            if (window.classUnits && Array.isArray(window.classUnits)) {
+                window.classUnits.forEach(unit => {
+                    const opt = document.createElement('option');
+                    opt.value = unit.id;
+                    opt.textContent = unit.title;
+                    unitSelect.appendChild(opt);
                 });
-                 unitTab.addEventListener('click', handleUnitSwitch);
-            });
+            }
         }
     }
-    
-    function renderAssignments(assignments) {
-         if (!assignmentsContainer) return;
-         // Keep header, clear only assignment items (assuming they are direct children)
-         assignmentsContainer.querySelectorAll('.assignment, .empty-state').forEach(el => el.remove()); 
-
-        if (assignments.length === 0) {
-            assignmentsContainer.innerHTML += '<div class="empty-state"><i class="fas fa-clipboard-check"></i><p>No upcoming assignments.</p></div>';
-        } else {
-            // Sort assignments if needed (e.g., by dueDate)
-             assignments.sort((a, b) => new Date(a.dueDate || 0) - new Date(b.dueDate || 0));
-
-            assignments.forEach(assignment => {
-                // Determine urgency based on due date (example logic)
-                let statusClass = 'upcoming';
-                let dueDate = new Date(assignment.dueDate || 0);
-                let today = new Date();
-                let diffDays = (dueDate - today) / (1000 * 60 * 60 * 24);
-                if (diffDays < 3 && diffDays >= 0) statusClass = 'urgent';
-                else if (diffDays < 0) statusClass = 'past-due'; // Add styling for past-due
-
-                const assignmentElement = document.createElement('div');
-                assignmentElement.className = `assignment ${statusClass}`;
-                assignmentElement.setAttribute('data-assignment-id', assignment.id);
-                assignmentElement.innerHTML = `
-                    <div class="assignment-status ${statusClass}"></div>
-                    <div class="assignment-details">
-                        <h3>${assignment.title || 'Untitled Assignment'}</h3>
-                        <p><i class="fas fa-calendar"></i> Due: ${dueDate.toLocaleDateString() || 'No date'}</p>
-                         <!-- Add progress bar logic if needed -->
-                         <!-- <div class="progress-bar"><div class="progress" style="width: 0%"></div></div> -->
-                         <!-- <p class="progress-text">0% Complete</p> -->
-                         <!-- Add Edit/Delete buttons here -->
-                    </div>
-                `;
-                assignmentsContainer.appendChild(assignmentElement);
-            });
-        }
-    }
-    
-    function renderEvents(events) {
-         if (!eventsContainer) return;
-         // Keep header and 'View All' button, clear only event items
-         const viewAllBtn = eventsContainer.querySelector('.btn-text');
-         eventsContainer.querySelectorAll('.event, .empty-state').forEach(el => el.remove());
-
-        if (events.length === 0) {
-            eventsContainer.insertAdjacentHTML('afterbegin', '<div class="empty-state"><i class="fas fa-calendar-check"></i><p>No upcoming events scheduled.</p></div>');
-        } else {
-             // Sort events by start date
-             events.sort((a, b) => new Date(a.startDate || 0) - new Date(b.startDate || 0));
-             
-            events.forEach(event => {
-                const startDate = event.startDate ? new Date(event.startDate) : null;
-                const endDate = event.endDate ? new Date(event.endDate) : null;
-                
-                const eventElement = document.createElement('div');
-                eventElement.className = 'event';
-                eventElement.setAttribute('data-event-id', event.id);
-                eventElement.innerHTML = `
-                    <div class="event-date">
-                        <span class="day">${startDate ? startDate.getDate() : '--'}</span>
-                        <span class="month">${startDate ? startDate.toLocaleString('default', { month: 'short' }) : '---'}</span>
-                    </div>
-                    <div class="event-details">
-                        <h3>${event.title || 'Untitled Event'}</h3>
-                        ${startDate ? `<p><i class="fas fa-clock"></i> ${startDate.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit'})} ${endDate ? ' - ' + endDate.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit'}) : ''}</p>` : ''}
-                        ${event.location ? `<p><i class="fas fa-map-marker-alt"></i> ${event.location}</p>` : ''}
-                        ${event.hostName ? `<p><i class="fas fa-user"></i> Hosted by: ${event.hostName}</p>` : ''} <!-- Need hostName -->
-                    </div>
-                    <div class="event-actions">
-                        <button class="btn btn-small">RSVP</button> <!-- Add Edit/Delete buttons here -->
-                    </div>
-                `;
-                 // Insert before the 'View All' button
-                 if (viewAllBtn) {
-                    eventsContainer.insertBefore(eventElement, viewAllBtn);
-                 } else {
-                     eventsContainer.appendChild(eventElement);
-                 }
-            });
-        }
-    }
-
-    // --- Add/Create Functions --- 
-    
-    async function handleAddUnit() {
-        const title = prompt("Enter title for the new unit:");
-        if (!title || title.trim() === "") return alert("Unit title is required.");
-
-        const unitData = { title: title.trim() }; // Add description etc. via modal if needed
-
-        try {
-            const response = await fetch(`/api/Classes/${classId}/units`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(unitData)
-            });
-            if (!response.ok) throw new Error(`HTTP error! ${response.status}`);
-            const result = await response.json();
-            console.log("Unit added:", result);
-            // Re-fetch all class data to get updated units array (simplest approach)
-            // Alternatively, manually add the new unit to the UI
-            loadClassData(); 
-        } catch (error) {
-            console.error("Error adding unit:", error);
-            alert("Failed to add unit.");
-        }
-    }
-    
-    async function handleAddAssignment() {
-         const title = prompt("Enter title for the new assignment:");
-         if (!title || title.trim() === "") return alert("Assignment title is required.");
-         
-         // Use generic POST /Assignments route
-         const assignmentData = {
-             title: title.trim(),
-             classId: classId, // Crucial: Associate with this class
-             // Add other fields (description, dueDate, points) via modal/form
-             description: "",
-             dueDate: null, 
-             points: 0,
-             status: 'published' // Default status?
-         };
-         
-        try {
-            const response = await fetch(`/api/Assignments`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(assignmentData)
-            });
-            if (!response.ok) throw new Error(`HTTP error! ${response.status}`);
-            const result = await response.json();
-            console.log("Assignment added:", result);
-             // Re-fetch assignments for this class
-            loadAssignments(); 
-        } catch (error) {
-            console.error("Error adding assignment:", error);
-            alert("Failed to add assignment.");
-        }
+    if (addAssignmentBtn) addAssignmentBtn.addEventListener('click', openAssignmentModal);
+    if (closeAssignmentModalBtn && assignmentModal) closeAssignmentModalBtn.addEventListener('click', () => { assignmentModal.style.display = 'none'; });
+    window.addEventListener('click', (e) => { if (e.target === assignmentModal) assignmentModal.style.display = 'none'; });
+    if (assignmentForm) {
+        assignmentForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (assignmentModalStatus) assignmentModalStatus.textContent = '';
+            const title = document.getElementById('assignment-title').value.trim();
+            const description = document.getElementById('assignment-description').value.trim();
+            const type = document.getElementById('assignment-type').value;
+            const dueDate = document.getElementById('assignment-due').value;
+            const points = parseInt(document.getElementById('assignment-points').value, 10) || 0;
+            const status = document.getElementById('assignment-status').value;
+            const unitId = document.getElementById('assignment-unit').value;
+            // File upload (stub)
+            const fileInput = document.getElementById('assignment-file');
+            let fileUrl = '';
+            if (fileInput && fileInput.files.length > 0) {
+                // TODO: Upload file to storage and get URL
+                fileUrl = fileInput.files[0].name; // Stub: just file name
+            }
+            const assignmentData = {
+                title,
+                description,
+                type,
+                dueDate: dueDate ? new Date(dueDate).toISOString() : null,
+                points,
+                status,
+                classId: classId,
+                unitId: unitId || null,
+                fileUrl,
+            };
+            try {
+                const response = await fetch(`/api/Assignments`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(assignmentData)
+                });
+                if (!response.ok) throw new Error(`HTTP error! ${response.status}`);
+                const result = await response.json();
+                console.log("Assignment added:", result);
+                 // Re-fetch assignments for this class
+                loadAssignments(); 
+            } catch (error) {
+                console.error("Error adding assignment:", error);
+                alert("Failed to add assignment.");
+            }
+        });
     }
     
     async function handleAddEvent() {
@@ -1213,13 +1038,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.warn("Add Unit button (.unit-add-btn) not found.");
     }
     
-    // Add Assignment Listener
-    if (addAssignmentBtn) {
-        addAssignmentBtn.addEventListener('click', handleAddAssignment);
-    } else {
-         console.warn("Add Assignment button not found in .assignments-card header.");
-    }
-    
     // Add Event Listener
     if (addEventBtn) {
         addEventBtn.addEventListener('click', handleAddEvent);
@@ -1261,7 +1079,595 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load the class data initially
     loadClassData();
 
-    // ... (Rest of the code: Channel functionality, Message functionality, Theme, Chart) ...
+    // === Pull Grades Modal & Jupiter Integration ===
+    const pullGradesBtn = document.querySelector('.pull-grades-btn');
+    const pullGradesModal = document.getElementById('pull-grades-modal');
+    const closeModalBtn = pullGradesModal ? pullGradesModal.querySelector('.close-modal') : null;
+    const pullGradesForm = document.getElementById('pull-grades-form');
+    const modalStatus = pullGradesModal ? pullGradesModal.querySelector('.modal-status') : null;
+
+    // Show modal
+    if (pullGradesBtn && pullGradesModal) {
+        pullGradesBtn.addEventListener('click', () => {
+            pullGradesModal.style.display = 'flex';
+            modalStatus.textContent = '';
+            pullGradesForm.reset();
+        });
+    }
+    // Hide modal
+    if (closeModalBtn && pullGradesModal) {
+        closeModalBtn.addEventListener('click', () => {
+            pullGradesModal.style.display = 'none';
+        });
+    }
+    window.addEventListener('click', (e) => {
+        if (e.target === pullGradesModal) {
+            pullGradesModal.style.display = 'none';
+        }
+    });
+
+    // Handle form submit
+    if (pullGradesForm) {
+        pullGradesForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            modalStatus.textContent = '';
+            const fullname = document.getElementById('jupiter-fullname').value.trim();
+            const password = document.getElementById('jupiter-password').value;
+            if (!fullname || !password) {
+                modalStatus.textContent = 'Please enter both fields.';
+                return;
+            }
+            modalStatus.textContent = 'Fetching grades...';
+            try {
+                const resp = await fetch('/ai/pull_grades', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ osis: fullname, password, classId })
+                });
+                const data = await resp.json();
+                if (!resp.ok) throw new Error(data.error || 'Failed to fetch grades.');
+                modalStatus.textContent = 'Grades loaded!';
+                setTimeout(() => { pullGradesModal.style.display = 'none'; }, 800);
+                // Save the full grades/chart data to localStorage
+                localStorage.setItem('grades_' + classId, JSON.stringify(data));
+                renderGradesSection(data);
+            } catch (err) {
+                modalStatus.textContent = 'Error: ' + (err.message || 'Could not fetch grades.');
+            }
+        });
+    }
+
+    // At the very end of this handler, after everything is defined:
+    const savedGrades = localStorage.getItem('grades_' + classId);
+    if (savedGrades) {
+        try {
+            const parsed = JSON.parse(savedGrades);
+            renderGradesSection(parsed);
+        } catch (e) { /* ignore */ }
+    }
+
+    // --- Chart.js chart instances ---
+    let charts = {};
+
+    function renderGradesSection(data) {
+        // Update overall grade
+        const gradeValue = document.querySelector('.grade-value');
+        const gradePercent = document.querySelector('.grade-percentage');
+        if (gradeValue && gradePercent) {
+            gradeValue.textContent = data.currentGrade || '--';
+            gradePercent.textContent = data.currentGradePercent ? `${data.currentGradePercent}%` : '--%';
+        }
+        // Update recent scores
+        const scoreList = document.querySelector('.score-list');
+        if (scoreList) {
+            scoreList.innerHTML = '';
+            if (data.recentScores && data.recentScores.length > 0) {
+                data.recentScores.forEach(score => {
+                    const li = document.createElement('li');
+                    li.className = 'score';
+                    li.innerHTML = `<span class="score-title">${score.name}</span><span class="score-value">${score.score}</span>`;
+                    scoreList.appendChild(li);
+                });
+            } else {
+                scoreList.innerHTML = '<li class="empty-state-small">No recent scores available.</li>';
+            }
+        }
+        // Render multiple charts
+        renderGradesCharts(data);
+    }
+
+    function renderGradesCharts(data) {
+        const area = document.querySelector('.grades-charts-area');
+        if (!area) return;
+        area.innerHTML = '';
+        // 1. Assignment Category Breakdown (doughnut)
+        if (data.timeDistribution && data.timeDistribution.labels.length > 0) {
+            const catDiv = document.createElement('div');
+            catDiv.className = 'chart-container';
+            catDiv.innerHTML = '<h4>Assignment Category Breakdown</h4><canvas id="catBreakdownChart"></canvas>';
+            area.appendChild(catDiv);
+            if (charts.catBreakdown) charts.catBreakdown.destroy();
+            charts.catBreakdown = new Chart(catDiv.querySelector('canvas'), {
+                type: 'doughnut',
+                data: {
+                    labels: data.timeDistribution.labels,
+                    datasets: [{
+                        data: data.timeDistribution.data,
+                        backgroundColor: [
+                            'rgba(52, 152, 219, 0.8)',
+                            'rgba(46, 204, 113, 0.8)',
+                            'rgba(155, 89, 182, 0.8)',
+                            'rgba(241, 196, 15, 0.8)',
+                            'rgba(231, 76, 60, 0.8)',
+                            'rgba(39, 174, 96, 0.8)',
+                            'rgba(243, 156, 18, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: { enabled: true }
+                    },
+                    cutout: '60%'
+                }
+            });
+        } else {
+            area.appendChild(emptyChartDiv('Assignment Category Breakdown'));
+        }
+        // 2. Score Over Time (line)
+        if (data.scoreTimeline && data.scoreTimeline.labels.length > 0) {
+            const lineDiv = document.createElement('div');
+            lineDiv.className = 'chart-container';
+            lineDiv.innerHTML = '<h4>Score Over Time</h4><canvas id="scoreTimelineChart"></canvas>';
+            area.appendChild(lineDiv);
+            if (charts.scoreTimeline) charts.scoreTimeline.destroy();
+            charts.scoreTimeline = new Chart(lineDiv.querySelector('canvas'), {
+                type: 'line',
+                data: {
+                    labels: data.scoreTimeline.labels,
+                    datasets: [{
+                        label: 'Score %',
+                        data: data.scoreTimeline.data,
+                        fill: false,
+                        borderColor: 'rgba(52, 152, 219, 1)',
+                        backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                        tension: 0.2,
+                        pointRadius: 3
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: true }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, max: 110 }
+                    }
+                }
+            });
+        } else {
+            area.appendChild(emptyChartDiv('Score Over Time'));
+        }
+        // 3. Assignment Completion Rate (pie)
+        if (data.completionRate && data.completionRate.labels.length > 0) {
+            const pieDiv = document.createElement('div');
+            pieDiv.className = 'chart-container';
+            pieDiv.innerHTML = '<h4>Assignment Completion Rate</h4><canvas id="completionRateChart"></canvas>';
+            area.appendChild(pieDiv);
+            if (charts.completionRate) charts.completionRate.destroy();
+            charts.completionRate = new Chart(pieDiv.querySelector('canvas'), {
+                type: 'pie',
+                data: {
+                    labels: data.completionRate.labels,
+                    datasets: [{
+                        data: data.completionRate.data,
+                        backgroundColor: [
+                            'rgba(46, 204, 113, 0.8)',
+                            'rgba(231, 76, 60, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: { enabled: true }
+                    }
+                }
+            });
+        } else {
+            area.appendChild(emptyChartDiv('Assignment Completion Rate'));
+        }
+    }
+    function emptyChartDiv(title) {
+        const div = document.createElement('div');
+        div.className = 'chart-container';
+        div.innerHTML = `<h4>${title}</h4><div class='empty-state'><i class='fas fa-chart-bar'></i><p>No data available.</p></div>`;
+        return div;
+    }
+
+    // === Channel Modal Logic ===
+    const channelModal = document.getElementById('channel-modal');
+    const channelForm = document.getElementById('channel-form');
+    const channelModalStatus = channelModal ? channelModal.querySelector('.modal-status') : null;
+    const closeChannelModalBtn = channelModal ? channelModal.querySelector('.close-modal') : null;
+
+    function openChannelModal(editData = null) {
+        if (!channelModal) return;
+        channelModal.style.display = 'flex';
+        channelModalStatus.textContent = '';
+        channelForm.reset();
+        document.getElementById('channel-modal-title').textContent = editData ? 'Edit Channel' : 'Create Channel';
+        if (editData) {
+            document.getElementById('channel-name').value = editData.name || '';
+            document.getElementById('channel-description').value = editData.description || '';
+            document.getElementById('channel-type').value = editData.type || 'general';
+            document.getElementById('channel-privacy').value = editData.isPrivate ? 'private' : 'public';
+            document.getElementById('channel-members').value = (editData.allowedMembers || []).join(',');
+            channelForm.setAttribute('data-edit-id', editData.id);
+        } else {
+            channelForm.removeAttribute('data-edit-id');
+        }
+    }
+    if (addChannelIconBtn) addChannelIconBtn.addEventListener('click', () => openChannelModal());
+    if (closeChannelModalBtn && channelModal) closeChannelModalBtn.addEventListener('click', () => { channelModal.style.display = 'none'; });
+    window.addEventListener('click', (e) => { if (e.target === channelModal) channelModal.style.display = 'none'; });
+    if (channelForm) {
+        channelForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (channelModalStatus) channelModalStatus.textContent = '';
+            const name = document.getElementById('channel-name').value.trim();
+            const description = document.getElementById('channel-description').value.trim();
+            const type = document.getElementById('channel-type').value;
+            const privacy = document.getElementById('channel-privacy').value;
+            const allowedMembers = document.getElementById('channel-members').value.split(',').map(s => s.trim()).filter(Boolean);
+            const isPrivate = privacy === 'private';
+            const editId = channelForm.getAttribute('data-edit-id');
+            const channelData = {
+                name, description, type, isPrivate, allowedMembers,
+                createdBy: 'CURRENT_USER_ID',
+                createdAt: new Date().toISOString(),
+            };
+            try {
+                channelForm.querySelector('button[type="submit"]').disabled = true;
+                let response;
+                if (editId) {
+                    response = await fetch(`/api/Classes/${classId}/channels/${editId}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(channelData)
+                    });
+                } else {
+                    response = await fetch(`/api/Classes/${classId}/channels`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(channelData)
+                    });
+                }
+                if (!response.ok) throw new Error(`HTTP error! ${response.status}`);
+                if (channelModalStatus) channelModalStatus.textContent = 'Channel saved!';
+                setTimeout(() => { channelModal.style.display = 'none'; }, 600);
+                loadClassData();
+            } catch (error) {
+                if (channelModalStatus) channelModalStatus.textContent = 'Error: ' + (error.message || 'Could not save channel.');
+            } finally {
+                channelForm.querySelector('button[type="submit"]').disabled = false;
+            }
+        });
+    }
+    // === END Channel Modal Logic ===
+
+    // === Emoji Picker Modal Logic ===
+    const emojiPickerModal = document.getElementById('emoji-picker-modal');
+    const closeEmojiModalBtn = emojiPickerModal ? emojiPickerModal.querySelector('.close-modal') : null;
+    let emojiPickerCallback = null;
+    if (closeEmojiModalBtn && emojiPickerModal) closeEmojiModalBtn.addEventListener('click', () => { emojiPickerModal.style.display = 'none'; });
+    window.addEventListener('click', (e) => { if (e.target === emojiPickerModal) emojiPickerModal.style.display = 'none'; });
+    if (emojiPickerModal) {
+        emojiPickerModal.querySelectorAll('.emoji').forEach(emojiEl => {
+            emojiEl.addEventListener('click', function() {
+                if (emojiPickerCallback) emojiPickerCallback(this.textContent);
+                emojiPickerModal.style.display = 'none';
+            });
+        });
+    }
+    function openEmojiPicker(cb) {
+        emojiPickerCallback = cb;
+        emojiPickerModal.style.display = 'flex';
+    }
+    // === END Emoji Picker Modal Logic ===
+
+    // === Improved Message Rendering, Reactions, Replies ===
+    function renderMessage(msg, currentUserId, usersById, allMessages) {
+        // Grouping, avatars, hover actions, reactions, replies
+        const isCurrentUser = msg.senderId === currentUserId;
+        const avatarText = usersById[msg.senderId]?.initials || (msg.senderName ? msg.senderName.substring(0, 2).toUpperCase() : '??');
+        const authorName = isCurrentUser ? 'You' : (usersById[msg.senderId]?.name || msg.senderName || 'Unknown User');
+        let formattedTime = 'Invalid Date';
+        try {
+            const date = new Date(msg.sentAt);
+            formattedTime = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+        } catch (e) {}
+        // Message group div
+        const messageElement = document.createElement('div');
+        messageElement.className = 'message-group';
+        messageElement.setAttribute('data-message-id', msg.id);
+        if (isCurrentUser) messageElement.classList.add('own-message');
+        // Avatar
+        const avatarDiv = document.createElement('div');
+        avatarDiv.className = 'message-avatar';
+        avatarDiv.textContent = avatarText;
+        messageElement.appendChild(avatarDiv);
+        // Content
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'message-content';
+        // Header
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'message-header';
+        headerDiv.innerHTML = `<span class="message-author">${authorName}</span><span class="message-time">${formattedTime}</span>`;
+        contentDiv.appendChild(headerDiv);
+        // Text
+        const textDiv = document.createElement('div');
+        textDiv.className = 'message-text';
+        textDiv.innerHTML = msg.content; // TODO: sanitize
+        contentDiv.appendChild(textDiv);
+        // Actions (hover)
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'message-actions';
+        actionsDiv.style.display = 'none';
+        actionsDiv.innerHTML = `
+            <button class="btn-text reply-btn">Reply</button>
+            <button class="btn-text react-btn">React</button>
+            ${isCurrentUser ? '<button class="btn-text edit-btn">Edit</button><button class="btn-text delete-btn">Delete</button>' : ''}
+        `;
+        contentDiv.appendChild(actionsDiv);
+        messageElement.appendChild(contentDiv);
+        // Show actions on hover
+        messageElement.addEventListener('mouseenter', () => { actionsDiv.style.display = 'block'; });
+        messageElement.addEventListener('mouseleave', () => { actionsDiv.style.display = 'none'; });
+        // Reactions
+        const reactionsDiv = document.createElement('div');
+        reactionsDiv.className = 'message-reactions';
+        if (msg.reactions && msg.reactions.length > 0) {
+            msg.reactions.forEach(r => {
+                const reactionBtn = document.createElement('span');
+                reactionBtn.className = 'reaction';
+                reactionBtn.textContent = `${r.emoji} ${r.count}`;
+                if (r.users && r.users.includes(currentUserId)) reactionBtn.classList.add('reacted');
+                reactionBtn.title = r.users ? `Reacted by: ${r.users.map(uid => usersById[uid]?.name || uid).join(', ')}` : '';
+                reactionBtn.addEventListener('click', () => handleToggleReaction(msg.id, r.emoji));
+                reactionsDiv.appendChild(reactionBtn);
+            });
+        }
+        // Add Reaction button
+        const addReactionBtn = document.createElement('button');
+        addReactionBtn.className = 'btn-text btn-small add-reaction-btn';
+        addReactionBtn.textContent = 'Add Reaction';
+        addReactionBtn.addEventListener('click', () => openEmojiPicker(emoji => handleAddReaction(msg.id, emoji)));
+        reactionsDiv.appendChild(addReactionBtn);
+        contentDiv.appendChild(reactionsDiv);
+        // Reply count and replies
+        const replies = allMessages.filter(m => m.replyTo === msg.id);
+        if (replies.length > 0) {
+            const replyCountDiv = document.createElement('div');
+            replyCountDiv.className = 'reply-count';
+            replyCountDiv.textContent = `${replies.length} repl${replies.length === 1 ? 'y' : 'ies'}`;
+            replyCountDiv.addEventListener('click', () => {
+                // Toggle replies
+                if (messageElement.querySelector('.replies-list')) {
+                    messageElement.querySelector('.replies-list').remove();
+                } else {
+                    const repliesList = document.createElement('div');
+                    repliesList.className = 'replies-list';
+                    replies.forEach(rmsg => {
+                        repliesList.appendChild(renderMessage(rmsg, currentUserId, usersById, allMessages));
+                    });
+                    messageElement.appendChild(repliesList);
+                }
+            });
+            contentDiv.appendChild(replyCountDiv);
+        }
+        // Reply input
+        actionsDiv.querySelector('.reply-btn').addEventListener('click', () => {
+            if (messageElement.querySelector('.reply-form')) return;
+            const replyTemplate = document.getElementById('reply-input-template');
+            const replyForm = replyTemplate.firstElementChild.cloneNode(true);
+            replyForm.querySelector('.cancel-reply').addEventListener('click', () => replyForm.remove());
+            replyForm.querySelector('.send-reply-btn').addEventListener('click', async () => {
+                const replyText = replyForm.querySelector('.reply-input').value.trim();
+                if (!replyText) return;
+                await sendReply(msg.id, replyText);
+                replyForm.remove();
+            });
+            contentDiv.appendChild(replyForm);
+            replyForm.querySelector('.reply-input').focus();
+        });
+        // React button
+        actionsDiv.querySelector('.react-btn').addEventListener('click', () => openEmojiPicker(emoji => handleAddReaction(msg.id, emoji)));
+        // Edit/Delete (stub)
+        if (isCurrentUser) {
+            actionsDiv.querySelector('.edit-btn').addEventListener('click', () => alert('Edit message (not implemented)'));
+            actionsDiv.querySelector('.delete-btn').addEventListener('click', () => alert('Delete message (not implemented)'));
+        }
+        return messageElement;
+    }
+
+    // Restore renderUnits function
+    function renderUnits(units) {
+        window.classUnits = units;
+        if (!unitsNavContainer || !unitsContentContainer) return;
+        // Clear existing units (keep the 'Add Unit' button if it's inside nav container)
+        unitsNavContainer.querySelectorAll('.unit-tab').forEach(tab => tab.remove());
+        unitsContentContainer.innerHTML = '';
+        if (units.length === 0) {
+            const addUnitBtnEl = unitsNavContainer.querySelector('.unit-add-btn');
+            unitsNavContainer.innerHTML = '';
+            if (addUnitBtnEl) unitsNavContainer.appendChild(addUnitBtnEl);
+            unitsNavContainer.insertAdjacentHTML('afterbegin', '<span class="empty-state-small">No units created.</span>');
+            unitsContentContainer.innerHTML = '<div class="empty-state-large"><i class="fas fa-books"></i><h3>No units available yet.</h3><p>Create a unit to add resources.</p></div>';
+        } else {
+            units.forEach((unit, index) => {
+                const isActive = index === 0;
+                const unitTab = document.createElement('button');
+                unitTab.className = `unit-tab ${isActive ? 'active' : ''}`;
+                unitTab.setAttribute('data-unit', unit.id);
+                unitTab.textContent = unit.title || 'Untitled Unit';
+                const addBtn = unitsNavContainer.querySelector('.unit-add-btn');
+                if (addBtn) {
+                    unitsNavContainer.insertBefore(unitTab, addBtn);
+                } else {
+                    unitsNavContainer.appendChild(unitTab);
+                }
+                const unitContent = document.createElement('div');
+                unitContent.className = `unit-content ${isActive ? 'active' : ''}`;
+                unitContent.id = unit.id;
+                unitContent.innerHTML = `
+                    <div class="unit-header">
+                        <h3 class="unit-title">${unit.title || 'Untitled Unit'}</h3>
+                        <p class="unit-description">${unit.description || 'No description.'}</p>
+                    </div>
+                    <div class="unit-tabs">
+                        <div class="tabs">
+                            <button class="tab-btn active" data-tab="${unit.id}-worksheets">Worksheets</button>
+                            <button class="tab-btn" data-tab="${unit.id}-guides">Study Guides</button>
+                            <button class="tab-btn" data-tab="${unit.id}-mindwebs">Mind Webs</button>
+                            <button class="tab-btn" data-tab="${unit.id}-practice">Practice Problems</button>
+                            <button class="tab-btn" data-tab="${unit.id}-tests">Practice Tests</button>
+                        </div>
+                    </div>
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="${unit.id}-worksheets"></div>
+                        <div class="tab-pane" id="${unit.id}-guides"></div>
+                        <div class="tab-pane" id="${unit.id}-mindwebs"></div>
+                        <div class="tab-pane" id="${unit.id}-practice"></div>
+                        <div class="tab-pane" id="${unit.id}-tests"></div>
+                    </div>
+                `;
+                unitsContentContainer.appendChild(unitContent);
+                unitContent.querySelectorAll('.tab-btn').forEach(button => {
+                    button.addEventListener('click', handleTabSwitch);
+                });
+                unitTab.addEventListener('click', handleUnitSwitch);
+            });
+        }
+    }
+
+    // Restore handleAddUnit function
+    async function handleAddUnit() {
+        const title = prompt('Enter title for the new unit:');
+        if (!title || title.trim() === '') return alert('Unit title is required.');
+        const unitData = { title: title.trim() };
+        try {
+            const response = await fetch(`/api/Classes/${classId}/units`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(unitData)
+            });
+            if (!response.ok) throw new Error(`HTTP error! ${response.status}`);
+            loadClassData();
+        } catch (error) {
+            alert('Failed to add unit.');
+        }
+    }
+
+    // Restore loadAssignments function
+    async function loadAssignments() {
+        try {
+            const response = await fetch(`/api/Assignments?classId=${classId}`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const assignments = await response.json();
+            renderAssignments(assignments);
+        } catch (error) {
+            console.error('Error loading assignments:', error);
+            if (assignmentsContainer) assignmentsContainer.innerHTML = '<div class="error-state">Error loading assignments.</div>';
+        }
+    }
+
+    // Restore renderAssignments function
+    function renderAssignments(assignments) {
+        if (!assignmentsContainer) return;
+        // Keep header, clear only assignment items (assuming they are direct children)
+        assignmentsContainer.querySelectorAll('.assignment, .empty-state').forEach(el => el.remove());
+        if (assignments.length === 0) {
+            assignmentsContainer.innerHTML += '<div class="empty-state"><i class="fas fa-clipboard-check"></i><p>No upcoming assignments.</p></div>';
+        } else {
+            assignments.sort((a, b) => new Date(a.dueDate || 0) - new Date(b.dueDate || 0));
+            assignments.forEach(assignment => {
+                let statusClass = 'upcoming';
+                let dueDate = new Date(assignment.dueDate || 0);
+                let today = new Date();
+                let diffDays = (dueDate - today) / (1000 * 60 * 60 * 24);
+                if (diffDays < 3 && diffDays >= 0) statusClass = 'urgent';
+                else if (diffDays < 0) statusClass = 'past-due';
+                const assignmentElement = document.createElement('div');
+                assignmentElement.className = `assignment ${statusClass}`;
+                assignmentElement.setAttribute('data-assignment-id', assignment.id);
+                assignmentElement.innerHTML = `
+                    <div class="assignment-status ${statusClass}"></div>
+                    <div class="assignment-details">
+                        <h3>${assignment.title || 'Untitled Assignment'}</h3>
+                        <p><i class="fas fa-calendar"></i> Due: ${dueDate.toLocaleDateString() || 'No date'}</p>
+                    </div>
+                `;
+                assignmentsContainer.appendChild(assignmentElement);
+            });
+        }
+    }
+
+    // Restore renderEvents function
+    function renderEvents(events) {
+        if (!eventsContainer) return;
+        const viewAllBtn = eventsContainer.querySelector('.btn-text');
+        eventsContainer.querySelectorAll('.event, .empty-state').forEach(el => el.remove());
+        if (events.length === 0) {
+            eventsContainer.insertAdjacentHTML('afterbegin', '<div class="empty-state"><i class="fas fa-calendar-check"></i><p>No upcoming events scheduled.</p></div>');
+        } else {
+            events.sort((a, b) => new Date(a.startDate || 0) - new Date(b.startDate || 0));
+            events.forEach(event => {
+                const startDate = event.startDate ? new Date(event.startDate) : null;
+                const endDate = event.endDate ? new Date(event.endDate) : null;
+                const color = event.color || '#2196f3';
+                const icon = event.icon || '📅';
+                const eventElement = document.createElement('div');
+                eventElement.className = 'event';
+                eventElement.setAttribute('data-event-id', event.id);
+                eventElement.innerHTML = `
+                    <div class="event-date" style="background:${color};color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;width:48px;height:48px;font-size:2rem;">
+                        <span>${icon}</span>
+                    </div>
+                    <div class="event-details">
+                        <h3>${event.title || 'Untitled Event'}</h3>
+                        ${startDate ? `<p><i class="fas fa-clock"></i> ${startDate.toLocaleString([], {dateStyle:'short', timeStyle:'short'})}${endDate ? ' - ' + endDate.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit'}) : ''}</p>` : ''}
+                        ${event.location ? `<p><i class="fas fa-map-marker-alt"></i> ${event.location}</p>` : ''}
+                        ${event.hostName ? `<p><i class="fas fa-user"></i> Hosted by: ${event.hostName}</p>` : ''}
+                        ${event.description ? `<p>${event.description}</p>` : ''}
+                        ${event.recurrencePattern ? `<p><i class='fas fa-redo'></i> ${event.recurrencePattern.charAt(0).toUpperCase() + event.recurrencePattern.slice(1)}</p>` : ''}
+                    </div>
+                    <div class="event-actions">
+                        <button class="btn btn-small">RSVP</button>
+                    </div>
+                `;
+                if (viewAllBtn) {
+                    eventsContainer.insertBefore(eventElement, viewAllBtn);
+                } else {
+                    eventsContainer.appendChild(eventElement);
+                }
+            });
+        }
+    }
+
+    // Restore loadEvents function
+    async function loadEvents() {
+        try {
+            const response = await fetch(`/api/Events?classId=${classId}`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const events = await response.json();
+            renderEvents(events);
+        } catch (error) {
+            console.error('Error loading events:', error);
+            if (eventsContainer) eventsContainer.innerHTML = '<div class="error-state">Error loading events.</div>';
+        }
+    }
 
 });
 

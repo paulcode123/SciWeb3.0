@@ -1,0 +1,59 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Class Dashboard System
+
+## Core Structure
+The class dashboard is implemented in [static/js/class_dashboard.js](mdc:static/js/class_dashboard.js) and provides a comprehensive view of class information with an integrated edit mode.
+
+## Edit Mode Functionality
+The dashboard implements a complete edit mode system that allows teachers to modify all aspects of the dashboard:
+
+1. A floating edit button toggles edit mode (`setupEditMode()` function)
+2. When active, all editable elements show visual indicators on hover
+3. Clicking any editable element shows an inline form for editing that content
+4. Changes persist to the Firebase database
+
+## Editable Components
+The dashboard supports editing for the following components:
+
+- **Class Header**: Title and description (`createEditHandler()`)
+- **Teacher Profile**: Name, email, and profile picture (`editTeacherProfile()`)
+- **Syllabus**: Full content editing with rich text (`createEditHandler()`)
+- **Office Hours**: Dynamic list with add/remove capability (`editOfficeHours()`)
+- **Current Unit**: Title, description, current topic, and progress percentage (`editCurrentUnit()`)
+- **Assignments**: Both overview items and detailed cards (`editAssignmentItem()`, `editAssignmentCard()`)
+- **Resources**: Complete metadata editing (`editResourceCard()`)
+- **Discussion Channels**: Name, privacy settings, and descriptions (`editChannel()`, `editCurrentChannel()`)
+- **Student Information**: Name, email, grade level, and profile picture (`editStudentCard()`)
+
+## Firebase Integration
+The system integrates with Firebase for persistent storage:
+
+- Each edit function includes database update logic when Firebase is available
+- Updates are performed on the appropriate collections based on [database.md](mdc:database.md)
+- For complex data like channels and units that exist in arrays within documents, it implements fetch-modify-update patterns
+
+## Tab System
+The dashboard uses a tab-based navigation system:
+- Overview (default)
+- Assignments
+- Resources
+- Discussions (channels)
+- Grades
+- Students
+- Mind Web visualization
+
+Each tab loads data on demand when first activated through the `loadTabData()` function.
+
+## Database Structure
+The Firebase collections used by the class dashboard include:
+
+- **Classes**: Core class information including metadata arrays for channels and units
+- **Members**: User accounts including teachers and students
+- **Assignments**: Assignment details referenced in the dashboard
+- **Resources**: Educational materials shown in the resources tab
+- **Messages**: Channel discussion messages
+- **Events**: Upcoming class events

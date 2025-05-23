@@ -12,7 +12,7 @@ from db_init import db
 from firebase_admin import firestore
 
 # Load OpenAI API key from api_keys.json
-with open('api_keys.json') as f:
+with open('api_keys1.json') as f:
     api_keys = json.load(f)
 OPENAI_API_KEY = api_keys.get('OpenAiAPIKey') or os.environ.get('OPENAI_API_KEY')
 
@@ -578,3 +578,125 @@ def get_openai_key():
     except Exception as e:
         print(f"Error providing API key: {str(e)}")
         return jsonify({"error": str(e)}), 500 
+
+@ai_bp.route('/pull_grades', methods=['POST'])
+def pull_grades():
+    data = request.get_json()
+    osis = data.get('osis')
+    password = data.get('password')
+    class_id = data.get('classId')
+    if not osis or not password or not class_id:
+        return jsonify({'error': 'Missing credentials or class ID'}), 400
+    # Fetch Jupiter data (reuse fetch_jupiter_data logic)
+    params = urllib.parse.urlencode({'osis': osis, 'password': password})
+    cloud_run_url = f'https://jupiterapi-xz43fty7fq-pd.a.run.app/fetchData?{params}'
+    try:
+        with urllib.request.urlopen(cloud_run_url) as resp:
+            resp_data = resp.read().decode('utf-8')
+        result = json.loads(resp_data)
+    except Exception as e:
+        print(f"pull_grades: remote fetch error: {e}, falling back to sample.txt")
+        try:
+            with open('sample.txt') as f:
+                result = json.load(f)
+        except Exception as e2:
+            print(f"pull_grades: sample.txt load error: {e2}")
+            return jsonify({'error': 'Failed to fetch Jupiter data', 'details': str(e2)}), 500
+    nested_str = result.get('data')
+    if not nested_str:
+        return jsonify({'error': 'Malformed response from Jupiter API'}), 500
+    nested = json.loads(nested_str)
+    courses = nested.get('courses', [])
+    # Find the course matching the classId (by name or other logic)
+    course = None
+    for c in courses:
+        # Try to match by name (case-insensitive, substring)
+        if class_id.lower() in (c.get('name', '').lower()):
+            course = c
+            break
+    if not course:
+        # fallback: just use the first course
+        course = courses[0] if courses else None
+    if not course:
+        return jsonify({'error': 'No matching course found.'}), 404
+    # Process grade data for this course
+    grade = course.get('grade')
+    grade_percent = round(float(grade), 2) if grade is not None else None
+    # Recent scores (last 5 graded assignments)
+    assignments = course.get('assignments', [])
+    recent_scores = []
+    for a in assignments:
+        if a.get('graded') and a.get('score') is not None:
+            recent_scores.append({
+                'name': a.get('name'),
+                'score': f"{a.get('score')}/{a.get('points')}"
+            })
+        if len(recent_scores) >= 5:
+            break
+    # Time distribution (by assignment category)
+    time_labels = []
+    time_data = []
+    cat_map = {}
+    for a in assignments:
+        cat = a.get('category', 'Other')
+        cat_map.setdefault(cat, 0)
+        cat_map[cat] += 1
+    for k, v in cat_map.items():
+        time_labels.append(k)
+        time_data.append(v)
+    time_distribution = {
+        'labels': time_labels,
+        'data': time_data
+    }
+    # Score timeline (line chart: x=due date or name, y=percent score, sorted by date)
+    timeline = []
+    for a in assignments:
+        if a.get('graded') and a.get('score') is not None and a.get('points'):
+            label = a.get('due') or a.get('name')
+            try:
+                pct = round(float(a['score']) / float(a['points']) * 100, 2)
+            except Exception:
+                pct = None
+            timeline.append({
+                'label': label,
+                'date': a.get('due'),
+                'pct': pct
+            })
+    # Sort by date if possible, else by order
+    from datetime import datetime
+    def parse_date(d):
+        try:
+            return datetime.strptime(d, '%m/%d')
+        except Exception:
+            return None
+    def timeline_sort_key(x):
+        dt = parse_date(x['date'])
+        if dt:
+            return (0, dt)
+        else:
+            return (1, x['label'].lower() if x['label'] else '')
+    timeline.sort(key=timeline_sort_key)
+    score_timeline = {
+        'labels': [x['label'] for x in timeline],
+        'data': [x['pct'] for x in timeline]
+    }
+    # Assignment completion rate (pie: completed vs missing)
+    completed = 0
+    missing = 0
+    for a in assignments:
+        if a.get('graded'):
+            completed += 1
+        else:
+            missing += 1
+    completion_rate = {
+        'labels': ['Completed', 'Missing'],
+        'data': [completed, missing]
+    }
+    return jsonify({
+        'currentGrade': grade,
+        'currentGradePercent': grade_percent,
+        'recentScores': recent_scores,
+        'timeDistribution': time_distribution,
+        'scoreTimeline': score_timeline,
+        'completionRate': completion_rate
+    }) 

@@ -1,0 +1,871 @@
+{% extends "base.html" %}
+
+{% block title %}{{ class_name }} - SciWeb 3.0{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/class_dashboard.css') }}">
+<style>
+    /* Fix for white-on-white text issue */
+    .class-header {
+        color: white;
+    }
+    
+    .class-header-content {
+        color: white;
+    }
+    
+    /* Ensure proper text color throughout */
+    .class-sidebar, .class-content, .class-details {
+        color: var(--gray-800);
+    }
+    
+    /* Ensure channel text is visible */
+    .channel:not(.active) {
+        color: var(--gray-700);
+    }
+    
+    /* Ensure modal text is visible */
+    .modal-content {
+        color: var(--gray-800);
+    }
+    
+    /* Styles for messages */
+    .messages-container {
+        height: 400px;
+        overflow-y: auto;
+        padding: 15px;
+        background-color: var(--gray-100);
+        border-radius: 8px;
+    }
+    
+    .message {
+        display: flex;
+        margin-bottom: 20px;
+        animation: fade-in 0.3s ease-in-out;
+    }
+    
+    .message-avatar {
+        margin-right: 12px;
+    }
+    
+    .message-avatar img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    
+    .message-content {
+        flex: 1;
+    }
+    
+    .message-header {
+        margin-bottom: 5px;
+        display: flex;
+        align-items: baseline;
+    }
+    
+    .sender-name {
+        font-weight: 600;
+        margin-right: 8px;
+        color: var(--gray-800);
+    }
+    
+    .message-time {
+        font-size: 0.8rem;
+        color: var(--gray-500);
+    }
+    
+    .message-text {
+        background-color: white;
+        padding: 10px 15px;
+        border-radius: 0 8px 8px 8px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        color: var(--gray-800);
+    }
+    
+    .current-user-message .message-text {
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 8px 0 8px 8px;
+    }
+    
+    .message-input-area {
+        display: flex;
+        margin-top: 15px;
+    }
+    
+    .message-input-area textarea {
+        flex: 1;
+        padding: 12px;
+        border: 1px solid var(--gray-300);
+        border-radius: 4px;
+        resize: none;
+        height: 60px;
+        font-family: inherit;
+    }
+    
+    .message-input-area button {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 0 15px;
+        margin-left: 8px;
+        cursor: pointer;
+    }
+    
+    .loading-message, .no-messages {
+        text-align: center;
+        padding: 20px;
+        color: var(--gray-500);
+    }
+    
+    /* Styles for grades */
+    .grade-circle {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--gray-200);
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0 auto 10px;
+        color: white;
+    }
+    
+    .grade-a {
+        background-color: #4CAF50;
+    }
+    
+    .grade-b {
+        background-color: #2196F3;
+    }
+    
+    .grade-c {
+        background-color: #FF9800;
+    }
+    
+    .grade-d {
+        background-color: #FF5722;
+    }
+    
+    .grade-f {
+        background-color: #F44336;
+    }
+    
+    .grade-value {
+        font-weight: 600;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .status-graded {
+        background-color: #E8F5E9;
+        color: #2E7D32;
+    }
+    
+    .status-submitted {
+        background-color: #E3F2FD;
+        color: #1565C0;
+    }
+    
+    .status-late {
+        background-color: #FFF3E0;
+        color: #E65100;
+    }
+    
+    .status-not_submitted {
+        background-color: #FFEBEE;
+        color: #C62828;
+    }
+    
+    .chart-footer {
+        margin-top: 15px;
+        text-align: center;
+    }
+    
+    .your-grade-indicator {
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .indicator-dot {
+        width: 12px;
+        height: 12px;
+        background-color: var(--primary-color);
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+    
+    /* Styles for students */
+    .students-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px; /* Adjust gap as needed */
+    }
+
+    .student-card {
+        display: flex;
+        flex-direction: column; /* Stack items vertically */
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 15px;
+        /* margin-bottom: 15px; */ /* Removed as gap is used */
+        align-items: flex-start; /* Align items to the start */
+        transition: transform 0.2s;
+        width: calc(33.333% - 20px); /* Adjust for 3 cards per row, considering gap */
+        min-width: 250px; /* Minimum width for smaller screens */
+    }
+    
+    .student-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .student-avatar {
+        position: relative;
+        margin-right: 0; /* Remove right margin as items are stacked */
+        margin-bottom: 15px; /* Add bottom margin for spacing */
+        align-self: center; /* Center avatar */
+    }
+    
+    .student-avatar img {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    
+    .activity-indicator {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 12px;
+        height: 12px;
+        background-color: #4CAF50;
+        border-radius: 50%;
+        border: 2px solid white;
+    }
+    
+    .student-info {
+        flex: 1;
+        width: 100%; /* Ensure info takes full width */
+        text-align: center; /* Center text */
+    }
+    
+    .student-name {
+        margin: 0 0 5px;
+        font-size: 1.1rem;
+    }
+    
+    .student-email, .student-grade {
+        margin: 0 0 8px; /* Increased bottom margin */
+        color: var(--gray-600);
+        font-size: 0.9rem;
+    }
+    
+    .student-actions {
+        display: flex;
+        flex-direction: row; /* Align buttons horizontally */
+        justify-content: space-around; /* Space out buttons */
+        width: 100%; /* Take full width */
+        margin-top: 15px; /* Add margin above buttons */
+    }
+    
+    .student-actions button {
+        background-color: transparent;
+        border: 1px solid var(--primary-color);
+        color: var(--primary-color);
+        border-radius: 4px;
+        padding: 6px 12px;
+        /* margin-bottom: 8px; */ /* Removed as buttons are side-by-side */
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+        flex-grow: 1; /* Allow buttons to grow */
+        margin-right: 5px; /* Add small margin between buttons */
+    }
+
+    .student-actions button:last-child {
+        margin-right: 0;
+    }
+    
+    .student-actions button:hover {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    /* Mind Web styles */
+    #mindweb-canvas {
+        width: 100%;
+        height: 100%;
+        background-color: var(--gray-100);
+        border-radius: 8px;
+    }
+    
+    .mindweb-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 400px;
+    }
+    
+    .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid var(--gray-200);
+        border-top: 5px solid var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 15px;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes fade-in {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .mindweb-controls {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .control-btn {
+        background-color: white;
+        border: 1px solid var(--gray-300);
+        color: var(--gray-700);
+        border-radius: 4px;
+        padding: 8px 15px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .control-btn:hover {
+        background-color: var(--gray-100);
+    }
+
+    .btn-primary-outline {
+        background-color: transparent;
+        border: 1px solid var(--primary-color);
+        color: var(--primary-color);
+        padding: 8px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-weight: 500;
+        display: inline-block; /* Or block depending on layout needs */
+        text-align: center;
+    }
+
+    .btn-primary-outline:hover {
+        background-color: var(--primary-color);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="class-dashboard">
+    <!-- Class Header Section -->
+    <header class="class-header">
+        <div class="class-header-bg" id="class-header-bg"></div>
+        <div class="class-header-content">
+            <h1 class="class-title">{{ class_name }}</h1>
+            <p class="class-subtitle">{{ class_description }}</p>
+            <div class="class-meta">
+                <div class="meta-item">
+                    <i class="fas fa-user-tie"></i>
+                    <span id="teacher-name">Loading...</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-clock"></i>
+                    <span id="class-period">Loading...</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-users"></i>
+                    <span id="student-count">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Grid -->
+    <div class="dashboard-grid">
+        <!-- Left Sidebar -->
+        <aside class="class-sidebar">
+            <nav class="class-nav">
+                <button class="nav-item active" data-tab="overview">
+                    <i class="fas fa-home"></i>
+                    <span>Overview</span>
+                </button>
+                <button class="nav-item" data-tab="assignments">
+                    <i class="fas fa-tasks"></i>
+                    <span>Assignments</span>
+                </button>
+                <button class="nav-item" data-tab="resources">
+                    <i class="fas fa-book"></i>
+                    <span>Resources</span>
+                </button>
+                <button class="nav-item" data-tab="discussions">
+                    <i class="fas fa-comments"></i>
+                    <span>Discussions</span>
+                </button>
+                <button class="nav-item" data-tab="grades">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Grades</span>
+                </button>
+                <button class="nav-item" data-tab="students">
+                    <i class="fas fa-user-graduate"></i>
+                    <span>Students</span>
+                </button>
+                <button class="nav-item" data-tab="mindweb">
+                    <i class="fas fa-brain"></i>
+                    <span>Mind Web</span>
+                </button>
+            </nav>
+            
+            <div class="upcoming-events">
+                <h3>Upcoming</h3>
+                <div class="events-list" id="upcoming-events-list">
+                    <div class="event-skeleton">
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line short"></div>
+                    </div>
+                    <div class="event-skeleton">
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line short"></div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="class-content">
+            <!-- Overview Tab -->
+            <section class="content-tab active" id="overview-tab">
+                <div class="overview-grid">
+                    <!-- Current Unit -->
+                    <div class="overview-card current-unit">
+                        <div class="card-header">
+                            <h3>Current Unit</h3>
+                            <button class="unit-nav-btn" id="prev-unit" aria-label="Previous unit">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button class="unit-nav-btn" id="next-unit" aria-label="Next unit">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <div class="card-content" id="current-unit-content">
+                            <div class="skeleton-loading">
+                                <div class="skeleton-line"></div>
+                                <div class="skeleton-line"></div>
+                                <div class="skeleton-line short"></div>
+                            </div>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-label">
+                                <span>Unit Progress</span>
+                                <span id="unit-progress-percent">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-bar-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Activity -->
+                    <div class="overview-card recent-activity">
+                        <h3>Recent Activity</h3>
+                        <ul class="activity-list" id="activity-list">
+                            <li class="skeleton-loading">
+                                <div class="skeleton-line"></div>
+                                <div class="skeleton-line short"></div>
+                            </li>
+                            <li class="skeleton-loading">
+                                <div class="skeleton-line"></div>
+                                <div class="skeleton-line short"></div>
+                            </li>
+                            <li class="skeleton-loading">
+                                <div class="skeleton-line"></div>
+                                <div class="skeleton-line short"></div>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Quick Stats -->
+                    <div class="overview-card quick-stats">
+                        <h3>Class Stats</h3>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <span class="stat-value" id="assignment-count">--</span>
+                                <span class="stat-label">Assignments</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value" id="resource-count">--</span>
+                                <span class="stat-label">Resources</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value" id="discussion-count">--</span>
+                                <span class="stat-label">Discussions</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value" id="avg-grade">--</span>
+                                <span class="stat-label">Avg. Grade</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Upcoming Assignments -->
+                    <div class="overview-card upcoming-assignments">
+                        <div class="card-header">
+                            <h3>Upcoming Assignments</h3>
+                            <a href="#" class="view-all" data-tab="assignments">View All</a>
+                        </div>
+                        <ul class="assignment-list" id="upcoming-assignments-list">
+                            <li class="skeleton-loading">
+                                <div class="skeleton-line"></div>
+                                <div class="skeleton-line short"></div>
+                            </li>
+                            <li class="skeleton-loading">
+                                <div class="skeleton-line"></div>
+                                <div class="skeleton-line short"></div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Assignments Tab -->
+            <section class="content-tab" id="assignments-tab">
+                <div class="assignments-header">
+                    <h2>Assignments</h2>
+                    <div class="assignments-filters">
+                        <div class="filter-group">
+                            <label for="assignment-status">Status</label>
+                            <select id="assignment-status">
+                                <option value="all">All</option>
+                                <option value="upcoming">Upcoming</option>
+                                <option value="completed">Completed</option>
+                                <option value="late">Late</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="assignment-type">Type</label>
+                            <select id="assignment-type">
+                                <option value="all">All Types</option>
+                                <option value="homework">Homework</option>
+                                <option value="quiz">Quiz</option>
+                                <option value="project">Project</option>
+                                <option value="exam">Exam</option>
+                            </select>
+                        </div>
+                        <div class="search-group">
+                            <input type="text" id="assignment-search" placeholder="Search...">
+                            <button id="search-btn"><i class="fas fa-search"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="assignments-grid" id="assignments-grid">
+                    <div class="skeleton-loading-assignment"></div>
+                    <div class="skeleton-loading-assignment"></div>
+                    <div class="skeleton-loading-assignment"></div>
+                </div>
+            </section>
+
+            <!-- Resources Tab -->
+            <section class="content-tab" id="resources-tab">
+                <div class="resources-header">
+                    <h2>Class Resources</h2>
+                    <div class="resource-search">
+                        <input type="text" id="resource-search" placeholder="Search resources...">
+                        <button id="resource-search-btn"><i class="fas fa-search"></i></button>
+                    </div>
+                </div>
+                <div class="resources-categories">
+                    <button class="category-btn active" data-category="all">All</button>
+                    <button class="category-btn" data-category="slides">Slides</button>
+                    <button class="category-btn" data-category="handouts">Handouts</button>
+                    <button class="category-btn" data-category="readings">Readings</button>
+                    <button class="category-btn" data-category="videos">Videos</button>
+                    <button class="category-btn" data-category="practice">Practice</button>
+                </div>
+                <div class="resources-grid" id="resources-grid">
+                    <div class="skeleton-loading-resource"></div>
+                    <div class="skeleton-loading-resource"></div>
+                    <div class="skeleton-loading-resource"></div>
+                    <div class="skeleton-loading-resource"></div>
+                </div>
+            </section>
+
+            <!-- Discussions Tab -->
+            <section class="content-tab" id="discussions-tab">
+                <div class="discussions-container">
+                    <div class="channels-sidebar">
+                        <div class="channels-header">
+                            <h3>Channels</h3>
+                            <button id="create-channel-btn"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <ul class="channels-list" id="channels-list">
+                            <li class="channel active" data-channel="general">
+                                <span class="channel-icon">#</span>
+                                <span class="channel-name">general</span>
+                            </li>
+                            <li class="channel" data-channel="questions">
+                                <span class="channel-icon">#</span>
+                                <span class="channel-name">questions</span>
+                            </li>
+                            <li class="channel" data-channel="resources">
+                                <span class="channel-icon">#</span>
+                                <span class="channel-name">resources</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="chat-area">
+                        <div class="chat-header">
+                            <h3><span class="channel-icon">#</span> <span id="current-channel">general</span></h3>
+                        </div>
+                        <div class="messages-container" id="messages-container">
+                            <div class="loading-message">Loading messages...</div>
+                        </div>
+                        <div class="message-input-area">
+                            <textarea id="message-input" placeholder="Type your message..."></textarea>
+                            <button id="send-message-btn"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Grades Tab -->
+            <section class="content-tab" id="grades-tab">
+                <div class="grades-header">
+                    <h2>Your Grades</h2>
+                    <div class="grade-summary">
+                        <div class="overall-grade">
+                            <div class="grade-circle">
+                                <span id="overall-grade-value">--</span>
+                            </div>
+                            <span class="grade-label">Overall Grade</span>
+                        </div>
+                        <div class="grade-stats">
+                            <div class="grade-stat">
+                                <span class="stat-label">Assignments</span>
+                                <span class="stat-value" id="completed-assignments">--/--</span>
+                            </div>
+                            <div class="grade-stat">
+                                <span class="stat-label">On-time Rate</span>
+                                <span class="stat-value" id="ontime-rate">--%</span>
+                            </div>
+                            <div class="grade-stat">
+                                <span class="stat-label">Class Rank</span>
+                                <span class="stat-value" id="class-rank">--/--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="grades-table-container">
+                    <table class="grades-table">
+                        <thead>
+                            <tr>
+                                <th>Assignment</th>
+                                <th>Type</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Score</th>
+                                <th>Grade</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grades-table-body">
+                            <tr class="skeleton-row">
+                                <td><div class="skeleton-line"></div></td>
+                                <td><div class="skeleton-line short"></div></td>
+                                <td><div class="skeleton-line short"></div></td>
+                                <td><div class="skeleton-line short"></div></td>
+                                <td><div class="skeleton-line short"></div></td>
+                                <td><div class="skeleton-line short"></div></td>
+                            </tr>
+                            <tr class="skeleton-row">
+                                <td><div class="skeleton-line"></div></td>
+                                <td><div class="skeleton-line short"></div></td>
+                                <td><div class="skeleton-line short"></div></td>
+                                <td><div class="skeleton-line short"></div></td>
+                                <td><div class="skeleton-line short"></div></td>
+                                <td><div class="skeleton-line short"></div></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="grade-distribution">
+                    <h3>Grade Distribution</h3>
+                    <div class="chart-container" id="grade-chart-container">
+                        <div class="skeleton-chart"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Students Tab -->
+            <section class="content-tab" id="students-tab">
+                <div class="students-header">
+                    <h2>Classmates</h2>
+                    <div class="student-search">
+                        <input type="text" id="student-search" placeholder="Search students...">
+                        <button id="student-search-btn"><i class="fas fa-search"></i></button>
+                    </div>
+                </div>
+                <div class="students-grid" id="students-grid">
+                    <div class="skeleton-loading-student"></div>
+                    <div class="skeleton-loading-student"></div>
+                    <div class="skeleton-loading-student"></div>
+                    <div class="skeleton-loading-student"></div>
+                    <div class="skeleton-loading-student"></div>
+                    <div class="skeleton-loading-student"></div>
+                </div>
+            </section>
+
+            <!-- Mind Web Tab -->
+            <section class="content-tab" id="mindweb-tab">
+                <div class="mindweb-header">
+                    <h2>Class Mind Web</h2>
+                    <div class="mindweb-controls">
+                        <button id="add-node-btn" class="control-btn">
+                            <i class="fas fa-plus"></i> Add Node
+                        </button>
+                        <button id="zoom-in-btn" class="control-btn">
+                            <i class="fas fa-search-plus"></i>
+                        </button>
+                        <button id="zoom-out-btn" class="control-btn">
+                            <i class="fas fa-search-minus"></i>
+                        </button>
+                        <button id="center-btn" class="control-btn">
+                            <i class="fas fa-compress-arrows-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="mindweb-container" id="mindweb-container">
+                    <div class="mindweb-loading">
+                        <div class="loading-spinner"></div>
+                        <p>Loading Mind Web...</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Right Sidebar -->
+        <aside class="class-details">
+            <div class="teacher-info">
+                <h3>Instructor</h3>
+                <div class="teacher-profile" id="teacher-profile">
+                    <div class="skeleton-loading">
+                        <div class="skeleton-circle"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line short"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="class-syllabus">
+                <h3>Syllabus</h3>
+                <div class="syllabus-content" id="syllabus-content">
+                    <div class="skeleton-loading">
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line short"></div>
+                    </div>
+                </div>
+                <button id="download-syllabus" class="btn-outline">
+                    <i class="fas fa-download"></i> Download
+                </button>
+            </div>
+            
+            <div class="office-hours">
+                <h3>Office Hours</h3>
+                <ul class="office-hours-list" id="office-hours-list">
+                    <li class="skeleton-loading">
+                        <div class="skeleton-line"></div>
+                    </li>
+                    <li class="skeleton-loading">
+                        <div class="skeleton-line"></div>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+    </div>
+</div>
+
+<!-- Modals -->
+<div class="modal" id="create-channel-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Create New Channel</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="channel-name">Channel Name</label>
+                <input type="text" id="channel-name" placeholder="e.g., homework-help">
+            </div>
+            <div class="form-group">
+                <label for="channel-description">Description (Optional)</label>
+                <textarea id="channel-description" placeholder="What is this channel for?"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="private-channel">
+                    <span>Make this a private channel</span>
+                </label>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary cancel-modal">Cancel</button>
+            <button class="btn-primary" id="save-channel-btn">Create Channel</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="assignment-detail-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="assignment-detail-title">Assignment Title</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="assignment-detail-content" id="assignment-detail-content">
+                <!-- Will be populated dynamically -->
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary cancel-modal">Close</button>
+            <button class="btn-primary" id="submit-assignment-btn">Submit Assignment</button>
+        </div>
+    </div>
+</div>
+
+<!-- Pass class data to JavaScript -->
+{% if class_data %}
+<script id="class-data" type="application/json">
+    {{ class_data|tojson }}
+</script>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/class_dashboard.js') }}"></script>
+{% endblock %} 

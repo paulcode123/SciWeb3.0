@@ -1686,4 +1686,159 @@ body {
 
 .dark-mode .problems-filter {
     background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Modal Styles for Pull Grades */
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: auto;
+    background: rgba(30, 33, 39, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s;
+}
+.modal-content {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 2.5rem 2rem 2rem 2rem;
+    box-shadow: 0 8px 32px rgba(142, 68, 173, 0.25), 0 1.5px 8px rgba(0,0,0,0.08);
+    min-width: 340px;
+    max-width: 95vw;
+    position: relative;
+    animation: fadeIn 0.4s;
+}
+.close-modal {
+    position: absolute;
+    top: 1.2rem;
+    right: 1.5rem;
+    font-size: 1.5rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.2s;
+    z-index: 10;
+}
+.close-modal:hover {
+    color: #BF55EC;
+}
+#pull-grades-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    margin-top: 1rem;
+}
+#pull-grades-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+#pull-grades-form label {
+    font-weight: 600;
+    color: #8E44AD;
+    margin-bottom: 0.2rem;
+}
+#pull-grades-form input[type="text"],
+#pull-grades-form input[type="password"] {
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--message-input-bg);
+    color: var(--text-color);
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+#pull-grades-form input:focus {
+    border-color: #BF55EC;
+    outline: none;
+}
+#pull-grades-form .btn-block {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.8rem 0;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #8E44AD, #9B59B6);
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(142, 68, 173, 0.15);
+    transition: background 0.2s, box-shadow 0.2s;
+}
+#pull-grades-form .btn-block:hover {
+    background: linear-gradient(135deg, #9B59B6, #8E44AD);
+    box-shadow: 0 4px 16px rgba(142, 68, 173, 0.22);
+}
+.modal-status {
+    min-height: 1.5rem;
+    font-size: 1rem;
+    color: #BF55EC;
+    text-align: center;
+    margin-top: 0.5rem;
+}
+@media (max-width: 600px) {
+    .modal-content {
+        min-width: 90vw;
+        padding: 1.2rem 0.5rem 1.5rem 0.5rem;
+    }
+}
+
+/* Simple overall grade display */
+.overall-grade-simple {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1.2rem;
+    color: #8E44AD;
+}
+.overall-grade-simple .grade-label {
+    color: #8E44AD;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+.overall-grade-simple .grade-value {
+    color: #2ECC71;
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+.overall-grade-simple .grade-percentage {
+    color: #3498DB;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+/* Multi-chart area for grades */
+.grades-charts-area {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 2rem 1.5rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+.grades-charts-area .chart-container {
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(142, 68, 173, 0.08);
+    padding: 1.2rem 1rem 1.5rem 1rem;
+    min-height: 260px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.grades-charts-area h4 {
+    text-align: center;
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 0.7rem;
+    color: #BF55EC;
+}
+@media (max-width: 900px) {
+    .grades-charts-area {
+        grid-template-columns: 1fr;
+    }
 } 

@@ -716,9 +716,9 @@
 
 .node-image img {
   max-width: 100%;
-  max-height: 250px;
-  border-radius: 8px;
-  pointer-events: none;
+  max-height: 100px; /* Adjust as needed */
+  border-radius: 4px;
+  margin-top: 8px;
 }
 
 .node-idea {
@@ -3284,7 +3284,6 @@
   border-radius: 4px;
   padding: 6px 10px;
   margin-top: 10px;
->>>>>>> b489811433f2ce2eb98d5abd8f2b991a3ea7d051
   cursor: pointer;
   border: 1px solid #e0e0e0;
   opacity: 0.97;
@@ -3299,4 +3298,68 @@
 .zoom-controls, .zoom-controls * {
   pointer-events: auto !important;
   z-index: 10000 !important;
+}
+
+/* Added node styles */
+.node-learningObjective {
+  background: var(--node-learningObjective);
+}
+
+.node-keyidea {
+  background: var(--node-keyidea);
+}
+
+.node-question {
+  background: var(--node-question);
+}
+
+.node-problemtype {
+  background: var(--node-problemtype);
+}
+
+.node-nhscredit {
+  background: var(--node-nhscredit);
+}
+
+/* Added button styles */
+.btn-learningObjective {
+  background: var(--node-learningObjective);
+}
+
+.btn-keyidea {
+  background: var(--node-keyidea);
+}
+
+.btn-question {
+  background: var(--node-question);
+}
+
+.btn-problemtype {
+  background: var(--node-problemtype);
+}
+
+.btn-nhscredit {
+ background: var(--node-nhscredit);
+}
+
+/* Learning Objective Node Specifics */
+.node-learningObjective .learning-objective-status {
+  position: absolute;
+  bottom: 8px; /* Adjust as needed */
+  right: 8px; /* Adjust as needed */
+  font-size: 1em; /* Adjust as needed */
+  color: white; /* Or a color that contrasts with the node background */
+  padding: 3px;
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 50%;
+  width: 20px; /* Adjust to fit icon */
+  height: 20px; /* Adjust to fit icon */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.node-learningObjective.voice-active {
+  /* Optional: style for when voice mode is active, e.g., a glowing border */
+  box-shadow: 0 0 15px 5px var(--node-learningObjective), 0 10px 20px rgba(0, 0, 0, 0.4); /* Combine with existing dark shadow or adjust */
 }
