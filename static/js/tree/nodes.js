@@ -676,179 +676,261 @@ function setupNodeHoverPanel(node, nodeObject) {
     controls.appendChild(dueDateBtn);
   }
 
-  // Add AI buttons for new features
-  // Challenge AI button
-  const challengeBtn = document.createElement('div');
-  challengeBtn.className = 'node-control ai-feature-btn challenge-btn';
-  challengeBtn.innerHTML = '<i class="fas fa-brain"></i>';
-  challengeBtn.title = 'AI Challenge - Test your knowledge';
-  challengeBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    AI.showAIFeatureChat(node, hoverPanel, 'challenge');
-  });
-  controls.appendChild(challengeBtn);
-
-  // Enrich AI button
-  const enrichBtn = document.createElement('div');
-  enrichBtn.className = 'node-control ai-feature-btn enrich-btn';
-  enrichBtn.innerHTML = '<i class="fas fa-seedling"></i>';
-  enrichBtn.title = 'AI Enrich - Expand on this node';
-  enrichBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    AI.showAIFeatureChat(node, hoverPanel, 'enrich');
-  });
-  controls.appendChild(enrichBtn);
-
-  // Explore AI button
-  const exploreBtn = document.createElement('div');
-  exploreBtn.className = 'node-control ai-feature-btn explore-btn';
-  exploreBtn.innerHTML = '<i class="fas fa-compass"></i>';
-  exploreBtn.title = 'AI Explore - Discover connections';
-  exploreBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    AI.showAIFeatureChat(node, hoverPanel, 'explore');
-  });
-  controls.appendChild(exploreBtn);
-
-  // Add node info based on type
-  const infoSection = document.createElement('div');
-  infoSection.className = 'node-info collapsed';
-  switch(nodeObject.type) {
-    case 'motivator':
-      infoSection.innerHTML = `
-        <h4>Motivator</h4>
-        <p>A personal goal or motivation that drives your hard work. The Envision page helps you visualize and feel renewed energy and drive from your motivators.</p>
-        <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
-      `;
-      break;
-    case 'nhscredit':
-      infoSection.innerHTML = `
-        <h4>NHS Credit Tracker</h4>
-        <p>Track your National Honor Society service hours and credits. Use this node to monitor your progress towards NHS requirements.</p>
-        <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
-      `;
-      break;
-    case 'task':
-      infoSection.innerHTML = `
-        <h4>Task</h4>
-        <p>A specific actionable item that needs to be completed. Connect tasks to classes or projects to organize your work.</p>
-        <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
-      `;
-      break;
-    case 'challenge':
-      infoSection.innerHTML = `
-        <h4>Challenge</h4>
-        <p>A difficult problem or obstacle to overcome, or a question, dilemma, or consideration that you need to think about. Breaking down challenges with idea nodes helps make them manageable.</p>
-        <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
-      `;
-      break;
-    case 'class':
-      infoSection.innerHTML = `
-        <h4>Class</h4>
-        <p>A course or subject you're studying. The Class page contains grades, resources, chats, and practice problems.</p>
-        <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
-      `;
-      break;
-    case 'assignment':
-      infoSection.innerHTML = `
-        <h4>Assignment</h4>
-        <p>Coursework that needs to be completed. The Class page helps track your assignments and deadlines.</p>
-        <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
-      `;
-      break;
-    case 'test':
-      infoSection.innerHTML = `
-        <h4>Test</h4>
-        <p>An exam or quiz to assess your knowledge. The MindWeb page helps you study by mapping out and expanding on your knowledge.</p>
-        <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
-      `;
-      break;
-    case 'project':
-      infoSection.innerHTML = `
-        <h4>Project</h4>
-        <p>A larger task involving multiple people and components. The Collaboration page allows you to work with others on this project.</p>
-        <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
-      `;
-      break;
-    case 'essay':
-      infoSection.innerHTML = `
-        <h4>Essay</h4>
-        <p>A written composition on a particular subject. Connect to class nodes to organize your writing assignments.</p>
-        <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
-      `;
-      break;
-    case 'image':
-      infoSection.innerHTML = `
-        <h4>Image</h4>
-        <p>Visual content to support your learning. Connect images to related nodes for visual reference.</p>
-        <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
-      `;
-      break;
-    case 'idea':
-      infoSection.innerHTML = `
-        <h4>Idea</h4>
-        <p>A concept, thought, or potential solution. Connect ideas to challenges, tasks, or other ideas to map out your thinking.</p>
-        <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
-      `;
-      break;
-    case 'learningObjective':
-      infoSection.innerHTML = `
-        <h4>Learning Objective</h4>
-        <p>A specific learning goal. Click to activate voice mode that helps probe your current understanding and expand upon it through AI-guided questioning.</p>
-        <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
-      `;
-      break;
-    case 'keyidea':
-      infoSection.innerHTML = `
-        <h4>Key Idea</h4>
-        <p>A core concept or piece of information related to a learning objective.</p>
-        <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
-      `;
-      break;
-    case 'question':
-      infoSection.innerHTML = `
-        <h4>Question</h4>
-        <p>A question to explore or answer, often related to a learning objective or challenge.</p>
-        <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
-      `;
-      break;
-    case 'problemtype':
-      infoSection.innerHTML = `
-        <h4>Problem Type</h4>
-        <p>A category of problems to practice or understand.</p>
-        <div class="node-info-toggle">Show more <i class="fas fa-chevron-down"></i></div>
-      `;
-      break;
-    default:
-      infoSection.innerHTML = `
-        <h4>${Utils.capitalize(nodeObject.type || 'Node')}</h4>
-        <p>No specific information available for this node type.</p>
-      `;
-      break;
-  }
-
-  // Add event listener for info toggle IF IT EXISTS
-  const infoToggle = infoSection.querySelector('.node-info-toggle');
-  if (infoToggle) {
-    infoToggle.addEventListener('click', function() {
-      if (infoSection.classList.contains('collapsed')) {
-        infoSection.classList.remove('collapsed');
-        infoSection.classList.add('expanded');
-        this.innerHTML = 'Show less <i class="fas fa-chevron-up"></i>';
-      } else {
-        infoSection.classList.remove('expanded');
-        infoSection.classList.add('collapsed');
-        this.innerHTML = 'Show more <i class="fas fa-chevron-down"></i>';
-      }
+  // Add AI buttons for motivator nodes only
+  if (nodeObject.type === 'motivator') {
+    // Challenge AI button
+    const challengeBtn = document.createElement('div');
+    challengeBtn.className = 'node-control ai-feature-btn challenge-btn';
+    challengeBtn.innerHTML = '<i class="fas fa-brain"></i>';
+    challengeBtn.title = 'AI Challenge - Test your knowledge';
+    challengeBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      AI.showAIFeatureChat(node, hoverPanel, 'challenge');
     });
-  } else {
-    // Optional: log if a toggle wasn't found for a type expected to have one
-    // console.warn(`Node info toggle not found for type: ${nodeObject.type}`);
+    controls.appendChild(challengeBtn);
+
+    // Enrich AI button
+    const enrichBtn = document.createElement('div');
+    enrichBtn.className = 'node-control ai-feature-btn enrich-btn';
+    enrichBtn.innerHTML = '<i class="fas fa-seedling"></i>';
+    enrichBtn.title = 'AI Enrich - Expand on this node';
+    enrichBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      AI.showAIFeatureChat(node, hoverPanel, 'enrich');
+    });
+    controls.appendChild(enrichBtn);
+
+    // Explore AI button
+    const exploreBtn = document.createElement('div');
+    exploreBtn.className = 'node-control ai-feature-btn explore-btn';
+    exploreBtn.innerHTML = '<i class="fas fa-compass"></i>';
+    exploreBtn.title = 'AI Explore - Discover connections';
+    exploreBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      AI.showAIFeatureChat(node, hoverPanel, 'explore');
+    });
+    controls.appendChild(exploreBtn);
   }
 
-  // Add controls and info to hover panel
+  // Add custom features section based on node type
+  const featuresSection = document.createElement('div');
+  featuresSection.className = 'node-features';
+  
+  switch(nodeObject.type) {
+    case 'task':
+      featuresSection.innerHTML = `
+        <div class="node-feature-buttons">
+          <button class="feature-button breakdown-btn">
+            <i class="fas fa-sitemap"></i>
+            <span>Break It Down</span>
+          </button>
+          <button class="feature-button ai-assist-btn">
+            <i class="fas fa-robot"></i>
+            <span>Do with AI</span>
+          </button>
+        </div>
+      `;
+      
+      // Add event listeners for task features
+      setTimeout(() => {
+        const breakdownBtn = featuresSection.querySelector('.breakdown-btn');
+        const aiAssistBtn = featuresSection.querySelector('.ai-assist-btn');
+        
+        if (breakdownBtn) {
+          breakdownBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            Voice.startNodeFeatureVoice(node, 'breakdown');
+          });
+        }
+        
+        if (aiAssistBtn) {
+          aiAssistBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            Voice.startNodeFeatureVoice(node, 'ai-assist');
+          });
+        }
+      }, 0);
+      break;
+      
+    case 'learningObjective':
+      featuresSection.innerHTML = `
+        <div class="learning-style-panel">
+          <h4>Learning Style Settings</h4>
+          <div class="learning-style-options">
+            <label class="style-option">
+              <input type="radio" name="learning-style-${nodeId}" value="visual" checked>
+              <span class="option-content">
+                <i class="fas fa-eye"></i>
+                <span>Visual</span>
+              </span>
+            </label>
+            <label class="style-option">
+              <input type="radio" name="learning-style-${nodeId}" value="auditory">
+              <span class="option-content">
+                <i class="fas fa-headphones"></i>
+                <span>Auditory</span>
+              </span>
+            </label>
+            <label class="style-option">
+              <input type="radio" name="learning-style-${nodeId}" value="kinesthetic">
+              <span class="option-content">
+                <i class="fas fa-hand-paper"></i>
+                <span>Hands-on</span>
+              </span>
+            </label>
+          </div>
+          <div class="learning-preferences">
+            <label class="preference-toggle">
+              <input type="checkbox" class="pref-checkbox">
+              <span>Use examples</span>
+            </label>
+            <label class="preference-toggle">
+              <input type="checkbox" class="pref-checkbox">
+              <span>Step-by-step breakdown</span>
+            </label>
+            <label class="preference-toggle">
+              <input type="checkbox" class="pref-checkbox">
+              <span>Connect to prior knowledge</span>
+            </label>
+          </div>
+        </div>
+      `;
+      break;
+      
+    case 'motivator':
+      featuresSection.innerHTML = `
+        <div class="motivator-features">
+          <h4>Motivator Tools</h4>
+          <div class="motivator-actions">
+            <button class="feature-button vision-btn">
+              <i class="fas fa-telescope"></i>
+              <span>Envision Success</span>
+            </button>
+            <button class="feature-button progress-btn">
+              <i class="fas fa-chart-line"></i>
+              <span>Track Progress</span>
+            </button>
+          </div>
+        </div>
+      `;
+      
+      setTimeout(() => {
+        const visionBtn = featuresSection.querySelector('.vision-btn');
+        const progressBtn = featuresSection.querySelector('.progress-btn');
+        
+        if (visionBtn) {
+          visionBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            Voice.startNodeFeatureVoice(node, 'envision');
+          });
+        }
+        
+        if (progressBtn) {
+          progressBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            Voice.startNodeFeatureVoice(node, 'progress');
+          });
+        }
+      }, 0);
+      break;
+      
+    case 'challenge':
+      featuresSection.innerHTML = `
+        <div class="challenge-features">
+          <div class="feature-button-row">
+            <button class="feature-button analyze-btn">
+              <i class="fas fa-search"></i>
+              <span>Analyze Challenge</span>
+            </button>
+          </div>
+        </div>
+      `;
+      
+      setTimeout(() => {
+        const analyzeBtn = featuresSection.querySelector('.analyze-btn');
+        if (analyzeBtn) {
+          analyzeBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            Voice.startNodeFeatureVoice(node, 'analyze');
+          });
+        }
+      }, 0);
+      break;
+      
+    case 'idea':
+      featuresSection.innerHTML = `
+        <div class="idea-features">
+          <div class="feature-button-row">
+            <button class="feature-button expand-btn">
+              <i class="fas fa-expand-arrows-alt"></i>
+              <span>Expand Idea</span>
+            </button>
+          </div>
+        </div>
+      `;
+      
+      setTimeout(() => {
+        const expandBtn = featuresSection.querySelector('.expand-btn');
+        if (expandBtn) {
+          expandBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            Voice.startNodeFeatureVoice(node, 'expand');
+          });
+        }
+      }, 0);
+      break;
+      
+    case 'assignment':
+    case 'test':
+    case 'project':
+    case 'essay':
+      featuresSection.innerHTML = `
+        <div class="academic-features">
+          <div class="feature-button-row">
+            <button class="feature-button study-btn">
+              <i class="fas fa-book-open"></i>
+              <span>Study Plan</span>
+            </button>
+            <button class="feature-button resource-btn">
+              <i class="fas fa-link"></i>
+              <span>Resources</span>
+            </button>
+          </div>
+        </div>
+      `;
+      
+      setTimeout(() => {
+        const studyBtn = featuresSection.querySelector('.study-btn');
+        const resourceBtn = featuresSection.querySelector('.resource-btn');
+        
+        if (studyBtn) {
+          studyBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            Voice.startNodeFeatureVoice(node, 'study-plan');
+          });
+        }
+        
+        if (resourceBtn) {
+          resourceBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            Voice.startNodeFeatureVoice(node, 'resources');
+          });
+        }
+      }, 0);
+      break;
+      
+    default:
+      featuresSection.innerHTML = `
+        <div class="default-features">
+          <p class="no-features">No special features available for this node type.</p>
+        </div>
+      `;
+      break;
+  }
+
+  // Add controls and features to hover panel
   hoverPanel.appendChild(controls);
-  hoverPanel.appendChild(infoSection);
+  hoverPanel.appendChild(featuresSection);
   document.body.appendChild(hoverPanel);
 
   // Hover logic

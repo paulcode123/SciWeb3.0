@@ -700,3 +700,422 @@ def pull_grades():
         'scoreTimeline': score_timeline,
         'completionRate': completion_rate
     }) 
+
+@ai_bp.route('/process_learning_objective_audio', methods=['POST'])
+def process_learning_objective_audio():
+    """
+    Process audio recording for learning objective mode.
+    Uses GPT-4o direct audio processing to extract correct ideas and generate follow-up questions.
+    
+    Expects:
+      - audio file uploaded as 'audio'
+      - learning_objective: JSON string with learning objective node data
+      - connected_nodes: JSON string with nodes connected to the learning objective
+      
+    Returns:
+      - JSON with correct ideas as nodes and follow-up questions
+    """
+    # Check if AI features are available
+    if not is_ai_available():
+        return jsonify({"error": "AI features are currently unavailable. Please set up your OpenAI API key."}), 503
+        
+    try:
+        # Check if audio file is present
+        if 'audio' not in request.files:
+            return jsonify({"error": "No audio file provided"}), 400
+        
+        audio_file = request.files['audio']
+        if audio_file.filename == '':
+            return jsonify({"error": "Empty audio file name"}), 400
+        
+        # Get learning objective and connected nodes context
+        learning_objective_json = request.form.get('learning_objective')
+        connected_nodes_json = request.form.get('connected_nodes')
+        
+        if not learning_objective_json:
+            return jsonify({"error": "No learning objective provided"}), 400
+        
+        learning_objective = json.loads(learning_objective_json)
+        connected_nodes = json.loads(connected_nodes_json) if connected_nodes_json else []
+        
+        # Save audio file temporarily
+        audio_filename = secure_filename(audio_file.filename)
+        temp_dir = tempfile.mkdtemp()
+        temp_audio_path = os.path.join(temp_dir, audio_filename)
+        audio_file.save(temp_audio_path)
+        
+        try:
+            # Step 1: Transcribe audio using Whisper (accepts many formats including WebM)
+            print(f"Transcribing audio file: {audio_filename}")
+            with open(temp_audio_path, "rb") as audio_data:
+                transcript_response = client.audio.transcriptions.create(
+                    model="whisper-1",
+                    file=audio_data
+                )
+            
+            transcript = transcript_response.text
+            print(f"Transcription successful: {transcript[:100]}...")
+            
+            if not transcript or len(transcript.strip()) < 5:
+                raise Exception("Transcription was too short or empty. Please speak more clearly.")
+            
+            # Step 2: Use GPT-4 to analyze the transcript
+            # Create system prompt for learning objective processing
+            system_prompt = (
+                f"You are a Socratic tutor analyzing a student's spoken response about the learning objective: '{learning_objective.get('title', 'Unknown')}'. "
+                f"Connected concepts already on the map: {[node.get('title', '') for node in connected_nodes]}. "
+                
+                "Your tasks: "
+                "1. Extract all CORRECT and RELEVANT ideas from the student's speech that advance understanding of the learning objective. "
+                "2. Generate 1-2 follow-up questions that challenge or expand their understanding. "
+                "3. Do NOT include incorrect information or tangential ideas. "
+                "4. Focus on building conceptual understanding, not just facts. "
+                
+                "For each correct idea, determine if it should connect to: "
+                "- The main learning objective (if it directly relates to the core concept) "
+                "- Specific connected nodes (if it builds on or relates to existing concepts) "
+                "- Both (if it bridges concepts) "
+                
+                "Return your analysis using the provided function."
+            )
+            
+            # Prepare context message about the learning scenario
+            context_message = (
+                f"Learning Objective: {learning_objective.get('title', 'Unknown')}\n"
+                f"Objective Description: {learning_objective.get('content', 'No description')}\n"
+                f"Connected Concepts: {', '.join([node.get('title', '') for node in connected_nodes])}\n\n"
+                f"Student's spoken response: \"{transcript}\"\n\n"
+                "Please analyze this response and extract correct ideas and generate follow-up questions."
+            )
+            
+            # Define function for structured output
+            tools = [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "analyze_learning_objective_response",
+                        "description": "Analyze student's spoken response and generate nodes and questions for learning objective",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "correct_ideas": {
+                                    "type": "array",
+                                    "description": "Correct and relevant ideas extracted from the speech",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {
+                                                "type": "string",
+                                                "description": "Unique identifier for the idea node"
+                                            },
+                                            "title": {
+                                                "type": "string",
+                                                "description": "Clear, concise title for the idea"
+                                            },
+                                            "content": {
+                                                "type": "string",
+                                                "description": "Optional additional context or explanation"
+                                            },
+                                            "node_type": {
+                                                "type": "string",
+                                                "description": "Type of node",
+                                                "enum": ["keyidea", "concept", "example", "connection"]
+                                            },
+                                            "connections": {
+                                                "type": "array",
+                                                "description": "IDs of nodes this idea should connect to",
+                                                "items": {"type": "string"}
+                                            },
+                                            "position_relative_to": {
+                                                "type": "string",
+                                                "description": "ID of node to position this near (usually learning objective or related node)"
+                                            }
+                                        },
+                                        "required": ["id", "title", "node_type", "connections"]
+                                    }
+                                },
+                                "follow_up_questions": {
+                                    "type": "array",
+                                    "description": "Socratic questions to challenge or expand understanding",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {
+                                                "type": "string",
+                                                "description": "Unique identifier for the question node"
+                                            },
+                                            "question": {
+                                                "type": "string",
+                                                "description": "The follow-up question"
+                                            },
+                                            "purpose": {
+                                                "type": "string",
+                                                "description": "Why this question advances learning"
+                                            },
+                                            "connections": {
+                                                "type": "array",
+                                                "description": "IDs of nodes this question relates to",
+                                                "items": {"type": "string"}
+                                            },
+                                            "position_relative_to": {
+                                                "type": "string",
+                                                "description": "ID of node to position this near"
+                                            }
+                                        },
+                                        "required": ["id", "question", "connections"]
+                                    }
+                                },
+                                "audio_transcript": {
+                                    "type": "string",
+                                    "description": "What the student said (for reference)"
+                                }
+                            },
+                            "required": ["correct_ideas", "follow_up_questions", "audio_transcript"]
+                        }
+                    }
+                }
+            ]
+            
+            # Call GPT-4 with the transcript
+            response = client.chat.completions.create(
+                model="gpt-4.1-mini",  # Use regular GPT-4 since we're using text input now
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": context_message}
+                ],
+                tools=tools,
+                tool_choice={"type": "function", "function": {"name": "analyze_learning_objective_response"}},
+                temperature=0.7
+            )
+            
+            # Extract function call result
+            tool_call = response.choices[0].message.tool_calls[0]
+            function_args = json.loads(tool_call.function.arguments)
+            
+            # Add the original transcript to the response if not already included
+            if 'audio_transcript' not in function_args:
+                function_args['audio_transcript'] = transcript
+            
+        except Exception as processing_error:
+            print(f"Error during transcription or analysis: {processing_error}")
+            raise processing_error
+        
+        finally:
+            # Clean up temporary files
+            try:
+                os.remove(temp_audio_path)
+                os.rmdir(temp_dir)
+            except Exception as cleanup_error:
+                print(f"Error cleaning up files: {cleanup_error}")
+        
+        return jsonify(function_args)
+        
+    except Exception as e:
+        print(f"Error in process_learning_objective_audio: {str(e)}")
+        # Clean up temp files if they exist
+        try:
+            if 'temp_audio_path' in locals():
+                os.remove(temp_audio_path)
+            if 'temp_dir' in locals():
+                os.rmdir(temp_dir)
+        except:
+            pass
+        return jsonify({"error": str(e)}), 500
+
+
+@ai_bp.route('/analyze_conversation', methods=['POST'])
+def analyze_conversation():
+    """
+    Analyze a conversation between user and AI to suggest relevant nodes for the concept map.
+    
+    Expects JSON with:
+      - node_data: Information about the node that triggered the conversation
+      - feature_type: Type of feature (breakdown, ai-assist, analyze, etc.)
+      - connected_nodes: Nodes connected to the original node
+      - map_state: Current state of the concept map
+      - conversation_history: Recent conversation messages
+      - latest_exchange: The most recent AI response and user response
+      
+    Returns:
+      - suggested_nodes: Array of nodes to create based on the conversation
+    """
+    # Check if AI features are available
+    if not is_ai_available():
+        return jsonify({"error": "AI features are currently unavailable. Please set up your OpenAI API key."}), 503
+        
+    try:
+        data = request.get_json()
+        
+        node_data = data.get('node_data', {})
+        analysis_type = data.get('analysis_type', 'node_feature')  # 'node_feature' or 'learning_objective'
+        feature_type = data.get('feature_type', '')
+        connected_nodes = data.get('connected_nodes', [])
+        map_state = data.get('map_state', {})
+        conversation_history = data.get('conversation_history', [])
+        analysis_context = data.get('analysis_context', {})
+        
+        if not node_data or not conversation_history:
+            return jsonify({"error": "Missing required conversation data"}), 400
+            
+        # For node features, feature_type is required
+        if analysis_type == 'node_feature' and not feature_type:
+            return jsonify({"error": "Missing feature_type for node feature analysis"}), 400
+        
+        # Create context-specific system prompt based on analysis type
+        if analysis_type == 'learning_objective':
+            conversation_context = f"The user is exploring their understanding of the learning objective: '{node_data.get('title', '')}'. Based on the conversation, identify what they know well (create 'keyidea' nodes) and what they need to learn more about (create 'question' nodes)."
+        else:
+            # Node feature contexts
+            feature_contexts = {
+                'breakdown': f"The user is working on breaking down the {node_data.get('type', 'item')}: '{node_data.get('title', '')}'. Look for concrete tasks, steps, or sub-components they mention that could become separate nodes.",
+                'ai-assist': f"The user needs help with: '{node_data.get('title', '')}'. Look for challenges, resources, approaches, or specific assistance they need that could become actionable nodes.",
+                'analyze': f"The user is analyzing the challenge: '{node_data.get('title', '')}'. Look for problem components, root causes, constraints, or analytical insights that could become nodes.",
+                'expand': f"The user is expanding on the idea: '{node_data.get('title', '')}'. Look for related concepts, applications, implications, or extensions they mention.",
+                'study-plan': f"The user is creating a study plan for: '{node_data.get('title', '')}'. Look for learning objectives, study methods, resources, or milestones they mention.",
+                'resources': f"The user is seeking resources for: '{node_data.get('title', '')}'. Look for specific tools, materials, people, or information sources they mention or need.",
+                'envision': f"The user is envisioning success with: '{node_data.get('title', '')}'. Look for goals, outcomes, motivations, or success metrics they express.",
+                'progress': f"The user is tracking progress on: '{node_data.get('title', '')}'. Look for milestones, achievements, next steps, or progress indicators they mention."
+            }
+            conversation_context = feature_contexts.get(feature_type, f"The user is working with: '{node_data.get('title', '')}'.")
+        
+        # Get comprehensive map context
+        all_nodes = map_state.get('all_nodes', [])
+        all_edges = map_state.get('all_edges', [])
+        total_nodes = map_state.get('total_nodes', 0)
+        
+        existing_titles = [node.get('title', '') for node in all_nodes]
+        turns_since_analysis = analysis_context.get('turns_since_last_analysis', 0)
+        
+        system_prompt = (
+            f"You are analyzing a conversation between a user and an AI assistant about a concept map node. "
+            f"{conversation_context}\n\n"
+            
+            f"CONVERSATION CONTEXT:\n"
+            f"- Original node: {node_data.get('title', '')} (Type: {node_data.get('type', 'unknown')})\n"
+            f"- Directly connected: {', '.join([node.get('title', '') for node in connected_nodes])}\n"
+            f"- Total nodes in map: {total_nodes}\n"
+            f"- Conversation turns since last analysis: {turns_since_analysis}\n\n"
+            
+            f"EXISTING MAP STRUCTURE:\n"
+            f"Current nodes: {', '.join(existing_titles[:20])}{'...' if len(existing_titles) > 20 else ''}\n"
+            f"Relationships: {len(all_edges)} connections between nodes\n\n"
+            
+            "ANALYSIS INSTRUCTIONS:\n"
+            "You are being selective and thoughtful. Only suggest nodes for substantial, concrete concepts that:\n"
+            "1. The user explicitly mentioned or clearly discussed in detail\n"
+            "2. Are NOT already covered by existing nodes (avoid duplicates)\n"
+            "3. Would meaningfully advance their understanding or organization\n"
+            "4. Represent actionable steps, important concepts, or key relationships\n\n"
+            
+            "QUALITY OVER QUANTITY: It's better to suggest 0-2 high-quality, necessary nodes than to spam with minor details.\n"
+            "Consider whether existing nodes could be UPDATED instead of creating new ones.\n\n"
+            
+            f"{'LEARNING OBJECTIVE FOCUS:' if analysis_type == 'learning_objective' else 'GENERAL FOCUS:'}\n"
+            f"{'- Create keyidea nodes for concepts the student clearly understands and can explain well' if analysis_type == 'learning_objective' else '- What new insights or concrete steps emerged from the conversation?'}\n"
+            f"{'- Create question nodes for areas where they show uncertainty, gaps, or need to learn more' if analysis_type == 'learning_objective' else '- What important concepts are missing from their current map?'}\n"
+            f"{'- Look for misconceptions that could be clarified through follow-up questions' if analysis_type == 'learning_objective' else '- What would genuinely help organize their thinking about this topic?'}\n"
+            f"{'- Identify prerequisite knowledge they may be missing' if analysis_type == 'learning_objective' else '- What specific next actions or sub-components became clear?'}"
+        )
+        
+        # Prepare comprehensive conversation context
+        conversation_text = f"FULL CONVERSATION ({len(conversation_history)} messages):\n\n"
+        
+        for i, msg in enumerate(conversation_history):
+            role = "User" if msg['role'] == 'user' else "AI Assistant"
+            conversation_text += f"{i+1}. {role}: {msg['message']}\n\n"
+        
+        conversation_text += f"\nANALYSIS FOCUS: Look for concrete concepts, tasks, or insights that emerged from this conversation that would benefit from being represented as nodes on the concept map."
+        
+        # Define function for structured output
+        tools = [
+            {
+                "type": "function",
+                "function": {
+                    "name": "suggest_concept_nodes",
+                    "description": "Suggest nodes to add to the concept map based on the conversation",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "suggested_nodes": {
+                                "type": "array",
+                                "description": "Nodes to create based on the conversation - BE SELECTIVE, only suggest meaningful additions",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "action": {
+                                            "type": "string",
+                                            "description": "What to do with this node",
+                                            "enum": ["create", "update"]
+                                        },
+                                        "node_id": {
+                                            "type": "string",
+                                            "description": "For update actions: ID of existing node to modify"
+                                        },
+                                        "title": {
+                                            "type": "string",
+                                            "description": "Clear, concise title for the node"
+                                        },
+                                        "content": {
+                                            "type": "string",
+                                            "description": "Optional additional context or description"
+                                        },
+                                        "node_type": {
+                                            "type": "string",
+                                            "description": "Type of node based on content",
+                                            "enum": ["task", "idea", "challenge", "question", "resource", "goal", "concept", "step", "keyidea"]
+                                        },
+                                        "connections": {
+                                            "type": "array",
+                                            "description": "IDs of existing nodes this should connect to",
+                                            "items": {"type": "string"}
+                                        },
+                                        "reasoning": {
+                                            "type": "string",
+                                            "description": "Why this node should be created/updated based on the conversation"
+                                        }
+                                    },
+                                    "required": ["action", "title", "node_type", "reasoning"]
+                                }
+                            },
+                            "analysis_summary": {
+                                "type": "string",
+                                "description": "Brief summary of the key insights from the conversation"
+                            }
+                        },
+                        "required": ["suggested_nodes"]
+                    }
+                }
+            }
+        ]
+        
+        # Call GPT-4 to analyze the conversation
+        response = client.chat.completions.create(
+            model="gpt-4.1-mini",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": conversation_text}
+            ],
+            tools=tools,
+            tool_choice={"type": "function", "function": {"name": "suggest_concept_nodes"}},
+            temperature=0.3  # Lower temperature for more focused analysis
+        )
+        
+        # Extract function call result
+        tool_call = response.choices[0].message.tool_calls[0]
+        function_args = json.loads(tool_call.function.arguments)
+        
+        # Add the original node ID to connections if not specified
+        for node in function_args.get('suggested_nodes', []):
+            if not node.get('connections'):
+                node['connections'] = [node_data.get('id')]
+        
+        print(f"Conversation analysis for {feature_type}: {len(function_args.get('suggested_nodes', []))} nodes suggested")
+        
+        return jsonify(function_args)
+        
+    except Exception as e:
+        print(f"Error in analyze_conversation: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+ 

@@ -932,4 +932,9 @@
     .recent-activity {
         grid-row: 4;
     }
+}
+
+/* Allow edit forms in header to overflow in edit mode */
+.edit-mode .class-header {
+    overflow: visible;
 } 

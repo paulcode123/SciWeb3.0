@@ -35,6 +35,21 @@ let isActiveSpeechDetected = false; // New state variable
 let isLearningObjectiveMode = false;
 let activeLearningObjectiveNode = null;
 let learningObjectiveSessionActive = false;
+let learningObjectiveMediaRecorder = null;
+let learningObjectiveRecordingTimer = null;
+let learningObjectiveAudioChunks = [];
+const LEARNING_OBJECTIVE_MAX_RECORDING_TIME = 60000; // 1 minute in milliseconds
+
+// Node feature interaction variables
+let isNodeFeatureMode = false;
+let activeFeatureNode = null;
+let activeFeatureType = null;
+let featureSessionActive = false;
+let conversationHistory = [];
+let lastAIResponse = '';
+let lastUserResponse = '';
+let conversationTurnsSinceLastAnalysis = 0;
+let lastAnalysisTime = 0;
 
 // Tool definitions for the AI
 const mapManipulationTools = [
@@ -240,32 +255,124 @@ function toggleVoiceRecording() {
   if (isRecording) {
     stopRecording();
   } else {
+    // Stop any active voice modes first
+    if (isNodeFeatureMode && activeFeatureNode) {
+      stopNodeFeatureVoice();
+    }
+    if (isLearningObjectiveMode && activeLearningObjectiveNode) {
+      toggleLearningObjectiveVoice(activeLearningObjectiveNode, false);
+    }
     startRecording();
   }
 }
 
-// Toggle Learning Objective voice mode
-export function toggleLearningObjectiveVoice(node, activate) {
-  if (isRecording) {
-    // If regular voice mode is active, stop it first
+// Stop node feature voice interaction
+export function stopNodeFeatureVoice() {
+  if (isNodeFeatureMode && isRecording) {
     stopRecording();
   }
   
+  // Reset node feature mode variables
+  isNodeFeatureMode = false;
+  activeFeatureNode = null;
+  activeFeatureType = null;
+  featureSessionActive = false;
+  
+  // Reset conversation tracking
+  conversationHistory = [];
+  lastAIResponse = '';
+  lastUserResponse = '';
+  conversationTurnsSinceLastAnalysis = 0;
+  lastAnalysisTime = 0;
+  
+  // Visual feedback
+  showMessage('Node feature voice mode deactivated');
+}
+
+// Start node feature voice interaction using real-time WebRTC
+export function startNodeFeatureVoice(node, featureType) {
+  // If any recording is active, stop it first
+  if (isRecording) {
+    stopRecording();
+  }
+  if (isLearningObjectiveMode && learningObjectiveSessionActive) {
+    // Stop learning objective mode properly
+    toggleLearningObjectiveVoice(activeLearningObjectiveNode, false);
+  }
+    
+  // Set node feature mode
+  isNodeFeatureMode = true;
+  activeFeatureNode = node;
+  activeFeatureType = featureType;
+  featureSessionActive = true;
+  
+  // Reset conversation tracking
+  conversationHistory = [];
+  lastAIResponse = '';
+  lastUserResponse = '';
+  conversationTurnsSinceLastAnalysis = 0;
+  lastAnalysisTime = Date.now();
+    
+  // Visual feedback
+  const nodeTitle = node.querySelector('.node-title').textContent;
+  const featureMessages = {
+    'breakdown': `Starting breakdown session for: ${nodeTitle}`,
+    'ai-assist': `Starting AI assistance for: ${nodeTitle}`,
+    'analyze': `Starting analysis session for: ${nodeTitle}`,
+    'expand': `Starting expansion session for: ${nodeTitle}`,
+    'study-plan': `Starting study plan session for: ${nodeTitle}`,
+    'resources': `Starting resource session for: ${nodeTitle}`,
+    'envision': `Starting vision session for: ${nodeTitle}`,
+    'progress': `Starting progress session for: ${nodeTitle}`
+  };
+  
+  const message = featureMessages[featureType] || `Starting session for: ${nodeTitle}`;
+  showMessage(message);
+  
+  // Start real-time recording with node feature context
+  startRecording();
+}
+
+// Toggle Learning Objective voice mode
+export function toggleLearningObjectiveVoice(node, activate) {
   if (activate) {
+    // If any recording is active, stop it first
+    if (isRecording) {
+      stopRecording();
+    }
+    
     // Set learning objective mode
     isLearningObjectiveMode = true;
     activeLearningObjectiveNode = node;
     learningObjectiveSessionActive = true;
     
-    // Start recording with learning objective specific prompting
-    startLearningObjectiveRecording(node);
+    // Reset conversation tracking
+    conversationHistory = [];
+    lastAIResponse = '';
+    lastUserResponse = '';
+    conversationTurnsSinceLastAnalysis = 0;
+    lastAnalysisTime = Date.now();
     
     // Visual feedback
-    showMessage(`Learning Objective voice mode activated for: ${node.querySelector('.node-title').textContent}`);
+    const nodeTitle = node.querySelector('.node-title').textContent;
+    const message = `Starting learning exploration for: ${nodeTitle}`;
+    showMessage(message);
+    
+    // Start real-time recording with learning objective context
+    startRecording();
   } else {
     // Exit learning objective mode
-    if (isLearningObjectiveMode && learningObjectiveSessionActive) {
+    if (isLearningObjectiveMode && isRecording) {
       stopRecording();
+    }
+    
+    // Clean up UI immediately
+    if (activeLearningObjectiveNode) {
+      activeLearningObjectiveNode.classList.remove('voice-active');
+      const statusIndicator = activeLearningObjectiveNode.querySelector('.learning-objective-status');
+      if (statusIndicator) {
+        statusIndicator.innerHTML = `<i class="fas fa-microphone-slash"></i>`;
+      }
     }
     
     isLearningObjectiveMode = false;
@@ -277,572 +384,130 @@ export function toggleLearningObjectiveVoice(node, activate) {
   }
 }
 
-// Start recording specifically for Learning Objective mode
-async function startLearningObjectiveRecording(node) {
-  if (isRecording) return;
+
+
+// Note: Learning objective recording now uses the same real-time WebRTC approach as node features
+
+
+
+// Note: Learning objective processing now handled by the same conversation analysis system
+
+
+
+// Note: Learning objective response processing now handled by processBackendNodeSuggestions
+
+// Helper function to get connected nodes for context
+function getConnectedNodes(nodeId) {
+  const connectedNodeIds = new Set();
   
-  try {
-    // Same audio setup as regular recording
-    stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
-    audioContext = new (window.AudioContext || window.webkitAudioContext)({
-      sampleRate: 24000
-    });
-    analyser = audioContext.createAnalyser();
-    const source = audioContext.createMediaStreamSource(stream);
-    source.connect(analyser);
-    const bufferSize = 1024;
-    const scriptProcessor = audioContext.createScriptProcessor(bufferSize, 1, 1);
-    source.connect(scriptProcessor);
-    scriptProcessor.connect(audioContext.destination);
+  // Find all edges connected to this node
+  Edges.edges.forEach(edge => {
+    if (edge.from === nodeId) {
+      connectedNodeIds.add(edge.to);
+    } else if (edge.to === nodeId) {
+      connectedNodeIds.add(edge.from);
+    }
+  });
+  
+  // Return node data for connected nodes
+  return Nodes.nodes
+    .filter(node => connectedNodeIds.has(node.id))
+    .map(node => ({
+      id: node.id,
+      title: node.title,
+      content: node.content,
+      type: node.type
+    }));
+}
 
-    const SILENCE_THRESHOLD = 0.01;
-    lastAudioSendTime = Date.now();
-    audioChunks = [];
-    silenceCounter = 0;
-
-    // Reset isActiveSpeechDetected
-    isActiveSpeechDetected = false; 
-
-    // Same audio processing as regular recording
-    scriptProcessor.onaudioprocess = (e) => {
-      if (!isRecording) return;
-      const input = e.inputBuffer.getChannelData(0);
-      let sum = 0;
-      for (let i = 0; i < input.length; i++) { sum += Math.abs(input[i]); }
-      const avg = sum / input.length;
-      if (avg > SILENCE_THRESHOLD) {
-        silenceCounter = 0;
-        const currentAudioChunk = convertFloat32ToInt16(input);
-        audioChunks.push(currentAudioChunk);
-        const now = Date.now();
-        if (now - lastAudioSendTime >= AUDIO_SEND_INTERVAL) {
-          sendAccumulatedAudio();
-          lastAudioSendTime = now;
-        }
-      } else {
-        silenceCounter++;
-        if (silenceCounter > SILENCE_FLUSH_THRESHOLD && audioChunks.length > 0) {
-          sendAccumulatedAudio();
-          lastAudioSendTime = Date.now();
-          silenceCounter = 0;
-        }
-      }
+// Helper function to get node by ID
+function getNodeById(nodeId) {
+  if (!nodeId) return null;
+  
+  // First try to find in the Nodes.nodes array
+  const nodeObj = Nodes.nodes.find(node => node.id === nodeId);
+  if (nodeObj) {
+    // Make sure the element property is set
+    if (!nodeObj.element) {
+      nodeObj.element = document.querySelector(`[data-id="${nodeId}"]`);
+    }
+    return nodeObj;
+  }
+  
+  // Fallback: search by DOM element
+  const element = document.querySelector(`[data-id="${nodeId}"]`);
+  if (element) {
+    // Create a minimal node object
+    return {
+      id: nodeId,
+      element: element,
+      title: element.querySelector('.node-title')?.textContent || '',
+      content: element.querySelector('.node-content textarea')?.value || '',
+      type: element.dataset.type || 'unknown'
     };
-    
-    // Capture tree state with focus on the learning objective
-    treeState = captureTreeState();
-    
-    // Get token and setup WebRTC
-    const tokenResponse = await fetch('/ai/get_realtime_token', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
-    if (!tokenResponse.ok) throw new Error("Failed to get OpenAI token: " + await tokenResponse.text());
-    const tokenData = await tokenResponse.json();
-    openAIToken = tokenData.token;
-    
-    await new Promise(resolve => setTimeout(resolve, 500));
-    await setupLearningObjectiveWebRTCConnection(stream, node);
-    
-    isRecording = true;
-    
-    // UI feedback
-    if (elements.voiceRecordBtn) {
-      elements.voiceRecordBtn.classList.add('recording');
-    }
-    
-    startWaveAnimation();
-    analyser.fftSize = 256;
-    dataArray = new Uint8Array(analyser.frequencyBinCount);
-    showMessage('Learning Objective voice mode active - AI will probe your knowledge and help expand it');
-  } catch (err) {
-    console.error('Error starting Learning Objective voice recording:', err);
-    showMessage('Error: ' + err.message);
-    cleanupResources();
-    
-    // Reset learning objective state
-    isLearningObjectiveMode = false;
-    activeLearningObjectiveNode = null;
-    learningObjectiveSessionActive = false;
-    
-    // Reset node UI
-    if (node) {
-      node.classList.remove('voice-active');
-      const statusIndicator = node.querySelector('.learning-objective-status');
-      if (statusIndicator) {
-        statusIndicator.innerHTML = `<i class="fas fa-microphone-slash"></i>`;
-      }
-    }
   }
+  
+  return null;
 }
 
-// Setup WebRTC connection specifically for Learning Objective mode
-async function setupLearningObjectiveWebRTCConnection(stream, node) {
-  // Create a new RTCPeerConnection (same as regular voice mode)
-  peerConnection = new RTCPeerConnection(rtcConfig);
-  
-  // Setup for AI audio output (same as regular voice mode)
-  if (!assistantAudioElement) {
-    assistantAudioElement = new Audio();
-    assistantAudioElement.autoplay = true;
-  }
-
-  peerConnection.ontrack = (event) => {
-    console.log('Received remote audio track from AI:', event);
-    if (event.streams && event.streams[0]) {
-        assistantAudioElement.srcObject = event.streams[0];
-        assistantAudioElement.play().catch(e => console.error("Error playing assistant audio:", e));
-    } else {
-        console.warn("Remote track event did not contain streams.");
-    }
-  };
-
-  // Add local audio track (same as regular voice mode)
-  const audioTracks = stream.getAudioTracks();
-  if (audioTracks.length === 0) {
-    throw new Error("No audio track found in the media stream");
+// Helper function to calculate position near a reference node
+function calculatePositionNearNode(referenceNode) {
+  if (!referenceNode) {
+    console.log('No reference node provided, using view center');
+    // Fallback to view center if no reference node
+    const viewCenter = PanZoom.getViewCenter();
+    return {
+      x: viewCenter.x + (Math.random() * 300 - 150),
+      y: viewCenter.y + (Math.random() * 300 - 150)
+    };
   }
   
-  audioTracks.forEach(track => {
-    track.enabled = true;
-    peerConnection.addTrack(track, stream);
-  });
+  let refElement = referenceNode.element;
   
-  // Create data channel
-  dataChannel = peerConnection.createDataChannel('oai-events');
+  // If no element, try to find it
+  if (!refElement && referenceNode.id) {
+    refElement = document.querySelector(`[data-id="${referenceNode.id}"]`);
+  }
   
-  // Handle data channel events (similar to regular voice mode)
-  dataChannel.onclose = () => {
-    console.log('Learning Objective data channel closed. Setting isWaitingForAIResponse = false.');
-    isWaitingForAIResponse = false;
-    isActiveSpeechDetected = false;
-    if (isRecording) {
-      console.log('Data channel closed while recording, stopping recording.');
-      stopRecording({ sendFinalBuffer: false });
-    }
-  };
+  if (!refElement) {
+    console.log('Reference node element not found, using view center');
+    // Fallback to view center if element not found
+    const viewCenter = PanZoom.getViewCenter();
+    return {
+      x: viewCenter.x + (Math.random() * 300 - 150),
+      y: viewCenter.y + (Math.random() * 300 - 150)
+    };
+  }
   
-  dataChannel.onerror = (error) => {
-    console.error('Learning Objective data channel error:', error);
-    isWaitingForAIResponse = false;
-    isActiveSpeechDetected = false;
-    showMessage('Data channel error occurred');
-    
-    if (isRecording) {
-      stopRecording({ sendFinalBuffer: false });
-    }
-  };
+  const refLeft = parseFloat(refElement.dataset.originalLeft || refElement.style.left);
+  const refTop = parseFloat(refElement.dataset.originalTop || refElement.style.top);
   
-  dataChannel.onopen = () => {
-    console.log('Learning Objective data channel opened');
-  };
+  if (isNaN(refLeft) || isNaN(refTop)) {
+    console.log('Reference node position data invalid, using view center');
+    // Fallback if position data is invalid
+    const viewCenter = PanZoom.getViewCenter();
+    return {
+      x: viewCenter.x + (Math.random() * 300 - 150),
+      y: viewCenter.y + (Math.random() * 300 - 150)
+    };
+  }
   
-  // Handle data channel messages (similar to regular voice mode)
-  dataChannel.onmessage = (event) => {
-    try {
-      console.log('Received Learning Objective data channel message:', event.data);
-      let data;
-      
-      try {
-        data = JSON.parse(event.data);
-      } catch (jsonError) {
-        console.error('Error parsing JSON from data channel:', jsonError);
-        console.log('Raw message data:', event.data);
-        return;
-      }
-      
-      // Handle different message types from OpenAI Realtime API
-      // This is the same switch/case structure as in the regular voice mode
-      // but with learning objective-specific handling for response creation
-      switch (data.type) {
-        case 'session.created':
-          console.log('Learning Objective session created successfully:', data.session.id);
-          if (dataChannel && dataChannel.readyState === 'open') {
-            const currentMapState = captureTreeState();
-            const learningObjectiveTitle = node.querySelector('.node-title').textContent;
-            
-            // Special instructions for Learning Objective mode
-            const initialInstructions = 
-              `You are a masterful educational Socratic tutor incorporated into a concept mapping application. 
-              You're working with a Learning Objective titled "${learningObjectiveTitle}".
-              
-              YOUR PRIMARY RESPONSIBILITY is to create a visual concept map:
-              1. YOU MUST use the 'add_node_to_map' function for EVERY concept or idea discovered, whether from the user's input or as follow-up questions.
-              2. DO NOT just discuss topics in text - ALWAYS represent them as nodes on the map.
-              3. For each user response, identify at least one concrete understanding and add it as a 'keyidea' node.
-              4. Add follow-up questions as 'question' nodes.
-              5. ALL communication about concepts MUST be done via the map, not just in text responses.
-              
-              DO NOT ask a question without first creating an appropriate node for it. DO NOT acknowledge understanding without creating a node.
-              
-              The current map state is: ${JSON.stringify(currentMapState)}.
-              
-              START by creating a 'question' node asking about the user's current knowledge of ${learningObjectiveTitle}, then listen attentively to the response.`
-            
-            console.log("Sending Learning Objective session instructions and tool definitions.");
-            try {
-                dataChannel.send(JSON.stringify({
-                    type: "session.update",
-                    session: {
-                        instructions: initialInstructions,
-                        tools: learningObjectiveTools, // Use specialized LO tools
-                        tool_choice: "required" // CHANGE: Force the model to use tools
-                    }
-                }));
-            } catch (e) {
-                console.error("Error sending Learning Objective session.update with tools:", e);
-            }
-          }
-          break;
-        
-        case 'response.done':
-          console.log('Server: Response.done event for Learning Objective. Setting isWaitingForAIResponse = false.', data.response);
-          isWaitingForAIResponse = false; 
-          isActiveSpeechDetected = false;
-
-          // Handle function calls for Learning Objective mode
-          if (data.response && data.response.output && data.response.output.length > 0) {
-            const outputItem = data.response.output[0];
-            if (outputItem.type === "function_call") {
-              const functionName = outputItem.name;
-              const callId = outputItem.call_id;
-              let args;
-              try {
-                  args = JSON.parse(outputItem.arguments);
-                  console.log(`[LO Mode] AI function call received: ${functionName}, Args:`, JSON.stringify(args)); // LOG 1
-              } catch (e) {
-                  console.error("[LO Mode] Error parsing function call arguments:", e, "Raw arguments:", outputItem.arguments);
-                  // Send error back to AI or handle appropriately
-                  // For now, we'll create a functionCallResult indicating failure
-                  functionCallResult = { success: false, message: "Error parsing function call arguments from AI." };
-                  // Ensure dataChannel exists and is open before sending
-                  if (dataChannel && dataChannel.readyState === 'open') {
-                    try {
-                        dataChannel.send(JSON.stringify({
-                            type: "conversation.item.create",
-                            item: { type: "function_call_output", call_id: callId, output: JSON.stringify(functionCallResult) }
-                        }));
-                        // Potentially trigger a new response.create here if appropriate after an error
-                    } catch (sendError) {
-                        console.error("[LO Mode] Error sending error-parsing function call output:", sendError);
-                    }
-                  }
-                  return; // Stop further processing for this message
-              }
-
-              console.log(`[LO Mode] Processing AI function call: ${functionName} with parsed args:`, args); // LOG 2
-              let functionCallResult = { success: false, message: "Function not implemented or error occurred." };
-
-              if (functionName === "add_node_to_map") {
-                if (!args.title || !args.node_type) {
-                    console.error("[LO Mode] add_node_to_map called with missing title or node_type. Args:", args);
-                    functionCallResult = { success: false, message: "Missing title or node_type for add_node_to_map." };
-                } else {
-                    try {
-                      const currentTree = Nodes.captureTreeState ? Nodes.captureTreeState() : captureTreeState(); // Use Nodes.captureTreeState if available
-                      let defaultX, defaultY;
-                      if (activeLearningObjectiveNode && activeLearningObjectiveNode.dataset) { // Check activeLearningObjectiveNode and dataset
-                        const loNodeLeft = parseFloat(activeLearningObjectiveNode.dataset.originalLeft);
-                        const loNodeTop = parseFloat(activeLearningObjectiveNode.dataset.originalTop);
-                        if (!isNaN(loNodeLeft) && !isNaN(loNodeTop)) {
-                            const angle = Math.random() * Math.PI * 2;
-                            const distance = 150 + Math.random() * 100;
-                            defaultX = loNodeLeft + Math.cos(angle) * distance;
-                            defaultY = loNodeTop + Math.sin(angle) * distance;
-                        } else {
-                           console.warn("[LO Mode] LO Node position not found, using view center for new node.");
-                           defaultX = args.target_x !== undefined && args.target_x !== null ? args.target_x : currentTree.viewCenter.x + (Math.random() * 150 - 75);
-                           defaultY = args.target_y !== undefined && args.target_y !== null ? args.target_y : currentTree.viewCenter.y + (Math.random() * 150 - 75);
-                        }
-                      } else {
-                        console.warn("[LO Mode] Active LO Node not available for positioning, using view center.");
-                        defaultX = args.target_x !== undefined && args.target_x !== null ? args.target_x : currentTree.viewCenter.x + (Math.random() * 150 - 75);
-                        defaultY = args.target_y !== undefined && args.target_y !== null ? args.target_y : currentTree.viewCenter.y + (Math.random() * 150 - 75);
-                      }
-                      
-                      console.log(`[LO Mode] Attempting to call Nodes.createNode with type: ${args.node_type || 'keyidea'}, title: ${args.title}, x: ${defaultX}, y: ${defaultY}, content: ${args.content || ''}`); // LOG 3
-                      const newNode = Nodes.createNode(
-                        args.node_type || 'keyidea',
-                        args.title,
-                        defaultX,
-                        defaultY,
-                        args.content || ''
-                      );
-                      
-                      if (newNode && newNode.id) {
-                        console.log("[LO Mode] Node created successfully by Nodes.createNode:", JSON.stringify(newNode.id)); // LOG 4
-                        const nodeElement = document.querySelector(`[data-id="${newNode.id}"]`);
-                        if (nodeElement) {
-                          nodeElement.classList.add('appear');
-                          setTimeout(() => nodeElement.classList.remove('appear'), 3000);
-                        }
-                        
-                        if (activeLearningObjectiveNode && activeLearningObjectiveNode.dataset && newNode.id) {
-                          const loNodeId = activeLearningObjectiveNode.dataset.id;
-                          console.log(`[LO Mode] Attempting to connect LO node ${loNodeId} to new node ${newNode.id}`); // LOG 5
-                          const edgeExists = Edges.edges.some(e => 
-                            (e.from === loNodeId && e.to === newNode.id) || 
-                            (e.from === newNode.id && e.to === loNodeId)
-                          );
-                          if (!edgeExists) {
-                            Edges.edges.push({ from: loNodeId, to: newNode.id });
-                            Edges.drawEdges();
-                            Nodes.scheduleAutosave();
-                            console.log("[LO Mode] Edge created and autosave scheduled."); // LOG 6
-                          } else {
-                            console.log("[LO Mode] Edge already exists, not creating duplicate.");
-                          }
-                        } else {
-                            console.warn("[LO Mode] Could not connect: Active LO node or new node ID is missing for connection.");
-                        }
-                        functionCallResult = { success: true, nodeId: newNode.id, title: newNode.title, message: "Node added successfully." };
-                      } else {
-                        console.error("[LO Mode] Nodes.createNode did not return a valid new node object. newNode:", newNode);
-                        functionCallResult = { success: false, message: "Failed to create node instance locally." };
-                      }
-                    } catch (error) {
-                      console.error(`[LO Mode] Error executing Nodes.createNode or subsequent logic for ${functionName}:`, error);
-                      functionCallResult = { success: false, message: `Error in ${functionName}: ${error.message}` };
-                    }
-                }
-              } else if (functionName === "connect_nodes") {
-                // Same as in regular voice mode
-                try {
-                  const fromNode = Nodes.nodes.find(n => n.id === args.source_node_id);
-                  const toNode = Nodes.nodes.find(n => n.id === args.target_node_id);
-                  if (fromNode && toNode) {
-                    const edgeExists = Edges.edges.some(e => 
-                      (e.from === fromNode.id && e.to === toNode.id) || 
-                      (e.from === toNode.id && e.to === fromNode.id)
-                    );
-                    if (!edgeExists) {
-                      Edges.edges.push({ from: fromNode.id, to: toNode.id });
-                      Edges.drawEdges();
-                      Nodes.scheduleAutosave();
-                      functionCallResult = { success: true, message: `Connected ${fromNode.title} to ${toNode.title}.` };
-                    } else {
-                      functionCallResult = { success: false, message: "Edge already exists." };
-                    }
-                  } else {
-                    functionCallResult = { success: false, message: "One or both nodes not found for connection." };
-                  }
-                } catch (error) {
-                  console.error(`Error executing local function ${functionName} in Learning Objective mode:`, error);
-                  functionCallResult = { success: false, message: `Error in ${functionName}: ${error.message}` };
-                }
-              }
-
-              // Send the result back to the AI (same as in regular voice mode)
-              if (dataChannel && dataChannel.readyState === 'open') {
-                try {
-                  dataChannel.send(JSON.stringify({
-                    type: "conversation.item.create",
-                    item: {
-                      type: "function_call_output",
-                      call_id: callId,
-                      output: JSON.stringify(functionCallResult) 
-                    }
-                  }));
-                  
-                  // Introduce a delay before asking for the next response
-                  const DELAY_AFTER_FUNC_OUTPUT = 250;
-                  
-                  setTimeout(() => {
-                    if (dataChannel && dataChannel.readyState === 'open') {
-                      console.log("Sending new response.create after delay in Learning Objective mode. Setting isWaitingForAIResponse = true.");
-                      isWaitingForAIResponse = true;
-                      try {
-                        dataChannel.send(JSON.stringify({ type: "response.create" }));
-                      } catch (e) {
-                        console.error("Error sending response.create after function output in Learning Objective mode:", e);
-                        isWaitingForAIResponse = false;
-                      }
-                    } else {
-                      console.warn("Data channel closed during delayed response.create in Learning Objective mode.");
-                      isWaitingForAIResponse = false;
-                    }
-                  }, DELAY_AFTER_FUNC_OUTPUT);
-                } catch (e) {
-                  console.error("Error sending function call output in Learning Objective mode:", e);
-                }
-              }
-            } else { // AI response is not a function call
-                console.log("[LO Mode] AI response was not a function call. Full AI output item:", JSON.stringify(outputItem));
-                
-                // Fallback: Extract content from non-function responses and create nodes automatically
-                let transcriptText = "";
-                if (outputItem.type === 'text_content' && outputItem.text) {
-                    transcriptText = outputItem.text;
-                } else if (outputItem.content && Array.isArray(outputItem.content)) {
-                    const textPart = outputItem.content.find(part => part.type === 'text');
-                    if (textPart && textPart.text) {
-                        transcriptText = textPart.text;
-                    } else {
-                        // Check for audio transcript
-                        const audioPart = outputItem.content.find(part => part.type === 'audio' && part.transcript);
-                        if (audioPart && audioPart.transcript) {
-                            transcriptText = audioPart.transcript;
-                        }
-                    }
-                } else if (outputItem.type === 'message' && outputItem.content) {
-                    // Handle nested content structure
-                    const contentItem = outputItem.content.find(item => 
-                        (item.type === 'text' && item.text) || 
-                        (item.type === 'audio' && item.transcript));
-                    if (contentItem) {
-                        transcriptText = contentItem.type === 'text' ? contentItem.text : contentItem.transcript;
-                    }
-                }
-                
-                if (transcriptText) {
-                    console.log("[LO Mode] Extracted transcript for fallback node creation:", transcriptText);
-                    
-                    // Create fallback nodes
-                    // 1. Create a question node from the AI's question
-                    try {
-                        // Only proceed if we have activeLearningObjectiveNode
-                        if (activeLearningObjectiveNode && activeLearningObjectiveNode.dataset) {
-                            const loNodeLeft = parseFloat(activeLearningObjectiveNode.dataset.originalLeft);
-                            const loNodeTop = parseFloat(activeLearningObjectiveNode.dataset.originalTop);
-                            
-                            if (!isNaN(loNodeLeft) && !isNaN(loNodeTop)) {
-                                // Create a random position near the learning objective node
+  // Position in a circle around the reference node
                                 const angle = Math.random() * Math.PI * 2;
-                                const distance = 150 + Math.random() * 100;
-                                const newX = loNodeLeft + Math.cos(angle) * distance;
-                                const newY = loNodeTop + Math.sin(angle) * distance;
-                                
-                                // Create node from the question (if it contains a question)
-                                if (transcriptText.includes("?")) {
-                                    console.log("[LO Mode] Creating question node from transcript");
-                                    const newNode = Nodes.createNode(
-                                        'question',
-                                        transcriptText.split("?")[0] + "?", // Use the first question
-                                        newX,
-                                        newY
-                                    );
-                                    
-                                    // Connect to LO node
-                                    if (newNode && newNode.id) {
-                                        const loNodeId = activeLearningObjectiveNode.dataset.id;
-                                        const edgeExists = Edges.edges.some(e => 
-                                            (e.from === loNodeId && e.to === newNode.id) || 
-                                            (e.from === newNode.id && e.to === loNodeId)
-                                        );
-                                        
-                                        if (!edgeExists) {
-                                            Edges.edges.push({ from: loNodeId, to: newNode.id });
-                                            Edges.drawEdges();
-                                            Nodes.scheduleAutosave();
-                                            console.log("[LO Mode] Created fallback question node and edge");
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } catch (error) {
-                        console.error("[LO Mode] Error creating fallback node:", error);
-                    }
-                }
-                
-                // Request a new response, hopefully a function call
-                if (dataChannel && dataChannel.readyState === 'open') {
-                    setTimeout(() => {
-                        if (dataChannel && dataChannel.readyState === 'open') {
-                            console.log("[LO Mode] Sending new response.create to prompt for function calls");
-                            isWaitingForAIResponse = true;
-                            try {
-                                dataChannel.send(JSON.stringify({ 
-                                    type: "response.create",
-                                    response: {
-                                        // Explicitly remind the model to use functions
-                                        input: [{
-                                            type: "message",
-                                            role: "system",
-                                            content: [{ 
-                                                type: "text", 
-                                                text: "You must use the provided function calls to modify the map. Create nodes for concepts and questions rather than just discussing them in text." 
-                                            }]
-                                        }]
-                                    }
-                                }));
-                            } catch (e) {
-                                console.error("[LO Mode] Error sending follow-up response.create:", e);
-                                isWaitingForAIResponse = false;
-                            }
-                        }
-                    }, 500);
-                }
-            }
-          }
-          break;
-        
-        // Include other case handling from regular voice mode
-        // (This would be a long section covering all the message types)
-        
-        default:
-          // Use the same handlers as in regular voice mode
-          break;
-      }
-    } catch (err) {
-      console.error('Error processing message in Learning Objective mode:', err, event.data);
-    }
+  const distance = 150 + Math.random() * 100; // 150-250 pixels away
+  
+  const position = {
+    x: refLeft + Math.cos(angle) * distance,
+    y: refTop + Math.sin(angle) * distance
   };
   
-  // WebRTC setup code (same as regular voice mode)
-  peerConnection.onerror = (error) => {
-    console.error('WebRTC connection error in Learning Objective mode:', error);
-    showMessage('WebRTC connection error: ' + error.message);
-  };
-  
-  peerConnection.onconnectionstatechange = () => {
-    console.log('WebRTC connection state in Learning Objective mode:', peerConnection.connectionState);
-    if (peerConnection.connectionState === 'failed' || 
-        peerConnection.connectionState === 'disconnected' || 
-        peerConnection.connectionState === 'closed') {
-      isWaitingForAIResponse = false;
-      isActiveSpeechDetected = false;
-      showMessage('WebRTC connection ' + peerConnection.connectionState);
-      
-      if (isRecording) {
-        console.log(`WebRTC connection became ${peerConnection.connectionState} in Learning Objective mode. Stopping recording.`);
-        stopRecording({ sendFinalBuffer: false });
-      }
-    }
-  };
-  
-  peerConnection.onicecandidate = async (event) => {
-    if (event.candidate) {
-      await sendIceCandidate(event.candidate);
-    }
-  };
-  
-  // Create and set local description (same as regular voice mode)
-  const offer = await peerConnection.createOffer();
-  await peerConnection.setLocalDescription(offer);
-  
-  const model = 'gpt-4o-mini-realtime-preview';
-  const response = await fetch(`https://api.openai.com/v1/realtime?model=${model}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/sdp',
-      'Authorization': `Bearer ${openAIToken}`
-    },
-    body: peerConnection.localDescription.sdp
-  });
-  
-  if (!response.ok) {
-    throw new Error('Failed to send offer to OpenAI: ' + await response.text());
-  }
-  
-  // Get the SDP answer from OpenAI
-  const sdpAnswer = await response.text();
-  
-  // Set the remote description
-  await peerConnection.setRemoteDescription(new RTCSessionDescription({
-    type: 'answer',
-    sdp: sdpAnswer
-  }));
-  
-  console.log('Learning Objective WebRTC connection established');
+  console.log(`Calculated position near reference node ${referenceNode.id}:`, position);
+  return position;
 }
+
+// Note: Learning objective cleanup now handled by the unified cleanupResources function
+
+
 
 // Start recording and connect to OpenAI Realtime API via WebRTC
 async function startRecording() {
@@ -1005,7 +670,56 @@ async function setupWebRTCConnection(stream) {
           console.log('Session created successfully:', data.session.id);
           if (dataChannel && dataChannel.readyState === 'open') {
             const currentMapState = captureTreeState(); // Capture state for initial context if needed
-            const initialInstructions = 
+            
+            // Create context-specific instructions and tools based on mode
+            let initialInstructions, toolsToUse;
+            
+            if (isNodeFeatureMode && activeFeatureNode && activeFeatureType) {
+              // Node feature specific instructions
+              const nodeTitle = activeFeatureNode.querySelector('.node-title').textContent;
+              const nodeType = activeFeatureNode.dataset.type;
+              
+              const featureInstructions = {
+                'breakdown': `You are helping the user break down the ${nodeType}: "${nodeTitle}". Start by asking them to tell you more about this task - what it involves, what parts seem challenging, and what they've already thought about. Have a conversation to understand their needs before creating any nodes. Only create nodes when you have enough information and the user seems ready for concrete next steps.`,
+                'ai-assist': `You are helping the user with the ${nodeType}: "${nodeTitle}". Start by asking them what specific challenges they're facing or what kind of help they need. Listen carefully to their response and ask follow-up questions to understand their situation. Only suggest approaches and create nodes after you understand what they're struggling with.`,
+                'analyze': `You are helping the user analyze the challenge: "${nodeTitle}". Begin by asking them to describe the challenge in their own words - what makes it difficult, what they've tried, and what aspects they're most concerned about. Have a thoughtful conversation to understand the problem before breaking it down into components.`,
+                'expand': `You are helping the user expand the idea: "${nodeTitle}". Start by asking them to share more about this idea - what got them thinking about it, what aspects interest them most, and where they'd like to take it. Engage in a conversation to understand their vision before creating related concepts.`,
+                'study-plan': `You are helping the user create a study plan for: "${nodeTitle}". Begin by asking about their current knowledge level, learning goals, timeline, and preferred learning style. Have a conversation to understand their educational needs before creating any study structure.`,
+                'resources': `You are helping the user find resources for: "${nodeTitle}". Start by asking what specific aspects they want to learn about, what type of resources they prefer (videos, books, articles, etc.), and what their current level of knowledge is. Understand their needs through conversation before suggesting resources.`,
+                'envision': `You are helping the user envision success with: "${nodeTitle}". Begin by asking them to describe what success looks like to them, what motivates them about this goal, and what positive outcomes they're hoping for. Have an inspiring conversation before creating motivational nodes.`,
+                'progress': `You are helping the user track progress on: "${nodeTitle}". Start by asking about what they've accomplished so far, what milestones matter to them, and how they like to measure progress. Understand their situation through conversation before creating tracking systems.`
+              };
+              
+              initialInstructions = featureInstructions[activeFeatureType] || 
+                `You are helping the user with the ${nodeType}: "${nodeTitle}". Listen to their needs and create helpful nodes to support their goals.`;
+              
+              initialInstructions += ` 
+
+IMPORTANT: You are ONLY responsible for having a conversation. Do NOT create any nodes or modify the map in any way. Your only job is to be helpful, conversational, and gather information about the user's needs. The conversation will be analyzed separately to create relevant nodes.`;
+              
+              toolsToUse = []; // No tools - conversation only
+            } else if (isLearningObjectiveMode && activeLearningObjectiveNode) {
+              // Learning objective specific instructions
+              const nodeTitle = activeLearningObjectiveNode.querySelector('.node-title').textContent;
+              
+              initialInstructions = `You are helping a student explore their understanding of the learning objective: "${nodeTitle}". 
+
+Your role is to have an educational conversation to:
+1. Understand what the student already knows about this topic
+2. Identify gaps in their knowledge through gentle questioning
+3. Help them articulate their understanding clearly
+4. Ask follow-up questions to probe deeper into their knowledge
+5. Encourage them to explain concepts in their own words
+6. Guide them to make connections between ideas
+
+Be encouraging, patient, and pedagogically sound. Ask one question at a time and listen carefully to their responses. Help them discover knowledge through themselves rather than directly teaching.
+
+IMPORTANT: You are ONLY responsible for having a conversation. Do NOT create any nodes or modify the map in any way. Your only job is to facilitate learning through dialogue. The conversation will be analyzed separately to create relevant nodes based on the student's demonstrated knowledge and learning needs.`;
+              
+              toolsToUse = []; // No tools - conversation only
+            } else {
+              // Regular mode instructions
+              initialInstructions = 
               `You are a helpful assistant integrated into a real-time concept mapping application. 
               Your primary role is to help the user build and modify their concept map by listening to their voice. 
               Use the available tools (functions) to add new nodes, connect existing nodes, or modify the map based on the user's commands. 
@@ -1013,6 +727,9 @@ async function setupWebRTCConnection(stream) {
               Also consider the current map state to determine appropriate placement if not specified. 
               The current map state is: ${JSON.stringify(currentMapState)}. 
               Always aim to use a function call for map manipulations rather than just describing the action in text. Be conservative when adding new nodes; wait for clear, explicit instructions or substantial concepts to emerge from the user's speech before creating a node. Avoid creating nodes for every minor detail or fleeting thought. If unsure, wait for more context rather than adding a node prematurely.`;
+              
+              toolsToUse = mapManipulationTools;
+            }
             
             console.log("Sending initial session instructions and tool definitions.");
             try {
@@ -1020,12 +737,43 @@ async function setupWebRTCConnection(stream) {
                     type: "session.update",
                     session: {
                         instructions: initialInstructions,
-                        tools: mapManipulationTools,
-                        tool_choice: "auto" // Let the AI decide when to use tools
+                        tools: toolsToUse,
+                        tool_choice: "auto", // Let the AI decide when to use tools
+                        input_audio_transcription: {
+                            model: "whisper-1"
+                        },
+                        turn_detection: {
+                            type: "server_vad",
+                            threshold: 0.5,        // Lower = less sensitive (0.0 to 1.0)
+                            prefix_padding_ms: 300, // Keep 300ms before speech starts
+                            silence_duration_ms: 2000 // Wait 2 seconds of silence before ending turn
+                        }
                     }
                 }));
             } catch (e) {
                 console.error("Error sending session.update with tools:", e);
+            }
+            // Trigger initial AI response for node feature conversation
+            if (isNodeFeatureMode && activeFeatureNode && activeFeatureType) {
+                console.log("Requesting initial AI response for node feature mode.");
+                isWaitingForAIResponse = true;
+                try {
+                    dataChannel.send(JSON.stringify({ type: "response.create" }));
+                } catch (error) {
+                    console.error("Error sending initial response.create:", error);
+                    isWaitingForAIResponse = false;
+                }
+            }
+            // Trigger initial AI response for learning objective mode
+            if (isLearningObjectiveMode && activeLearningObjectiveNode) {
+                console.log("Requesting initial AI response for learning objective mode.");
+                isWaitingForAIResponse = true;
+                try {
+                    dataChannel.send(JSON.stringify({ type: "response.create" }));
+                } catch (error) {
+                    console.error("Error sending initial response.create:", error);
+                    isWaitingForAIResponse = false;
+                }
             }
           }
           break;
@@ -1069,6 +817,33 @@ async function setupWebRTCConnection(stream) {
           
         case 'input_audio_transcription':
           console.log('Transcription:', data.transcription);
+          
+          // In node feature mode or learning objective mode, capture user transcription and send conversation for analysis
+          if ((isNodeFeatureMode && activeFeatureNode && activeFeatureType) || 
+              (isLearningObjectiveMode && activeLearningObjectiveNode)) {
+            if (data.transcription) {
+              console.log('CONVERSATION MODE: Capturing user transcription:', data.transcription);
+              lastUserResponse = data.transcription;
+              conversationHistory.push({
+                role: 'user',
+                message: data.transcription,
+                timestamp: Date.now()
+              });
+              
+              console.log('Conversation state after user speaks:', {
+                lastAIResponse: lastAIResponse,
+                lastUserResponse: lastUserResponse,
+                conversationLength: conversationHistory.length,
+                isNodeFeatureMode: isNodeFeatureMode,
+                isLearningObjectiveMode: isLearningObjectiveMode,
+                conversationHistory: conversationHistory
+              });
+              
+              // Check if we should send for analysis after user speaks
+              // We need to wait for the next AI response first before analyzing
+              console.log('User spoke. Waiting for AI response before analysis.');
+            }
+          }
           break;
           
         case 'audio_buffer.serialized':
@@ -1099,6 +874,36 @@ async function setupWebRTCConnection(stream) {
           console.log('Server: Conversation item created:', data.item);
           if (data.item && data.item.role === 'user' && data.item.status === 'completed') {
             console.log("User's speech (audio item) has been fully committed.");
+            
+            // In node feature mode, handle conversation differently
+            if (isNodeFeatureMode && activeFeatureNode && activeFeatureType) {
+              // For node feature mode, just continue the conversation without map context
+              const committedItemId = data.item.id;
+              const aiInputContext = [
+                { 
+                  type: "item_reference", 
+                  id: committedItemId 
+                }
+              ];
+
+              if (dataChannel && dataChannel.readyState === 'open') {
+                console.log("Sending response.create for node feature conversation.");
+                isWaitingForAIResponse = true;
+                try {
+                  dataChannel.send(JSON.stringify({
+                    type: "response.create",
+                    response: {
+                      input: aiInputContext
+                    }
+                  }));
+                  textBuffer = ''; 
+                } catch (e) {
+                  console.error("Error sending response.create for node feature:", e);
+                  isWaitingForAIResponse = false;
+                }
+              }
+            } else {
+              // Regular mode with map manipulation
             const currentTreeState = captureTreeState();
             const committedItemId = data.item.id;
 
@@ -1109,8 +914,6 @@ async function setupWebRTCConnection(stream) {
                 role: "system", 
                 content: [
                   { type: "input_text", text: `Current concept map state: ${JSON.stringify(currentTreeState)}` }
-                  // The main system instructions about tools are already set via session.update earlier.
-                  // We could add a briefer reminder here if needed, or rely on the session-level instructions.
                 ]
               },
               // Reference the committed user audio item directly in the input array
@@ -1118,12 +921,6 @@ async function setupWebRTCConnection(stream) {
                 type: "item_reference", 
                 id: committedItemId 
               }
-              // If you wanted to also send the transcript as text (redundant if AI transcribes item_reference):
-              // {
-              //   type: "message",
-              //   role: "user",
-              //   content: [ { type: "input_text", text: user_transcript_if_available } ]
-              // }
             ];
 
             if (dataChannel && dataChannel.readyState === 'open') {
@@ -1141,6 +938,7 @@ async function setupWebRTCConnection(stream) {
               } catch (e) {
                 console.error("Error sending response.create (corrected structure):", e);
                 isWaitingForAIResponse = false; // Reset on error
+                }
               }
             }
           } else if (data.item && data.item.role === 'assistant') {
@@ -1168,11 +966,14 @@ async function setupWebRTCConnection(stream) {
         case 'response.audio_transcript.delta':
           if (data.delta) {
             textBuffer += data.delta;
+            // In node feature mode, we're just having a conversation, no JSON processing needed
+            if (!isNodeFeatureMode) {
             // Simple check for potential JSON to pass to processTextData
             // Consider making processTextData more robust for streaming JSON or use response.done
             if (textBuffer.includes('{') && textBuffer.lastIndexOf('}') > textBuffer.indexOf('{')) {
                 // console.log("Attempting to process textBuffer with potential JSON:", textBuffer);
                 processTextData(textBuffer); 
+              }
             }
           }
           break;
@@ -1390,7 +1191,55 @@ async function setupWebRTCConnection(stream) {
                     }
                     if (finalFullText) {
                         console.log("Final text/transcript from AI (non-function call) in response.done:", finalFullText);
+                        
+                        // In conversation modes, capture AI response for analysis
+                        if ((isNodeFeatureMode && activeFeatureNode && activeFeatureType) || 
+                            (isLearningObjectiveMode && activeLearningObjectiveNode)) {
+                            console.log('CONVERSATION MODE: Capturing AI response:', finalFullText);
+                            lastAIResponse = finalFullText;
+                            conversationHistory.push({
+                                role: 'assistant',
+                                message: finalFullText,
+                                timestamp: Date.now()
+                            });
+                            
+                            console.log('AI response captured. Conversation state:', {
+                                lastAIResponse: lastAIResponse,
+                                lastUserResponse: lastUserResponse,
+                                conversationLength: conversationHistory.length,
+                                conversationHistory: conversationHistory
+                            });
+                            
+                            // Smart analysis timing - only analyze when there's meaningful new content
+                            conversationTurnsSinceLastAnalysis++;
+                            
+                            const timeSinceLastAnalysis = Date.now() - lastAnalysisTime;
+                            const shouldAnalyze = (
+                                conversationHistory.length >= 4 && // At least 2 exchanges
+                                conversationTurnsSinceLastAnalysis >= 2 && // At least 2 new turns
+                                timeSinceLastAnalysis > 10000 // At least 10 seconds since last analysis
+                            ) || (
+                                conversationHistory.length >= 8 // Or if conversation is getting long
+                            );
+                            
+                            if (shouldAnalyze) {
+                                console.log('CONDITIONS MET: Sending conversation for analysis', {
+                                    conversationLength: conversationHistory.length,
+                                    turnsSinceLastAnalysis: conversationTurnsSinceLastAnalysis,
+                                    timeSinceLastAnalysis: timeSinceLastAnalysis
+                                });
+                                sendConversationForAnalysis();
+                            } else {
+                                console.log('CONDITIONS NOT MET: Accumulating more conversation', {
+                                    conversationLength: conversationHistory.length,
+                                    turnsSinceLastAnalysis: conversationTurnsSinceLastAnalysis,
+                                    timeSinceLastAnalysis: timeSinceLastAnalysis
+                                });
+                            }
+                        } else {
                         // processTextData(finalFullText); // We are moving away from parsing JSON from text
+                        }
+                        
                         textBuffer = ''; 
                     } else {
                         console.log("No clear final text or full transcript in non-function call response.done output.");
@@ -1750,6 +1599,231 @@ function stopRecording(options = { sendFinalBuffer: true }) {
   }
 }
 
+// Send conversation for node analysis
+async function sendConversationForAnalysis() {
+  if ((!isNodeFeatureMode || !activeFeatureNode || !activeFeatureType) && 
+      (!isLearningObjectiveMode || !activeLearningObjectiveNode)) return;
+  
+  try {
+    // Get node context
+    let nodeData;
+    let analysisType;
+    
+    if (isNodeFeatureMode && activeFeatureNode && activeFeatureType) {
+      nodeData = {
+        id: activeFeatureNode.dataset.id,
+        title: activeFeatureNode.querySelector('.node-title').textContent,
+        type: activeFeatureNode.dataset.type,
+        content: activeFeatureNode.querySelector('.node-content textarea')?.value || ''
+      };
+      analysisType = 'node_feature';
+    } else if (isLearningObjectiveMode && activeLearningObjectiveNode) {
+      nodeData = {
+        id: activeLearningObjectiveNode.dataset.id,
+        title: activeLearningObjectiveNode.querySelector('.node-title').textContent,
+        type: activeLearningObjectiveNode.dataset.type,
+        content: activeLearningObjectiveNode.querySelector('.node-content textarea')?.value || ''
+      };
+      analysisType = 'learning_objective';
+    }
+    
+    // Get comprehensive tree context
+    const connectedNodes = getConnectedNodes(nodeData.id);
+    const currentMapState = captureTreeState();
+    
+    // Get detailed node information including content and relationships
+    const allNodesDetailed = Nodes.nodes.map(node => ({
+      id: node.id,
+      title: node.title,
+      content: node.content,
+      type: node.type,
+      position: {
+        x: parseFloat(node.element?.dataset.originalLeft || node.element?.style.left || 0),
+        y: parseFloat(node.element?.dataset.originalTop || node.element?.style.top || 0)
+      }
+    }));
+    
+    // Get all edges for relationship context
+    const allEdges = Edges.edges.map(edge => ({
+      from: edge.from,
+      to: edge.to,
+      fromTitle: Nodes.nodes.find(n => n.id === edge.from)?.title || 'Unknown',
+      toTitle: Nodes.nodes.find(n => n.id === edge.to)?.title || 'Unknown'
+    }));
+    
+    // Prepare comprehensive conversation data
+    const conversationData = {
+      node_data: nodeData,
+      analysis_type: analysisType,
+      feature_type: isNodeFeatureMode ? activeFeatureType : null,
+      connected_nodes: connectedNodes,
+      map_state: {
+        ...currentMapState,
+        all_nodes: allNodesDetailed,
+        all_edges: allEdges,
+        total_nodes: allNodesDetailed.length,
+        total_edges: allEdges.length
+      },
+      conversation_history: conversationHistory, // Send full conversation now
+      analysis_context: {
+        turns_since_last_analysis: conversationTurnsSinceLastAnalysis,
+        conversation_length: conversationHistory.length,
+        last_analysis_time: lastAnalysisTime
+      }
+    };
+    
+    console.log('Sending conversation for analysis:', conversationData);
+    
+    // Send to backend for analysis
+    const response = await fetch('/ai/analyze_conversation', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(conversationData)
+    });
+    
+    console.log('Backend response status:', response.status);
+    
+    if (response.ok) {
+      const result = await response.json();
+      console.log('Backend analysis result:', result);
+      
+      // Process any nodes the backend suggests
+      if (result.suggested_nodes && result.suggested_nodes.length > 0) {
+        console.log(`Processing ${result.suggested_nodes.length} suggested nodes:`, result.suggested_nodes);
+        await processBackendNodeSuggestions(result.suggested_nodes, nodeData.id);
+      } else {
+        console.log('No nodes suggested by backend');
+      }
+      
+      console.log('Conversation analysis complete');
+    } else {
+      const errorText = await response.text();
+      console.error('Error sending conversation for analysis:', response.status, errorText);
+    }
+    
+  } catch (error) {
+    console.error('Error in sendConversationForAnalysis:', error);
+  }
+  
+  // Update analysis tracking
+  console.log('Analysis complete. Updating tracking variables.');
+  lastAnalysisTime = Date.now();
+  conversationTurnsSinceLastAnalysis = 0;
+}
+
+// Process node suggestions from backend
+async function processBackendNodeSuggestions(suggestedNodes, originalNodeId) {
+  for (const nodeInfo of suggestedNodes) {
+    try {
+      console.log(`Processing backend suggestion (${nodeInfo.action}):`, nodeInfo);
+      
+      if (nodeInfo.action === 'create') {
+        // Calculate position near the original node
+        const originalNode = getNodeById(originalNodeId);
+        const position = calculatePositionNearNode(originalNode);
+        
+        // Create the new node
+        const newNode = Nodes.createNode(
+          nodeInfo.node_type || 'idea',
+          nodeInfo.title,
+          position.x,
+          position.y,
+          nodeInfo.content || ''
+        );
+        
+        if (newNode && newNode.id) {
+          console.log(`Created new node: ${newNode.title} (${newNode.id})`);
+          
+          // Add visual feedback for new node
+          const nodeElement = document.querySelector(`[data-id="${newNode.id}"]`);
+          if (nodeElement) {
+            nodeElement.classList.add('appear');
+            setTimeout(() => nodeElement.classList.remove('appear'), 3000);
+          }
+          
+          // Create connections as specified
+          for (const connectionId of nodeInfo.connections || [originalNodeId]) {
+            const targetNode = getNodeById(connectionId);
+            if (targetNode) {
+              const edgeExists = Edges.edges.some(e => 
+                (e.from === newNode.id && e.to === connectionId) || 
+                (e.from === connectionId && e.to === newNode.id)
+              );
+              
+              if (!edgeExists) {
+                Edges.edges.push({ from: newNode.id, to: connectionId });
+                console.log(`Created edge from ${newNode.id} to ${connectionId}`);
+              }
+            }
+          }
+        }
+        
+      } else if (nodeInfo.action === 'update' && nodeInfo.node_id) {
+        // Update existing node
+        const existingNode = getNodeById(nodeInfo.node_id);
+        if (existingNode) {
+          console.log(`Updating existing node: ${nodeInfo.node_id}`);
+          
+          // Update title if provided
+          if (nodeInfo.title && nodeInfo.title !== existingNode.title) {
+            existingNode.title = nodeInfo.title;
+            const titleElement = existingNode.element?.querySelector('.node-title');
+            if (titleElement) {
+              titleElement.textContent = nodeInfo.title;
+            }
+            console.log(`Updated title to: ${nodeInfo.title}`);
+          }
+          
+          // Update content if provided
+          if (nodeInfo.content && nodeInfo.content !== existingNode.content) {
+            existingNode.content = nodeInfo.content;
+            const contentElement = existingNode.element?.querySelector('.node-content textarea');
+            if (contentElement) {
+              contentElement.value = nodeInfo.content;
+            }
+            console.log(`Updated content`);
+          }
+          
+          // Add visual feedback for updated node
+          if (existingNode.element) {
+            existingNode.element.classList.add('updated');
+            setTimeout(() => existingNode.element.classList.remove('updated'), 2000);
+          }
+          
+          // Handle new connections
+          for (const connectionId of nodeInfo.connections || []) {
+            const targetNode = getNodeById(connectionId);
+            if (targetNode) {
+              const edgeExists = Edges.edges.some(e => 
+                (e.from === nodeInfo.node_id && e.to === connectionId) || 
+                (e.from === connectionId && e.to === nodeInfo.node_id)
+              );
+              
+              if (!edgeExists) {
+                Edges.edges.push({ from: nodeInfo.node_id, to: connectionId });
+                console.log(`Created edge from updated node ${nodeInfo.node_id} to ${connectionId}`);
+              }
+            }
+          }
+        } else {
+          console.warn(`Node to update not found: ${nodeInfo.node_id}`);
+        }
+      }
+      
+    } catch (error) {
+      console.error('Error processing node suggestion:', error, nodeInfo);
+    }
+  }
+  
+  // Redraw edges and save
+  Edges.drawEdges();
+  Nodes.scheduleAutosave();
+  
+  console.log('Backend node suggestions processed');
+}
+
 // Clean up all resources
 function cleanupResources() {
   // Clear the ping interval
@@ -1799,7 +1873,7 @@ function cleanupResources() {
   audioChunks = [];
   silenceCounter = 0;
   
-  // Clean up Learning Objective mode
+  // Clean up Learning Objective mode UI
   if (isLearningObjectiveMode && activeLearningObjectiveNode) {
     // Reset UI
     activeLearningObjectiveNode.classList.remove('voice-active');
@@ -1813,6 +1887,19 @@ function cleanupResources() {
   isLearningObjectiveMode = false;
   activeLearningObjectiveNode = null;
   learningObjectiveSessionActive = false;
+  
+  // Reset node feature mode variables
+  isNodeFeatureMode = false;
+  activeFeatureNode = null;
+  activeFeatureType = null;
+  featureSessionActive = false;
+  
+  // Reset conversation tracking
+  conversationHistory = [];
+  lastAIResponse = '';
+  lastUserResponse = '';
+  conversationTurnsSinceLastAnalysis = 0;
+  lastAnalysisTime = 0;
   
   console.log('Resources cleaned up');
 }

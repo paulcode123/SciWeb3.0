@@ -4,10 +4,14 @@ import datetime
 import random
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session, abort, Blueprint
 from ai_routes import ai_bp
-from firebase_routes import firebase_routes
+from firebase_routes import firebase_routes, send_email
 import firebase_admin
 from firebase_admin import credentials, firestore
 import uuid
+# Add email functionality imports
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 # Try to import from our initialization module
 try:
@@ -24,6 +28,44 @@ app.register_blueprint(firebase_routes, url_prefix='/api')
 
 # Set a secret key for session management
 app.secret_key = 'your_secret_key_here'  # This should be a secure random key in production
+
+# Temporary storage for verification codes (in production, use Redis or database)
+verification_codes = {}
+
+# Function to send email with verification code
+def send_verification_email(email, verification_code):
+    """Send verification code via email"""
+    try:
+        # Create email message
+        msg = MIMEMultipart()
+        msg['From'] = "sciwebbot@gmail.com"
+        msg['To'] = email
+        msg['Subject'] = "SciWeb 3.0 - Email Verification Code"
+        
+        # Email body
+        body = f"""
+Hello!
+
+Thank you for signing up for SciWeb 3.0! To complete your registration, please enter the following verification code:
+
+Verification Code: {verification_code}
+
+This code will expire in 10 minutes.
+
+If you didn't sign up for SciWeb 3.0, please ignore this email.
+
+Best regards,
+The SciWeb Team
+        """
+        
+        msg.attach(MIMEText(body, 'plain'))
+        
+        # Use the existing send_email function from firebase_routes
+        return send_email(email, msg)
+        
+    except Exception as e:
+        print(f"Error creating verification email: {e}")
+        return False
 
 # Function to initialize sample class data
 def init_sample_class_data():
@@ -51,6 +93,7 @@ def init_sample_class_data():
             'last_name': 'Rodriguez',
             'email': 'arodriguez@school.edu',
             'username': 'arod_teacher',
+            'password': 'teacher123',  # In production, this would be hashed
             'profilePicUrl': 'https://randomuser.me/api/portraits/men/44.jpg',
             'grade': 'Faculty',
             'userType': 'teacher',
@@ -81,6 +124,7 @@ def init_sample_class_data():
                 'last_name': 'Thompson',
                 'email': 'ethompson@student.edu',
                 'username': 'ethompson',
+                'password': 'password123',  # In production, this would be hashed
                 'profilePicUrl': 'https://randomuser.me/api/portraits/women/22.jpg',
                 'grade': '11th Grade',
                 'lastActive': datetime.datetime.now() - datetime.timedelta(hours=2),
@@ -108,6 +152,7 @@ def init_sample_class_data():
                 'last_name': 'Wilson',
                 'email': 'jwilson@student.edu',
                 'username': 'jwilson',
+                'password': 'password123',  # In production, this would be hashed
                 'profilePicUrl': 'https://randomuser.me/api/portraits/men/32.jpg',
                 'grade': '11th Grade',
                 'lastActive': datetime.datetime.now() - datetime.timedelta(days=1),
@@ -135,6 +180,7 @@ def init_sample_class_data():
                 'last_name': 'Lee',
                 'email': 'slee@student.edu',
                 'username': 'slee',
+                'password': 'password123',  # In production, this would be hashed
                 'profilePicUrl': 'https://randomuser.me/api/portraits/women/33.jpg',
                 'grade': '11th Grade',
                 'lastActive': datetime.datetime.now() - datetime.timedelta(hours=3),
@@ -162,6 +208,7 @@ def init_sample_class_data():
                 'last_name': 'Brown',
                 'email': 'mbrown@student.edu',
                 'username': 'mbrown',
+                'password': 'password123',  # In production, this would be hashed
                 'profilePicUrl': 'https://randomuser.me/api/portraits/men/55.jpg',
                 'grade': '11th Grade',
                 'lastActive': datetime.datetime.now() - datetime.timedelta(hours=5),
@@ -326,6 +373,54 @@ def init_sample_class_data():
                     'role': 'teacher',
                     'joinedAt': datetime.datetime.now(),
                     'status': 'active'
+                },
+                {
+                    'userId': 'student1',
+                    'role': 'student',
+                    'joinedAt': datetime.datetime.now() - datetime.timedelta(days=80),
+                    'status': 'active'
+                },
+                {
+                    'userId': 'student2',
+                    'role': 'student',
+                    'joinedAt': datetime.datetime.now() - datetime.timedelta(days=80),
+                    'status': 'active'
+                },
+                {
+                    'userId': 'student3',
+                    'role': 'student',
+                    'joinedAt': datetime.datetime.now() - datetime.timedelta(days=79),
+                    'status': 'active'
+                },
+                {
+                    'userId': 'student4',
+                    'role': 'student',
+                    'joinedAt': datetime.datetime.now() - datetime.timedelta(days=79),
+                    'status': 'active'
+                },
+                {
+                    'userId': 'student5',
+                    'role': 'student',
+                    'joinedAt': datetime.datetime.now() - datetime.timedelta(days=78),
+                    'status': 'active'
+                },
+                {
+                    'userId': 'student6',
+                    'role': 'student',
+                    'joinedAt': datetime.datetime.now() - datetime.timedelta(days=78),
+                    'status': 'active'
+                },
+                {
+                    'userId': 'student7',
+                    'role': 'student',
+                    'joinedAt': datetime.datetime.now() - datetime.timedelta(days=77),
+                    'status': 'active'
+                },
+                {
+                    'userId': 'student8',
+                    'role': 'student',
+                    'joinedAt': datetime.datetime.now() - datetime.timedelta(days=77),
+                    'status': 'active'
                 }
             ],
             'channels': [
@@ -470,15 +565,7 @@ def init_sample_class_data():
             }
         }
         
-        # Add students to class members
-        for student in students:
-            student_member = {
-                'userId': student['id'],
-                'role': 'student',
-                'joinedAt': datetime.datetime.now() - datetime.timedelta(days=random.randint(30, 60)),
-                'status': 'active'
-            }
-            class_data['members'].append(student_member)
+        # Note: Students are already added to class members array above
         
         # Add the class to Firestore
         sample_class_ref.set(class_data)
@@ -968,6 +1055,331 @@ def init_sample_class_data():
         for resource in resources:
             db.collection('Resources').document(resource['id']).set(resource)
         
+        # Create sample messages for discussion channels
+        messages = [
+            # General channel messages
+            {
+                'id': 'm1',
+                'classId': 'sample-ap-biology',
+                'channelId': 'general',
+                'senderId': 'teacher123',
+                'senderName': 'Dr. Alex Rodriguez',
+                'senderProfilePic': 'https://randomuser.me/api/portraits/men/44.jpg',
+                'content': 'Welcome to AP Biology! Looking forward to an exciting year of discovery and learning.',
+                'sentAt': datetime.datetime.now() - datetime.timedelta(days=60),
+                'editedAt': None,
+                'reactions': {},
+                'replyCount': 2,
+                'isAnnouncement': False
+            },
+            {
+                'id': 'm2',
+                'classId': 'sample-ap-biology',
+                'channelId': 'general',
+                'senderId': 'student1',
+                'senderName': 'Emma Thompson',
+                'senderProfilePic': 'https://randomuser.me/api/portraits/women/22.jpg',
+                'content': 'Excited to be in this class! Can\'t wait to start the labs.',
+                'sentAt': datetime.datetime.now() - datetime.timedelta(days=60, hours=2),
+                'editedAt': None,
+                'reactions': {'👍': ['student2', 'student3']},
+                'replyCount': 0,
+                'isAnnouncement': False
+            },
+            {
+                'id': 'm3',
+                'classId': 'sample-ap-biology',
+                'channelId': 'general',
+                'senderId': 'student2',
+                'senderName': 'James Wilson',
+                'senderProfilePic': 'https://randomuser.me/api/portraits/men/32.jpg',
+                'content': 'Same here! This is going to be an amazing year.',
+                'sentAt': datetime.datetime.now() - datetime.timedelta(days=59, hours=18),
+                'editedAt': None,
+                'reactions': {},
+                'replyCount': 0,
+                'isAnnouncement': False
+            },
+            
+            # Questions channel messages
+            {
+                'id': 'm4',
+                'classId': 'sample-ap-biology',
+                'channelId': 'questions',
+                'senderId': 'student3',
+                'senderName': 'Sophia Lee',
+                'senderProfilePic': 'https://randomuser.me/api/portraits/women/33.jpg',
+                'content': 'Can someone explain the difference between DNA and RNA structure again?',
+                'sentAt': datetime.datetime.now() - datetime.timedelta(days=5),
+                'editedAt': None,
+                'reactions': {},
+                'replyCount': 1,
+                'isAnnouncement': False
+            },
+            {
+                'id': 'm5',
+                'classId': 'sample-ap-biology',
+                'channelId': 'questions',
+                'senderId': 'teacher123',
+                'senderName': 'Dr. Alex Rodriguez',
+                'senderProfilePic': 'https://randomuser.me/api/portraits/men/44.jpg',
+                'content': 'Great question! The main differences are: 1) DNA is double-stranded, RNA is single-stranded, 2) DNA uses thymine, RNA uses uracil, 3) DNA has deoxyribose sugar, RNA has ribose sugar. Check out the lecture slides for more details!',
+                'sentAt': datetime.datetime.now() - datetime.timedelta(days=5, hours=3),
+                'editedAt': None,
+                'reactions': {'📚': ['student3', 'student4', 'student5']},
+                'replyCount': 0,
+                'isAnnouncement': False
+            },
+            
+            # Recent messages
+            {
+                'id': 'm6',
+                'classId': 'sample-ap-biology',
+                'channelId': 'general',
+                'senderId': 'student4',
+                'senderName': 'Michael Brown',
+                'senderProfilePic': 'https://randomuser.me/api/portraits/men/55.jpg',
+                'content': 'Has anyone started working on the protein synthesis diagram yet?',
+                'sentAt': datetime.datetime.now() - datetime.timedelta(hours=6),
+                'editedAt': None,
+                'reactions': {},
+                'replyCount': 2,
+                'isAnnouncement': False
+            },
+            {
+                'id': 'm7',
+                'classId': 'sample-ap-biology',
+                'channelId': 'general',
+                'senderId': 'student5',
+                'senderName': 'Olivia Garcia',
+                'senderProfilePic': 'https://randomuser.me/api/portraits/women/66.jpg',
+                'content': 'I started it last night! The transcription part is pretty straightforward.',
+                'sentAt': datetime.datetime.now() - datetime.timedelta(hours=4),
+                'editedAt': None,
+                'reactions': {'💪': ['student4', 'student6']},
+                'replyCount': 0,
+                'isAnnouncement': False
+            },
+            
+            # Announcements channel
+            {
+                'id': 'm8',
+                'classId': 'sample-ap-biology',
+                'channelId': 'announcements',
+                'senderId': 'teacher123',
+                'senderName': 'Dr. Alex Rodriguez',
+                'senderProfilePic': 'https://randomuser.me/api/portraits/men/44.jpg',
+                'content': 'Reminder: Lab session tomorrow at 2:30 PM in Lab 203. Please bring your lab notebooks and safety goggles.',
+                'sentAt': datetime.datetime.now() - datetime.timedelta(days=1),
+                'editedAt': None,
+                'reactions': {'✅': ['student1', 'student2', 'student3', 'student4']},
+                'replyCount': 0,
+                'isAnnouncement': True
+            },
+            
+            # Lab partners channel
+            {
+                'id': 'm9',
+                'classId': 'sample-ap-biology',
+                'channelId': 'lab_partners',
+                'senderId': 'student1',
+                'senderName': 'Emma Thompson',
+                'senderProfilePic': 'https://randomuser.me/api/portraits/women/22.jpg',
+                'content': 'Looking for a lab partner for the DNA extraction lab. Anyone interested?',
+                'sentAt': datetime.datetime.now() - datetime.timedelta(days=2),
+                'editedAt': None,
+                'reactions': {},
+                'replyCount': 1,
+                'isAnnouncement': False
+            },
+            {
+                'id': 'm10',
+                'classId': 'sample-ap-biology',
+                'channelId': 'lab_partners',
+                'senderId': 'student7',
+                'senderName': 'Ava Patel',
+                'senderProfilePic': 'https://randomuser.me/api/portraits/women/45.jpg',
+                'content': 'I\'d love to partner with you, Emma! I have some experience with lab techniques.',
+                'sentAt': datetime.datetime.now() - datetime.timedelta(days=2, hours=3),
+                'editedAt': None,
+                'reactions': {'🤝': ['student1', 'student2']},
+                'replyCount': 0,
+                'isAnnouncement': False
+            }
+        ]
+        
+        # Add messages to Firestore
+        for message in messages:
+            db.collection('Messages').document(message['id']).set(message)
+        
+        # Create sample mind web data
+        mind_webs = [
+            {
+                'id': 'mw1',
+                'classId': 'sample-ap-biology',
+                'unitId': 'unit1',
+                'title': 'Molecular Biology Concepts Map',
+                'description': 'Visual representation of key molecular biology concepts and their relationships',
+                'createdBy': 'teacher123',
+                'createdAt': datetime.datetime.now() - datetime.timedelta(days=45),
+                'updatedAt': datetime.datetime.now() - datetime.timedelta(days=10),
+                'isPublic': True,
+                'version': 1,
+                'nodes': [
+                    {
+                        'id': 'n1',
+                        'label': 'DNA Structure',
+                        'type': 'concept',
+                        'position': {'x': 500, 'y': 300},
+                        'description': 'Double helix structure of deoxyribonucleic acid',
+                        'color': '#4361ee',
+                        'size': 50
+                    },
+                    {
+                        'id': 'n2',
+                        'label': 'Nucleotides',
+                        'type': 'component',
+                        'position': {'x': 300, 'y': 200},
+                        'description': 'Building blocks of DNA containing base, sugar, and phosphate',
+                        'color': '#3a0ca3',
+                        'size': 40
+                    },
+                    {
+                        'id': 'n3',
+                        'label': 'Double Helix',
+                        'type': 'structure',
+                        'position': {'x': 700, 'y': 200},
+                        'description': 'Twisted ladder structure of DNA',
+                        'color': '#7209b7',
+                        'size': 40
+                    },
+                    {
+                        'id': 'n4',
+                        'label': 'Base Pairs',
+                        'type': 'interaction',
+                        'position': {'x': 350, 'y': 450},
+                        'description': 'Hydrogen bonding between complementary bases',
+                        'color': '#f72585',
+                        'size': 40
+                    },
+                    {
+                        'id': 'n5',
+                        'label': 'Hydrogen Bonds',
+                        'type': 'bond',
+                        'position': {'x': 650, 'y': 450},
+                        'description': 'Weak bonds holding base pairs together',
+                        'color': '#4cc9f0',
+                        'size': 40
+                    },
+                    {
+                        'id': 'n6',
+                        'label': 'Phosphate Backbone',
+                        'type': 'structure',
+                        'position': {'x': 200, 'y': 300},
+                        'description': 'Sugar-phosphate chain forming DNA backbone',
+                        'color': '#4361ee',
+                        'size': 40
+                    },
+                    {
+                        'id': 'n7',
+                        'label': 'RNA',
+                        'type': 'concept',
+                        'position': {'x': 500, 'y': 150},
+                        'description': 'Ribonucleic acid - single stranded nucleic acid',
+                        'color': '#f77f00',
+                        'size': 45
+                    },
+                    {
+                        'id': 'n8',
+                        'label': 'Protein Synthesis',
+                        'type': 'process',
+                        'position': {'x': 800, 'y': 300},
+                        'description': 'Process of creating proteins from genetic information',
+                        'color': '#06d6a0',
+                        'size': 45
+                    }
+                ],
+                'edges': [
+                    {
+                        'id': 'e1',
+                        'source': 'n1',
+                        'target': 'n2',
+                        'type': 'contains',
+                        'label': 'composed of',
+                        'weight': 1
+                    },
+                    {
+                        'id': 'e2',
+                        'source': 'n1',
+                        'target': 'n3',
+                        'type': 'has_structure',
+                        'label': 'forms',
+                        'weight': 1
+                    },
+                    {
+                        'id': 'e3',
+                        'source': 'n1',
+                        'target': 'n4',
+                        'type': 'contains',
+                        'label': 'includes',
+                        'weight': 1
+                    },
+                    {
+                        'id': 'e4',
+                        'source': 'n4',
+                        'target': 'n5',
+                        'type': 'connected_by',
+                        'label': 'held by',
+                        'weight': 1
+                    },
+                    {
+                        'id': 'e5',
+                        'source': 'n2',
+                        'target': 'n6',
+                        'type': 'part_of',
+                        'label': 'forms',
+                        'weight': 1
+                    },
+                    {
+                        'id': 'e6',
+                        'source': 'n1',
+                        'target': 'n7',
+                        'type': 'related_to',
+                        'label': 'similar to',
+                        'weight': 0.8
+                    },
+                    {
+                        'id': 'e7',
+                        'source': 'n7',
+                        'target': 'n8',
+                        'type': 'enables',
+                        'label': 'used in',
+                        'weight': 1
+                    },
+                    {
+                        'id': 'e8',
+                        'source': 'n1',
+                        'target': 'n8',
+                        'type': 'codes_for',
+                        'label': 'provides info for',
+                        'weight': 1
+                    }
+                ],
+                'layout': 'force-directed',
+                'style': {
+                    'backgroundColor': '#ffffff',
+                    'nodeStyle': 'circular',
+                    'edgeStyle': 'curved',
+                    'showLabels': True,
+                    'showEdgeLabels': False
+                }
+            }
+        ]
+        
+        # Add mind webs to Firestore
+        for mind_web in mind_webs:
+            db.collection('ClassMindWebs').document(mind_web['id']).set(mind_web)
+        
         # Create sample grades
         grades = [
             # Grades for completed assignments
@@ -1206,212 +1618,9 @@ def init_sample_class_data():
         for grade in grades:
             db.collection('Grades').document(grade['id']).set(grade)
         
-        # Create messages to Firestore
-        messages = [
-            {
-                'id': 'm1',
-                'classId': 'sample-ap-biology',
-                'channelId': 'general',
-                'senderId': 'teacher123',
-                'senderName': 'Dr. Alex Rodriguez',
-                'senderProfilePic': 'https://randomuser.me/api/portraits/men/44.jpg',
-                'content': 'Welcome to the AP Biology class! Today we will be discussing the fundamentals of DNA structure and replication.',
-                'sentAt': datetime.datetime.now() - datetime.timedelta(hours=2),
-                'time': '10:00 AM',
-                'date': 'Today',
-                'edited': False
-            },
-            {
-                'id': 'm2',
-                'classId': 'sample-ap-biology',
-                'channelId': 'general',
-                'senderId': 'teacher123',
-                'senderName': 'Dr. Alex Rodriguez',
-                'senderProfilePic': 'https://randomuser.me/api/portraits/men/44.jpg',
-                'content': 'Please take out your notebooks and get ready to take notes.',
-                'sentAt': datetime.datetime.now() - datetime.timedelta(hours=1),
-                'time': '10:05 AM',
-                'date': 'Today',
-                'edited': False
-            }
-        ]
-        
-        # Add messages to Firestore
-        for message in messages:
-            db.collection('Messages').document(message['id']).set(message)
+        # Note: Messages are already created above
             
-        # Create more sample messages for different channels
-        additional_messages = [
-            # General channel messages
-            {
-                'id': 'm3',
-                'classId': 'sample-ap-biology',
-                'channelId': 'general',
-                'senderId': 'student1',
-                'senderName': 'Emma Thompson',
-                'senderProfilePic': 'https://randomuser.me/api/portraits/women/22.jpg',
-                'content': 'Thank you for the lecture slides, Dr. Rodriguez. They were very helpful!',
-                'sentAt': datetime.datetime.now() - datetime.timedelta(hours=22),
-                'time': '3:15 PM',
-                'date': 'Yesterday',
-                'edited': False
-            },
-            {
-                'id': 'm4',
-                'classId': 'sample-ap-biology',
-                'channelId': 'general',
-                'senderId': 'student3',
-                'senderName': 'Sophia Lee',
-                'senderProfilePic': 'https://randomuser.me/api/portraits/women/33.jpg',
-                'content': 'Does anyone want to form a study group for the upcoming midterm?',
-                'sentAt': datetime.datetime.now() - datetime.timedelta(hours=4),
-                'time': '9:30 AM',
-                'date': 'Today',
-                'edited': False
-            },
-            {
-                'id': 'm5',
-                'classId': 'sample-ap-biology',
-                'channelId': 'general',
-                'senderId': 'student2',
-                'senderName': 'James Wilson',
-                'senderProfilePic': 'https://randomuser.me/api/portraits/men/32.jpg',
-                'content': 'I\'m interested in joining a study group. When were you thinking of meeting?',
-                'sentAt': datetime.datetime.now() - datetime.timedelta(hours=3),
-                'time': '10:45 AM',
-                'date': 'Today',
-                'edited': False
-            },
-            
-            # Questions channel
-            {
-                'id': 'm6',
-                'classId': 'sample-ap-biology',
-                'channelId': 'questions',
-                'senderId': 'student4',
-                'senderName': 'Michael Brown',
-                'senderProfilePic': 'https://randomuser.me/api/portraits/men/55.jpg',
-                'content': 'I\'m having trouble understanding the difference between transcription and translation. Could someone clarify?',
-                'sentAt': datetime.datetime.now() - datetime.timedelta(days=1, hours=5),
-                'time': '1:20 PM',
-                'date': 'Yesterday',
-                'edited': False
-            },
-            {
-                'id': 'm7',
-                'classId': 'sample-ap-biology',
-                'channelId': 'questions',
-                'senderId': 'teacher123',
-                'senderName': 'Dr. Alex Rodriguez',
-                'senderProfilePic': 'https://randomuser.me/api/portraits/men/44.jpg',
-                'content': 'Great question, Michael! Transcription is the process of making RNA from DNA, while translation is the process of making proteins from RNA. Think of transcription as making a working copy (RNA) of the instructions (DNA), and translation as using that copy to build something (proteins).',
-                'sentAt': datetime.datetime.now() - datetime.timedelta(days=1, hours=4),
-                'time': '2:15 PM',
-                'date': 'Yesterday',
-                'edited': False
-            },
-            {
-                'id': 'm8',
-                'classId': 'sample-ap-biology',
-                'channelId': 'questions',
-                'senderId': 'student4',
-                'senderName': 'Michael Brown',
-                'senderProfilePic': 'https://randomuser.me/api/portraits/men/55.jpg',
-                'content': 'Thanks, Dr. Rodriguez! That makes much more sense now.',
-                'sentAt': datetime.datetime.now() - datetime.timedelta(days=1, hours=3),
-                'time': '3:05 PM',
-                'date': 'Yesterday',
-                'edited': False
-            },
-            
-            # Resources channel
-            {
-                'id': 'm9',
-                'classId': 'sample-ap-biology',
-                'channelId': 'resources',
-                'senderId': 'student7',
-                'senderName': 'Ava Patel',
-                'senderProfilePic': 'https://randomuser.me/api/portraits/women/45.jpg',
-                'content': 'I found this amazing YouTube video explaining meiosis vs. mitosis: https://www.youtube.com/watch?v=example',
-                'sentAt': datetime.datetime.now() - datetime.timedelta(days=2, hours=6),
-                'time': '11:30 AM',
-                'date': '2 days ago',
-                'edited': False
-            },
-            {
-                'id': 'm10',
-                'classId': 'sample-ap-biology',
-                'channelId': 'resources',
-                'senderId': 'student5',
-                'senderName': 'Olivia Garcia',
-                'senderProfilePic': 'https://randomuser.me/api/portraits/women/66.jpg',
-                'content': 'Thanks for sharing! Here\'s another great resource for visualizing DNA replication: https://www.biointeractive.org/example',
-                'sentAt': datetime.datetime.now() - datetime.timedelta(days=2, hours=5),
-                'time': '12:45 PM',
-                'date': '2 days ago',
-                'edited': False
-            },
-            
-            # Lab partners channel
-            {
-                'id': 'm11',
-                'classId': 'sample-ap-biology',
-                'channelId': 'lab_partners',
-                'senderId': 'student8',
-                'senderName': 'Noah Johnson',
-                'senderProfilePic': 'https://randomuser.me/api/portraits/men/15.jpg',
-                'content': 'Who wants to partner up for the DNA extraction lab tomorrow?',
-                'sentAt': datetime.datetime.now() - datetime.timedelta(hours=8),
-                'time': '5:30 PM',
-                'date': 'Today',
-                'edited': False
-            },
-            {
-                'id': 'm12',
-                'classId': 'sample-ap-biology',
-                'channelId': 'lab_partners',
-                'senderId': 'student6',
-                'senderName': 'William Chen',
-                'senderProfilePic': 'https://randomuser.me/api/portraits/men/77.jpg',
-                'content': 'I\'m looking for a partner too. Want to work together, Noah?',
-                'sentAt': datetime.datetime.now() - datetime.timedelta(hours=7),
-                'time': '6:15 PM',
-                'date': 'Today',
-                'edited': False
-            },
-            
-            # Announcements channel
-            {
-                'id': 'm13',
-                'classId': 'sample-ap-biology',
-                'channelId': 'announcements',
-                'senderId': 'teacher123',
-                'senderName': 'Dr. Alex Rodriguez',
-                'senderProfilePic': 'https://randomuser.me/api/portraits/men/44.jpg',
-                'content': 'REMINDER: Lab tomorrow will require safety goggles and closed-toe shoes. Don\'t forget to review the pre-lab materials!',
-                'sentAt': datetime.datetime.now() - datetime.timedelta(hours=5),
-                'time': '8:00 PM',
-                'date': 'Today',
-                'edited': False
-            },
-            {
-                'id': 'm14',
-                'classId': 'sample-ap-biology',
-                'channelId': 'announcements',
-                'senderId': 'teacher123',
-                'senderName': 'Dr. Alex Rodriguez',
-                'senderProfilePic': 'https://randomuser.me/api/portraits/men/44.jpg',
-                'content': 'IMPORTANT: We have a guest lecturer next Tuesday. Please prepare two questions based on the pre-reading materials.',
-                'sentAt': datetime.datetime.now() - datetime.timedelta(days=2),
-                'time': '9:30 AM',
-                'date': '2 days ago',
-                'edited': False
-            }
-        ]
-        
-        # Add additional messages to Firestore
-        for message in additional_messages:
-            db.collection('Messages').document(message['id']).set(message)
+        # Note: All messages already created above in the main messages array
         
         # Create mind web data
         mind_web_data = {
@@ -1527,10 +1736,132 @@ def init_sample_class_data():
         # Add mind web to Firestore
         db.collection('ClassMindWebs').document(mind_web_data['id']).set(mind_web_data)
         
+        # Create sample events
+        events = [
+            {
+                'id': 'e1',
+                'classId': 'sample-ap-biology',
+                'title': 'Lab Session: DNA Extraction',
+                'description': 'Hands-on laboratory session to extract DNA from plant cells. Students will learn proper lab techniques and observe DNA structure.',
+                'type': 'lab',
+                'location': 'Lab 203',
+                'startDate': datetime.datetime.now() + datetime.timedelta(days=1, hours=2.5),  # Tomorrow at 2:30 PM
+                'endDate': datetime.datetime.now() + datetime.timedelta(days=1, hours=4),  # Tomorrow at 4:00 PM
+                'createdBy': 'teacher123',
+                'createdAt': datetime.datetime.now() - datetime.timedelta(days=7),
+                'updatedAt': datetime.datetime.now() - datetime.timedelta(days=7),
+                'hostId': 'teacher123',
+                'recurring': False,
+                'attendees': [
+                    {'userId': 'student1', 'status': 'going', 'responseTime': datetime.datetime.now() - datetime.timedelta(days=5)},
+                    {'userId': 'student2', 'status': 'going', 'responseTime': datetime.datetime.now() - datetime.timedelta(days=4)},
+                    {'userId': 'student3', 'status': 'maybe', 'responseTime': datetime.datetime.now() - datetime.timedelta(days=3)}
+                ],
+                'reminderSent': False,
+                'attachments': [],
+                'icon': '🧪',
+                'color': '#4361ee'
+            },
+            {
+                'id': 'e2',
+                'classId': 'sample-ap-biology',
+                'title': 'Quiz: Cell Structure',
+                'description': 'In-class quiz covering cell organelles, membrane structure, and cellular transport mechanisms.',
+                'type': 'quiz',
+                'location': 'Classroom',
+                'startDate': datetime.datetime.now() + datetime.timedelta(days=5, hours=10.25),  # Friday during class
+                'endDate': datetime.datetime.now() + datetime.timedelta(days=5, hours=11.75),  # Friday during class
+                'createdBy': 'teacher123',
+                'createdAt': datetime.datetime.now() - datetime.timedelta(days=10),
+                'updatedAt': datetime.datetime.now() - datetime.timedelta(days=10),
+                'hostId': 'teacher123',
+                'recurring': False,
+                'attendees': [],
+                'reminderSent': False,
+                'attachments': [],
+                'icon': '📝',
+                'color': '#f72585'
+            },
+            {
+                'id': 'e3',
+                'classId': 'sample-ap-biology',
+                'title': 'Study Group Session',
+                'description': 'Student-organized study group to review protein synthesis and gene expression concepts.',
+                'type': 'study_group',
+                'location': 'Library Study Room B',
+                'startDate': datetime.datetime.now() + datetime.timedelta(days=6, hours=15),  # Saturday at 3:00 PM
+                'endDate': datetime.datetime.now() + datetime.timedelta(days=6, hours=17),  # Saturday at 5:00 PM
+                'createdBy': 'student3',
+                'createdAt': datetime.datetime.now() - datetime.timedelta(days=3),
+                'updatedAt': datetime.datetime.now() - datetime.timedelta(days=3),
+                'hostId': 'student3',
+                'recurring': False,
+                'attendees': [
+                    {'userId': 'student3', 'status': 'going', 'responseTime': datetime.datetime.now() - datetime.timedelta(days=3)},
+                    {'userId': 'student4', 'status': 'going', 'responseTime': datetime.datetime.now() - datetime.timedelta(days=2)},
+                    {'userId': 'student5', 'status': 'going', 'responseTime': datetime.datetime.now() - datetime.timedelta(days=1)}
+                ],
+                'reminderSent': False,
+                'attachments': [],
+                'icon': '👥',
+                'color': '#4cc9f0'
+            },
+            {
+                'id': 'e4',
+                'classId': 'sample-ap-biology',
+                'title': 'Review Session: Molecular Biology',
+                'description': 'Comprehensive review session before the unit exam, covering DNA structure, replication, transcription, and translation.',
+                'type': 'review',
+                'location': 'Classroom',
+                'startDate': datetime.datetime.now() + datetime.timedelta(days=12, hours=15),  # Next Friday at 3:00 PM
+                'endDate': datetime.datetime.now() + datetime.timedelta(days=12, hours=16.5),  # Next Friday at 4:30 PM
+                'createdBy': 'teacher123',
+                'createdAt': datetime.datetime.now() - datetime.timedelta(days=5),
+                'updatedAt': datetime.datetime.now() - datetime.timedelta(days=5),
+                'hostId': 'teacher123',
+                'recurring': False,
+                'attendees': [],
+                'reminderSent': False,
+                'attachments': [],
+                'icon': '📚',
+                'color': '#7209b7'
+            },
+            {
+                'id': 'e5',
+                'classId': 'sample-ap-biology',
+                'title': 'Unit 1 Exam: Molecular Biology',
+                'description': 'Comprehensive exam covering all topics from Unit 1: DNA structure, replication, transcription, translation, and gene regulation.',
+                'type': 'exam',
+                'location': 'Classroom',
+                'startDate': datetime.datetime.now() + datetime.timedelta(days=19, hours=10.25),  # Next next Friday during class
+                'endDate': datetime.datetime.now() + datetime.timedelta(days=19, hours=11.75),  # Next next Friday during class
+                'createdBy': 'teacher123',
+                'createdAt': datetime.datetime.now() - datetime.timedelta(days=14),
+                'updatedAt': datetime.datetime.now() - datetime.timedelta(days=14),
+                'hostId': 'teacher123',
+                'recurring': False,
+                'attendees': [],
+                'reminderSent': False,
+                'attachments': [],
+                'icon': '📋',
+                'color': '#e63946'
+            }
+        ]
+        
+        # Add events to Firestore
+        for event in events:
+            db.collection('Events').document(event['id']).set(event)
+        
         print("Sample class data initialized successfully!")
         
     except Exception as e:
         print(f"Error initializing sample class data: {str(e)}")
+
+# Simple session check function
+def require_login():
+    if not session.get('logged_in') or not session.get('user_id'):
+        return redirect('/login')
+    return None
 
 # Initialize sample data when the app starts
 if is_firebase_available():
@@ -1538,10 +1869,14 @@ if is_firebase_available():
 
 @app.route('/')
 def home():
+    auth_check = require_login()
+    if auth_check: return auth_check
     return render_template('index.html')
 
 @app.route('/tree')
 def tree():
+    auth_check = require_login()
+    if auth_check: return auth_check
     return render_template('tree-modular.html')
 
 @app.route('/counselor')
@@ -1554,8 +1889,8 @@ def pmods():
 
 @app.route('/profile')
 def profile():
-    # In a real application, this would verify user authentication
-    # and fetch the user's profile data from a database
+    auth_check = require_login()
+    if auth_check: return auth_check
     return render_template('profile.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -1580,18 +1915,10 @@ def api_login():
         password = data.get('password')
         remember = data.get('remember', False)
         
-        # In a real application, you would:
-        # 1. Validate user credentials against your database
-        # 2. Set auth tokens/session data
-        # 3. Return appropriate response
-        
-        # For demo purposes, we'll just check against the Firebase database
-        # using a helper function
-        from firebase_admin import firestore
-        
-        # Connect to Firestore
-        db = firestore.client()
-        
+        # Check against Firebase Members collection
+        if not is_firebase_available():
+            return jsonify({"error": "Database unavailable"}), 500
+            
         # Query members collection
         members_ref = db.collection('Members')
         query = members_ref.where('email', '==', email).limit(1)
@@ -1603,17 +1930,21 @@ def api_login():
         user_doc = results[0]
         user_data = user_doc.to_dict()
         
-        # In a real app, you'd properly hash and validate the password
-        # This is just a simplified example - NEVER store plain passwords
+        # Simple password check (in production, use hashing)
         if user_data.get('password') != password:
             return jsonify({"error": "Invalid password"}), 401
         
-        # Set session data for server-side tracking
+        # Set session data
         session['user_id'] = user_doc.id
         session['user_email'] = email
         session['logged_in'] = True
         
-        # Prepare user data to return (exclude sensitive info)
+        # Update last login
+        db.collection('Members').document(user_doc.id).update({
+            'lastLogin': datetime.datetime.now()
+        })
+        
+        # Return user data (same format as before)
         safe_user_data = {
             'id': user_doc.id,
             'email': user_data.get('email'),
@@ -1990,6 +2321,8 @@ def class_page(class_id):
 @app.route('/class_dashboard/<class_id>')
 def class_dashboard(class_id):
     """Render the class dashboard with data from the database."""
+    auth_check = require_login()
+    if auth_check: return auth_check
     if not is_firebase_available():
         # If Firebase is not available, use mock data
         class_data_samples = {
@@ -2058,10 +2391,14 @@ def class_dashboard(class_id):
 
 @app.route('/collab')
 def collab():
+    auth_check = require_login()
+    if auth_check: return auth_check
     return render_template('collab.html')
 
 @app.route('/dashboard')
 def dashboard():
+    auth_check = require_login()
+    if auth_check: return auth_check
     return render_template('dashboard.html')
 
 @app.route('/collab/<project_id>')
@@ -2112,6 +2449,162 @@ def project_collab(project_id):
 def signup():
     # This will display the signup form initially and process form submission
     return render_template('signup.html')
+
+@app.route('/api/send-verification-code', methods=['POST'])
+def send_verification_code():
+    """Send verification code to email"""
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        
+        print(f"Received verification code request for email: {email}")
+        
+        if not email:
+            return jsonify({"error": "Email is required"}), 400
+        
+        # Generate 6-digit verification code
+        verification_code = str(random.randint(100000, 999999))
+        
+        print(f"Generated verification code: {verification_code}")
+        
+        # Store code with timestamp (expires in 10 minutes)
+        verification_codes[email] = {
+            'code': verification_code,
+            'timestamp': datetime.datetime.now(),
+            'expires_at': datetime.datetime.now() + datetime.timedelta(minutes=10)
+        }
+        
+        print(f"Stored verification code for {email}")
+        
+        # Send email
+        print(f"Attempting to send email to {email}")
+        if send_verification_email(email, verification_code):
+            print(f"Email sent successfully to {email}")
+            return jsonify({"message": "Verification code sent successfully"}), 200
+        else:
+            print(f"Failed to send email to {email}")
+            return jsonify({"error": "Failed to send verification email"}), 500
+            
+    except Exception as e:
+        print(f"Error in send_verification_code: {e}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@app.route('/api/verify-code', methods=['POST'])
+def verify_code():
+    """Verify the email verification code"""
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        code = data.get('code')
+        
+        if not email or not code:
+            return jsonify({"error": "Email and code are required"}), 400
+        
+        # Check if code exists for this email
+        if email not in verification_codes:
+            return jsonify({"error": "No verification code found for this email"}), 400
+        
+        stored_data = verification_codes[email]
+        
+        # Check if code has expired
+        if datetime.datetime.now() > stored_data['expires_at']:
+            del verification_codes[email]  # Clean up expired code
+            return jsonify({"error": "Verification code has expired"}), 400
+        
+        # Check if code matches
+        if stored_data['code'] != code:
+            return jsonify({"error": "Invalid verification code"}), 400
+        
+        # Code is valid, remove it from storage
+        del verification_codes[email]
+        
+        return jsonify({"message": "Email verified successfully"}), 200
+        
+    except Exception as e:
+        print(f"Error in verify_code: {e}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@app.route('/api/signup-complete', methods=['POST'])
+def signup_complete():
+    """Complete the signup process after email verification"""
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        required_fields = ['first_name', 'last_name', 'email', 'password']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({"error": f"{field} is required"}), 400
+        
+        # Create user data
+        user_data = {
+            'first_name': data['first_name'],
+            'last_name': data['last_name'],
+            'email': data['email'],
+            'username': data.get('username', ''),
+            'password': data['password'],  # In production, hash this password
+            'email_verified': True,
+            'createdAt': datetime.datetime.now(),
+            'updatedAt': datetime.datetime.now(),
+            'userType': 'student',
+            'grade': data.get('grade', ''),
+            'profilePicUrl': '',
+            'bio': '',
+            'friends': [],  # Initialize empty friends list
+            'friendRequests': {  # Initialize empty friend requests structure
+                'incoming': [],
+                'outgoing': []
+            },
+            'classes': [],  # Initialize empty classes list
+            'settings': {
+                'privacy': {
+                    'profileVisibility': 'friends',
+                    'webVisibility': 'friends',
+                    'classesVisibility': 'friends',
+                    'motivationsVisibility': 'private',
+                    'friendsVisibility': 'friends'
+                },
+                'appearance': {
+                    'theme': 'system',
+                    'colorAccent': 'pink'
+                }
+            }
+        }
+        
+        # Save user to database
+        if is_firebase_available():
+            doc_ref = db.collection('Members').document()
+            doc_ref.set(user_data)
+            user_id = doc_ref.id
+        else:
+            # Fallback when Firebase is not available
+            user_id = str(uuid.uuid4())
+        
+        # Store user ID in session
+        session['user_id'] = user_id
+        session['user_email'] = data['email']
+        session['user_name'] = f"{data['first_name']} {data['last_name']}"
+        
+        return jsonify({
+            "message": "Account created successfully",
+            "user_id": user_id,
+            "redirect_url": "/success"
+        }), 200
+        
+    except Exception as e:
+        print(f"Error in signup_complete: {e}")
+        return jsonify({"error": "Failed to create account"}), 500
+
+@app.route('/success')
+def success():
+    """Success page after signup completion"""
+    # Check if user is logged in
+    if 'user_id' not in session:
+        return redirect(url_for('signup'))
+    
+    return render_template('success.html', 
+                         user_name=session.get('user_name', 'User'),
+                         user_email=session.get('user_email', ''))
 
 @app.route('/onboarding', methods=['GET', 'POST'])
 def onboarding():

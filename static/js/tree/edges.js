@@ -50,6 +50,9 @@ export function drawEdges() {
   // Clear canvas
   ctx.clearRect(0, 0, width, height);
   
+  // Get canvas position relative to viewport for coordinate conversion
+  const canvasRect = elements.treeCanvas.getBoundingClientRect();
+  
   // Draw each edge
   edges.forEach(edge => {
     const fromNode = document.querySelector(`[data-id="${edge.from}"]`);
@@ -59,10 +62,13 @@ export function drawEdges() {
       // Get screen centers of nodes
       const fromRect = fromNode.getBoundingClientRect();
       const toRect   = toNode.getBoundingClientRect();
-      const fromCenterX = fromRect.left + fromRect.width / 2;
-      const fromCenterY = fromRect.top  + fromRect.height / 2;
-      const toCenterX   = toRect.left   + toRect.width / 2;
-      const toCenterY   = toRect.top    + toRect.height / 2;
+      
+      // Convert viewport coordinates to canvas coordinates
+      const fromCenterX = (fromRect.left + fromRect.width / 2) - canvasRect.left;
+      const fromCenterY = (fromRect.top  + fromRect.height / 2) - canvasRect.top;
+      const toCenterX   = (toRect.left   + toRect.width / 2) - canvasRect.left;
+      const toCenterY   = (toRect.top    + toRect.height / 2) - canvasRect.top;
+      
       // Compute extra vertical offset 5% of the vertical length of the edge
       const extraY = 0;
       const fromY = fromCenterY;

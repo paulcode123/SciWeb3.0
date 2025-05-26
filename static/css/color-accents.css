@@ -1,0 +1,191 @@
+/* Color Accent System for SciWeb3.0 */
+
+:root {
+  /* Default color accent - Pink */
+  --accent-primary: #ff1a75;
+  --accent-primary-light: #ff4d94;
+  --accent-primary-dark: #cc0051;
+  --accent-primary-ultra-light: rgba(255, 26, 117, 0.1);
+  --accent-primary-semi-transparent: rgba(255, 26, 117, 0.2);
+  
+  /* Color Accent Options */
+  --color-pink: #ff1a75;
+  --color-pink-light: #ff4d94;
+  --color-pink-dark: #cc0051;
+  --color-pink-ultra-light: rgba(255, 26, 117, 0.1);
+  --color-pink-semi-transparent: rgba(255, 26, 117, 0.2);
+  
+  --color-blue: #0088ff;
+  --color-blue-light: #33a3ff;
+  --color-blue-dark: #0066cc;
+  --color-blue-ultra-light: rgba(0, 136, 255, 0.1);
+  --color-blue-semi-transparent: rgba(0, 136, 255, 0.2);
+  
+  --color-purple: #9c27b0;
+  --color-purple-light: #ba68c8;
+  --color-purple-dark: #7b1fa2;
+  --color-purple-ultra-light: rgba(156, 39, 176, 0.1);
+  --color-purple-semi-transparent: rgba(156, 39, 176, 0.2);
+  
+  --color-green: #00c853;
+  --color-green-light: #4caf50;
+  --color-green-dark: #009624;
+  --color-green-ultra-light: rgba(0, 200, 83, 0.1);
+  --color-green-semi-transparent: rgba(0, 200, 83, 0.2);
+  
+  --color-orange: #ff9100;
+  --color-orange-light: #ffb74d;
+  --color-orange-dark: #e65100;
+  --color-orange-ultra-light: rgba(255, 145, 0, 0.1);
+  --color-orange-semi-transparent: rgba(255, 145, 0, 0.2);
+  
+  /* Legacy support - maintain compatibility with existing code */
+  --primary: var(--accent-primary);
+  --primary-light: var(--accent-primary-light);
+  --primary-dark: var(--accent-primary-dark);
+  --primary-color: var(--accent-primary);
+  --primary-color-light: var(--accent-primary-ultra-light);
+  --theme-primary: var(--accent-primary);
+  --theme-secondary: var(--accent-primary-light);
+  --theme-accent: var(--accent-primary-dark);
+}
+
+/* Color Accent Classes for Dynamic Switching */
+body[data-accent="pink"] {
+  --accent-primary: var(--color-pink);
+  --accent-primary-light: var(--color-pink-light);
+  --accent-primary-dark: var(--color-pink-dark);
+  --accent-primary-ultra-light: var(--color-pink-ultra-light);
+  --accent-primary-semi-transparent: var(--color-pink-semi-transparent);
+}
+
+body[data-accent="blue"] {
+  --accent-primary: var(--color-blue);
+  --accent-primary-light: var(--color-blue-light);
+  --accent-primary-dark: var(--color-blue-dark);
+  --accent-primary-ultra-light: var(--color-blue-ultra-light);
+  --accent-primary-semi-transparent: var(--color-blue-semi-transparent);
+}
+
+body[data-accent="purple"] {
+  --accent-primary: var(--color-purple);
+  --accent-primary-light: var(--color-purple-light);
+  --accent-primary-dark: var(--color-purple-dark);
+  --accent-primary-ultra-light: var(--color-purple-ultra-light);
+  --accent-primary-semi-transparent: var(--color-purple-semi-transparent);
+}
+
+body[data-accent="green"] {
+  --accent-primary: var(--color-green);
+  --accent-primary-light: var(--color-green-light);
+  --accent-primary-dark: var(--color-green-dark);
+  --accent-primary-ultra-light: var(--color-green-ultra-light);
+  --accent-primary-semi-transparent: var(--color-green-semi-transparent);
+}
+
+body[data-accent="orange"] {
+  --accent-primary: var(--color-orange);
+  --accent-primary-light: var(--color-orange-light);
+  --accent-primary-dark: var(--color-orange-dark);
+  --accent-primary-ultra-light: var(--color-orange-ultra-light);
+  --accent-primary-semi-transparent: var(--color-orange-semi-transparent);
+}
+
+/* Enhanced color utilities for special use cases */
+.accent-text { color: var(--accent-primary) !important; }
+.accent-bg { background-color: var(--accent-primary) !important; }
+.accent-border { border-color: var(--accent-primary) !important; }
+.accent-light-bg { background-color: var(--accent-primary-light) !important; }
+.accent-dark-bg { background-color: var(--accent-primary-dark) !important; }
+.accent-ultra-light-bg { background-color: var(--accent-primary-ultra-light) !important; }
+
+/* Gradient utilities */
+.accent-gradient {
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-primary-light) 100%) !important;
+}
+
+.accent-gradient-text {
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-primary-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Focus and hover states that respect accent color */
+.accent-focus:focus {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.accent-hover:hover {
+  color: var(--accent-primary);
+  transition: color 0.3s ease;
+}
+
+/* Button variants that use accent colors */
+.btn-accent {
+  background: var(--accent-primary);
+  color: white;
+  border: 1px solid var(--accent-primary);
+}
+
+.btn-accent:hover {
+  background: var(--accent-primary-dark);
+  border-color: var(--accent-primary-dark);
+}
+
+.btn-accent-outline {
+  background: transparent;
+  color: var(--accent-primary);
+  border: 2px solid var(--accent-primary);
+}
+
+.btn-accent-outline:hover {
+  background: var(--accent-primary);
+  color: white;
+}
+
+/* Additional utility classes for testing and visibility */
+.accent-shadow {
+  box-shadow: 0 4px 12px var(--accent-primary-semi-transparent) !important;
+}
+
+.accent-glow {
+  box-shadow: 0 0 20px var(--accent-primary-semi-transparent) !important;
+}
+
+/* Make profile picture border use accent color */
+#profile-picture {
+  border-color: var(--accent-primary) !important;
+}
+
+/* Make save buttons use accent color */
+.save-btn,
+.btn-primary {
+  background: var(--accent-primary) !important;
+  border-color: var(--accent-primary) !important;
+}
+
+.save-btn:hover,
+.btn-primary:hover {
+  background: var(--accent-primary-dark) !important;
+  border-color: var(--accent-primary-dark) !important;
+}
+
+/* Make active nav items use accent color */
+.profile-nav-item.active,
+.profile-nav-item:hover {
+  color: var(--accent-primary) !important;
+}
+
+.profile-nav-item.active::before {
+  background-color: var(--accent-primary) !important;
+}
+
+/* Make logo text use accent color */
+.logo-text {
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-primary-light) 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+} 

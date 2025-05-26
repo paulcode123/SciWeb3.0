@@ -88,3 +88,80 @@ Below is a reference guide for what code is in which file:
 - Drag node types into the lineup or create new ones.
 - Click a node type to edit its properties and features.
 - Click Save to persist changes, or Cancel to discard.
+
+# SciWeb Tree Interface
+
+## Files Overview
+
+- **main.js** - Main entry point and initialization
+- **nodes.js** - Node creation, editing, and management
+- **edges.js** - Edge/connection management between nodes
+- **voice.js** - Voice recording and AI integration
+- **ai.js** - AI-powered features and interactions
+- **dom.js** - DOM utility functions and element management
+- **panzoom.js** - Pan and zoom functionality for the canvas
+- **utils.js** - Utility functions and constants
+- **autosave.js** - Automatic saving functionality
+- **node_editor.js** - Node editing interface
+- **onboarding_processing.js** - Onboarding flow processing
+
+## Voice Features
+
+### Regular Voice Mode
+Uses OpenAI's Realtime API with WebRTC for continuous conversation and map manipulation.
+
+### Learning Objective Voice Mode (NEW)
+**How to use:**
+1. Create a Learning Objective node (type: `learningObjective`)
+2. Click on the Learning Objective node to activate voice mode
+3. Speak about your understanding for up to 1 minute
+4. AI will analyze your speech and add:
+   - Correct ideas as `keyidea` nodes
+   - Follow-up questions as `question` nodes
+   - Connections between nodes
+
+**Technical Details:**
+- Uses batch processing instead of real-time
+- Records up to 60 seconds of audio
+- Sends audio + context to `/ai/process_learning_objective_audio`
+- Uses GPT-4o direct audio processing
+- Focuses on educational assessment and Socratic questioning
+
+**Backend Endpoint:**
+```
+POST /ai/process_learning_objective_audio
+- audio: WebM audio file
+- learning_objective: JSON with LO node data  
+- connected_nodes: JSON with connected node data
+```
+
+## Node Types
+
+- **idea** - General concepts and thoughts
+- **task** - Action items and to-dos
+- **challenge** - Obstacles and difficulties
+- **motivator** - Inspiration and goals
+- **learningObjective** - Educational learning goals (special voice mode)
+- **keyidea** - Important concepts (created by AI during learning sessions)
+- **question** - Questions and areas to explore
+- **class** - Academic classes
+- **assignment** - Course assignments
+- **test** - Exams and assessments
+- **project** - Long-term projects
+- **essay** - Writing assignments
+
+## Key Functions
+
+### Voice.js
+- `toggleLearningObjectiveVoice(node, activate)` - Toggle LO voice mode
+- `setupVoiceRecording()` - Initialize regular voice mode
+- `processLearningObjectiveResponse(result, learningObjective)` - Handle AI response
+
+### Nodes.js  
+- `createNode(type, title, left, top, content, id)` - Create any node type
+- `createCanonicalNode({type, title, left, top, content, id})` - Canonical creation
+- Learning Objective nodes have automatic click handlers for voice mode
+
+### Edges.js
+- `drawEdges()` - Render all connections
+- Edges automatically connect ideas and questions to learning objectives

@@ -58,36 +58,35 @@ function initDashboard(classId, serverClassData) {
 }
 
 /**
- * Fetch class data from Firebase
+ * Fetch class data from Flask API instead of Firebase directly
  */
 function fetchClassDataFromFirebase(classId) {
-    if (is_firebase_available()) {
-        db.collection('Classes').doc(classId).get()
-            .then(doc => {
-                if (doc.exists) {
-                    const classData = doc.data();
-                    classData.id = doc.id;
-                    console.log('Class data loaded from Firebase:', classData);
+    fetch(`/api/Classes/${classId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // The API returns {classId: classData}
+            const classData = data[classId] || data;
+            classData.id = classId;
+            console.log('Class data loaded from API:', classData);
                     updateDashboardWithServerData(classData);
                     
                     // Load additional data
                     fetchUpcomingEventsFromFirebase(classId);
                     fetchUpcomingAssignmentsFromFirebase(classId);
-                } else {
-                    console.error('No class found with ID:', classId);
-                }
             })
             .catch(error => {
-                console.error('Error fetching class data from Firebase:', error);
-            });
-    } else {
-        console.error('Firebase is not available. Please check your connection or setup.');
+            console.error('Error fetching class data from API:', error);
         // Show an error message to the user
         const errorMessage = document.createElement('div');
         errorMessage.className = 'error-message';
         errorMessage.innerHTML = '<p>Unable to connect to the database. Please check your connection or contact support.</p>';
         document.querySelector('.dashboard-grid').prepend(errorMessage);
-    }
+        })
 }
 
 /**
@@ -146,13 +145,11 @@ function updateDashboardWithServerData(classData) {
 }
 
 /**
- * Function to determine if Firebase is available
+ * Function to determine if API is available (replaces Firebase check)
  */
 function is_firebase_available() {
-    return typeof firebase !== 'undefined' && 
-           firebase.app && 
-           firebase.firestore && 
-           typeof db !== 'undefined';
+    // Always return true since we're using Flask API instead of Firebase SDK
+    return true;
 }
 
 /**
@@ -297,37 +294,13 @@ function setRandomHeaderGradient() {
 }
 
 /**
- * Fetch class data from API
+ * Fetch class data from Firebase (replaced mock implementation)
  */
 function fetchClassData(classId) {
-    // In a real app, this would fetch from API
-    // For demo, we'll use mock data
-    
-    // Simulate API delay
-    setTimeout(() => {
-        // Mock class data
-        const classData = {
-            id: classId,
-            name: document.querySelector('.class-title').textContent,
-            teacher: {
-                id: 'teacher123',
-                name: 'Dr. Alex Rodriguez',
-                email: 'arodriguez@school.edu',
-                profilePic: 'https://randomuser.me/api/portraits/men/44.jpg',
-                officeHours: [
-                    'Monday: 3:00 PM - 4:30 PM',
-                    'Wednesday: 2:00 PM - 3:30 PM',
-                    'Friday: By appointment'
-                ]
-            },
-            period: '2nd Period (10:15 AM - 11:45 AM)',
-            studentCount: 28,
-            syllabus: 'This course covers fundamental concepts in molecular biology and genetics, with an emphasis on recent discoveries and research methods. Students will learn about DNA structure and replication, gene expression, protein synthesis, and the regulation of cellular processes. Laboratory sessions will provide hands-on experience with techniques such as PCR, gel electrophoresis, and microscopy. The course also explores ethical implications of genetic research and biotechnology applications.'
-        };
-        
-        // Update UI with class data
-        updateClassInfo(classData);
-    }, 800);
+    // This function is now replaced by fetchClassDataFromFirebase
+    // which is already implemented and called from initDashboard
+    console.log('fetchClassData called - delegating to fetchClassDataFromFirebase');
+    fetchClassDataFromFirebase(classId);
 }
 
 /**
@@ -359,45 +332,11 @@ function updateClassInfo(classData) {
 }
 
 /**
- * Fetch upcoming events for the class
+ * Fetch upcoming events for the class (replaced with Firebase implementation)
  */
 function fetchUpcomingEvents(classId) {
-    // In a real app, this would use an API call
-    // For demo, we'll use mock data
-    
-    // Simulate API delay
-    setTimeout(() => {
-        // Mock events data
-        const events = [
-            {
-                id: 'e1',
-                title: 'Lab Session: DNA Extraction',
-                date: 'Tomorrow',
-                time: '2:30 PM - 4:00 PM',
-                location: 'Lab 203',
-                type: 'lab'
-            },
-            {
-                id: 'e2',
-                title: 'Quiz: Cell Structure',
-                date: 'Friday',
-                time: 'During class',
-                location: 'Classroom',
-                type: 'quiz'
-            },
-            {
-                id: 'e3',
-                title: 'Study Group Session',
-                date: 'Saturday',
-                time: '11:00 AM - 1:00 PM',
-                location: 'Library Study Room 4',
-                type: 'study_group'
-            }
-        ];
-        
-        // Update events list
-        updateUpcomingEvents(events);
-    }, 1000);
+    // Use the Firebase implementation instead
+    fetchUpcomingEventsFromFirebase(classId);
 }
 
 /**
@@ -443,33 +382,12 @@ function formatEventType(type) {
 }
 
 /**
- * Fetch current unit information
+ * Fetch current unit information (now handled by Firebase class data)
  */
 function fetchCurrentUnit(classId) {
-    // In a real app, this would use an API call
-    // For demo, we'll use mock data
-    
-    // Simulate API delay
-    setTimeout(() => {
-        // Mock unit data
-        const unit = {
-            id: 'u3',
-            title: 'Molecular Biology Fundamentals',
-            description: 'An exploration of DNA structure, replication, and protein synthesis',
-            progress: 65,
-            topics: [
-                'DNA Structure and Organization',
-                'Replication Mechanisms',
-                'Transcription and RNA Processing',
-                'Translation and Protein Synthesis',
-                'Gene Regulation'
-            ],
-            current_topic: 'Translation and Protein Synthesis'
-        };
-        
-        // Update unit content
-        updateCurrentUnit(unit);
-    }, 1200);
+    // This is now handled by the main class data fetch
+    // The Firebase class data includes units array with current unit info
+    console.log('fetchCurrentUnit called - handled by main class data fetch');
 }
 
 /**
@@ -493,49 +411,11 @@ function updateCurrentUnit(unit) {
 }
 
 /**
- * Fetch recent activity
+ * Fetch recent activity (replaced with Firebase implementation)
  */
 function fetchRecentActivity(classId) {
-    // In a real app, this would use an API call
-    // For demo, we'll use mock data
-    
-    // Simulate API delay
-    setTimeout(() => {
-        // Mock activity data
-        const activities = [
-            {
-                id: 'a1',
-                text: 'Lab Report: DNA Extraction graded (92%)',
-                time: '2 hours ago',
-                icon: 'fas fa-flask',
-                type: 'grade'
-            },
-            {
-                id: 'a2',
-                text: 'Dr. Rodriguez posted new lecture slides',
-                time: 'Yesterday',
-                icon: 'fas fa-file-powerpoint',
-                type: 'resource'
-            },
-            {
-                id: 'a3',
-                text: 'New assignment posted: Protein Synthesis Diagram',
-                time: '2 days ago',
-                icon: 'fas fa-tasks',
-                type: 'assignment'
-            },
-            {
-                id: 'a4',
-                text: 'You asked a question in the discussion channel',
-                time: '3 days ago',
-                icon: 'fas fa-comment-dots',
-                type: 'discussion'
-            }
-        ];
-        
-        // Update activity list
-        updateRecentActivity(activities);
-    }, 1500);
+    // Use the Firebase implementation instead
+    fetchRecentActivityFromFirebase(classId);
 }
 
 /**
@@ -556,25 +436,11 @@ function updateRecentActivity(activities) {
 }
 
 /**
- * Fetch class stats
+ * Fetch class stats (replaced with Firebase implementation)
  */
 function fetchClassStats(classId) {
-    // In a real app, this would use an API call
-    // For demo, we'll use mock data
-    
-    // Simulate API delay
-    setTimeout(() => {
-        // Mock stats data
-        const stats = {
-            assignments: 14,
-            resources: 26,
-            discussions: 72,
-            average_grade: '89%'
-        };
-        
-        // Update stats
-        updateClassStats(stats);
-    }, 1000);
+    // Use the Firebase implementation instead
+    fetchClassStatsFromFirebase(classId);
 }
 
 /**
@@ -588,45 +454,11 @@ function updateClassStats(stats) {
 }
 
 /**
- * Fetch upcoming assignments
+ * Fetch upcoming assignments (replaced with Firebase implementation)
  */
 function fetchUpcomingAssignments(classId) {
-    // In a real app, this would use an API call
-    // For demo, we'll use mock data
-    
-    // Simulate API delay
-    setTimeout(() => {
-        // Mock assignments data
-        const assignments = [
-            {
-                id: 'as1',
-                title: 'Protein Synthesis Diagram',
-                due_date: 'Oct 15, 2025',
-                time_left: '5 days left',
-                type: 'project',
-                status: 'not_started'
-            },
-            {
-                id: 'as2',
-                title: 'Gene Expression Problem Set',
-                due_date: 'Oct 18, 2025',
-                time_left: '8 days left',
-                type: 'homework',
-                status: 'in_progress'
-            },
-            {
-                id: 'as3',
-                title: 'DNA Replication Quiz',
-                due_date: 'Oct 22, 2025',
-                time_left: '12 days left',
-                type: 'quiz',
-                status: 'not_started'
-            }
-        ];
-        
-        // Update assignments list
-        updateUpcomingAssignments(assignments);
-    }, 1300);
+    // Use the Firebase implementation instead
+    fetchUpcomingAssignmentsFromFirebase(classId);
 }
 
 /**
@@ -648,96 +480,11 @@ function updateUpcomingAssignments(assignments) {
 }
 
 /**
- * Fetch assignments for the assignments tab
+ * Fetch assignments for the assignments tab (replaced with Firebase implementation)
  */
 function fetchAssignments(classId) {
-    // In a real app, this would use an API call
-    // For demo, we'll use mock data
-    
-    // Simulate API delay
-    setTimeout(() => {
-        // Mock assignments data (more detailed than the overview ones)
-        const assignments = [
-            {
-                id: 'as1',
-                title: 'Protein Synthesis Diagram',
-                description: 'Create a detailed diagram showing the process of protein synthesis, including transcription and translation steps.',
-                due_date: 'Oct 15, 2025',
-                time_left: '5 days left',
-                type: 'project',
-                status: 'not_started',
-                points: 50,
-                allowed_formats: 'PDF, JPG, PNG',
-                resources: ['Lecture 4 Slides', 'Chapter 7 in textbook']
-            },
-            {
-                id: 'as2',
-                title: 'Gene Expression Problem Set',
-                description: 'Complete the problem set on gene expression regulation and feedback mechanisms.',
-                due_date: 'Oct 18, 2025',
-                time_left: '8 days left',
-                type: 'homework',
-                status: 'in_progress',
-                points: 25,
-                allowed_formats: 'PDF',
-                resources: ['Problem Set PDF', 'Chapter 8 in textbook']
-            },
-            {
-                id: 'as3',
-                title: 'DNA Replication Quiz',
-                description: 'Online quiz covering DNA replication, enzymes involved, and proofreading mechanisms.',
-                due_date: 'Oct 22, 2025',
-                time_left: '12 days left',
-                type: 'quiz',
-                status: 'not_started',
-                points: 30,
-                time_limit: '30 minutes',
-                resources: ['Lecture 3 Slides', 'Study Guide']
-            },
-            {
-                id: 'as4',
-                title: 'Genetic Disorders Research Paper',
-                description: 'Write a 5-page research paper on a genetic disorder of your choice, covering causes, symptoms, treatments, and current research.',
-                due_date: 'Nov 5, 2025',
-                time_left: '26 days left',
-                type: 'paper',
-                status: 'not_started',
-                points: 100,
-                allowed_formats: 'DOCX, PDF',
-                resources: ['Research Paper Guidelines', 'Example Papers']
-            },
-            {
-                id: 'as5',
-                title: 'Cell Division Video Analysis',
-                description: 'Watch the provided video on cell division and answer the analysis questions.',
-                due_date: 'Oct 25, 2025',
-                time_left: '15 days left',
-                type: 'analysis',
-                status: 'not_started',
-                points: 20,
-                allowed_formats: 'PDF, DOCX',
-                resources: ['Video Link', 'Analysis Questions']
-            },
-            {
-                id: 'as6',
-                title: 'Midterm Exam',
-                description: 'Comprehensive exam covering all topics from the first half of the semester.',
-                due_date: 'Nov 10, 2025',
-                time_left: '31 days left',
-                type: 'exam',
-                status: 'not_started',
-                points: 200,
-                time_limit: '2 hours',
-                resources: ['Study Guide', 'Review Session Schedule']
-            }
-        ];
-        
-        // Update assignments grid
-        updateAssignmentsGrid(assignments);
-        
-        // Set up assignment filtering
-        setupAssignmentFilters(assignments);
-    }, 1000);
+    // Use the Firebase implementation instead
+    fetchAssignmentsFromFirebase(classId);
 }
 
 /**
@@ -946,101 +693,11 @@ function capitalizeFirstLetter(string) {
 }
 
 /**
- * Fetch resources for the resources tab
+ * Fetch resources for the resources tab (replaced with Firebase implementation)
  */
 function fetchResources(classId) {
-    // In a real app, this would use an API call
-    // For demo, we'll use mock data
-    
-    // Simulate API delay
-    setTimeout(() => {
-        // Mock resources data
-        const resources = [
-            {
-                id: 'r1',
-                title: 'Lecture 1: Introduction to Molecular Biology',
-                description: 'Overview of course, key concepts, and research methodologies',
-                type: 'slides',
-                date_added: 'Sep 5, 2025',
-                file_type: 'PDF',
-                file_size: '2.4 MB',
-                thumbnail: 'https://via.placeholder.com/300x200/4361ee/ffffff?text=Lecture+1'
-            },
-            {
-                id: 'r2',
-                title: 'DNA Structure and Replication',
-                description: 'Video lecture explaining DNA structure and the replication process',
-                type: 'videos',
-                date_added: 'Sep 8, 2025',
-                duration: '28:45',
-                thumbnail: 'https://via.placeholder.com/300x200/3a0ca3/ffffff?text=DNA+Video'
-            },
-            {
-                id: 'r3',
-                title: 'Lab 1: Microscopy Techniques',
-                description: 'Handout for first lab session on microscopy techniques',
-                type: 'handouts',
-                date_added: 'Sep 10, 2025',
-                file_type: 'PDF',
-                file_size: '1.8 MB',
-                thumbnail: 'https://via.placeholder.com/300x200/f72585/ffffff?text=Lab+1'
-            },
-            {
-                id: 'r4',
-                title: 'The Cell Cycle and Division',
-                description: 'Interactive simulation of cell division processes',
-                type: 'practice',
-                date_added: 'Sep 15, 2025',
-                duration: 'Interactive',
-                thumbnail: 'https://via.placeholder.com/300x200/4cc9f0/000000?text=Cell+Cycle'
-            },
-            {
-                id: 'r5',
-                title: 'Current Research in Gene Therapy',
-                description: 'Recent journal articles on advances in gene therapy applications',
-                type: 'readings',
-                date_added: 'Sep 18, 2025',
-                file_type: 'PDF',
-                file_size: '4.2 MB',
-                thumbnail: 'https://via.placeholder.com/300x200/7209b7/ffffff?text=Research'
-            },
-            {
-                id: 'r6',
-                title: 'Lecture 2: Protein Synthesis',
-                description: 'Detailed lecture on transcription and translation processes',
-                type: 'slides',
-                date_added: 'Sep 20, 2025',
-                file_type: 'PDF',
-                file_size: '3.1 MB',
-                thumbnail: 'https://via.placeholder.com/300x200/4361ee/ffffff?text=Lecture+2'
-            },
-            {
-                id: 'r7',
-                title: 'Genetic Engineering Techniques',
-                description: 'Video demonstration of key genetic engineering methods',
-                type: 'videos',
-                date_added: 'Sep 23, 2025',
-                duration: '34:12',
-                thumbnail: 'https://via.placeholder.com/300x200/3a0ca3/ffffff?text=Genetic+Eng'
-            },
-            {
-                id: 'r8',
-                title: 'Practice Problems: Gene Expression',
-                description: 'Practice problems with solutions for gene expression mechanisms',
-                type: 'practice',
-                date_added: 'Sep 25, 2025',
-                file_type: 'PDF',
-                file_size: '1.5 MB',
-                thumbnail: 'https://via.placeholder.com/300x200/4cc9f0/000000?text=Practice'
-            }
-        ];
-        
-        // Update resources grid
-        updateResourcesGrid(resources);
-        
-        // Set up resource filtering
-        setupResourceFilters(resources);
-    }, 1000);
+    // Use the Firebase implementation instead
+    fetchResourcesFromFirebase(classId);
 }
 
 /**
@@ -1139,93 +796,11 @@ function filterResourcesBySearch(searchTerm) {
 }
 
 /**
- * Fetch channel messages for discussions tab
+ * Fetch channel messages for discussions tab (replaced with Firebase implementation)
  */
 function fetchChannelMessages(classId, channelId) {
-    // Show loading indicator
-    document.getElementById('messages-container').innerHTML = '<div class="loading-message">Loading messages...</div>';
-    
-    // Set up channel switching
-    setupChannelSwitching();
-    
-    // Set up message sending
-    setupMessageSending(classId, channelId);
-    
-    if (!is_firebase_available()) {
-        document.getElementById('messages-container').innerHTML = 
-            '<div class="error-message">Unable to load messages. Please check your connection.</div>';
-        return;
-    }
-    
-    // Update current channel display
-    updateCurrentChannelDisplay(channelId, getChannelNameFromId(channelId));
-    
-    // Fetch messages
-    db.collection('Messages')
-        .where('classId', '==', classId)
-        .where('channelId', '==', channelId)
-        .orderBy('sentAt', 'asc')
-        .get()
-        .then(querySnapshot => {
-            const messages = [];
-            
-            querySnapshot.forEach(doc => {
-                const data = doc.data();
-                
-                // Format date and time
-                let messageTime = 'Unknown time';
-                let messageDate = 'Unknown date';
-                
-                if (data.sentAt) {
-                    const sentDate = data.sentAt.toDate ? data.sentAt.toDate() : new Date(data.sentAt);
-                    const now = new Date();
-                    
-                    messageTime = sentDate.toLocaleTimeString('en-US', {
-                        hour: 'numeric',
-                        minute: '2-digit'
-                    });
-                    
-                    // Format relative date (Today, Yesterday, or actual date)
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    
-                    const yesterday = new Date(today);
-                    yesterday.setDate(yesterday.getDate() - 1);
-                    
-                    const messageDateOnly = new Date(sentDate);
-                    messageDateOnly.setHours(0, 0, 0, 0);
-                    
-                    if (messageDateOnly.getTime() === today.getTime()) {
-                        messageDate = 'Today';
-                    } else if (messageDateOnly.getTime() === yesterday.getTime()) {
-                        messageDate = 'Yesterday';
-                    } else {
-                        messageDate = sentDate.toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: sentDate.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
-                        });
-                    }
-                }
-                
-                messages.push({
-                    id: doc.id,
-                    senderId: data.senderId || 'unknown',
-                    senderName: data.senderName || 'Unknown User',
-                    senderProfilePic: data.senderProfilePic || 'https://via.placeholder.com/64',
-                    content: data.content || '',
-                    time: data.time || messageTime,
-                    date: data.date || messageDate
-                });
-            });
-            
-            updateMessagesContainer(messages);
-        })
-        .catch(error => {
-            console.error('Error fetching messages:', error);
-            document.getElementById('messages-container').innerHTML = 
-                '<div class="error-message">Failed to load messages. Please try again later.</div>';
-        });
+    // Use the Firebase implementation instead
+    fetchChannelMessagesFromFirebase(classId, channelId);
 }
 
 /**
@@ -1248,69 +823,11 @@ function getChannelNameFromId(channelId) {
 }
 
 /**
- * Fetch grades for the grades tab
+ * Fetch grades for the grades tab (replaced with Firebase implementation)
  */
 function fetchGrades(classId) {
-    // Simulate API delay
-    setTimeout(() => {
-        // Mock grades data
-        const grades = [
-            {
-                id: 'g1',
-                assignment: 'Lab Report: DNA Extraction',
-                type: 'lab',
-                dueDate: 'Oct 1, 2025',
-                status: 'graded',
-                score: '92/100',
-                grade: 'A-'
-            },
-            {
-                id: 'g2',
-                assignment: 'Quiz: Cell Structure',
-                type: 'quiz',
-                dueDate: 'Sep 25, 2025',
-                status: 'graded',
-                score: '18/20',
-                grade: 'A'
-            },
-            {
-                id: 'g3',
-                assignment: 'Homework: Gene Expression',
-                type: 'homework',
-                dueDate: 'Sep 20, 2025',
-                status: 'graded',
-                score: '24/25',
-                grade: 'A'
-            },
-            {
-                id: 'g4',
-                assignment: 'Midterm Exam',
-                type: 'exam',
-                dueDate: 'Sep 15, 2025',
-                status: 'graded',
-                score: '178/200',
-                grade: 'B+'
-            },
-            {
-                id: 'g5',
-                assignment: 'Protein Synthesis Diagram',
-                type: 'project',
-                dueDate: 'Oct 15, 2025',
-                status: 'not_submitted',
-                score: '-',
-                grade: '-'
-            }
-        ];
-        
-        // Update grades table
-        updateGradesTable(grades);
-        
-        // Update grade summary
-        updateGradeSummary(grades);
-        
-        // Render grade distribution chart
-        renderGradeChart(grades);
-    }, 1000);
+    // Use the Firebase implementation instead
+    fetchGradesFromFirebase(classId);
 }
 
 /**
@@ -1491,85 +1008,11 @@ function getLetterGrade(percentage) {
 }
 
 /**
- * Fetch classmates for the students tab
+ * Fetch classmates for the students tab (replaced with Firebase implementation)
  */
 function fetchClassmates(classId) {
-    // Simulate API delay
-    setTimeout(() => {
-        // Mock students data
-        const students = [
-            {
-                id: 's1',
-                name: 'Emma Thompson',
-                email: 'ethompson@student.edu',
-                profilePic: 'https://randomuser.me/api/portraits/women/22.jpg',
-                grade: '11th Grade',
-                lastActive: '2 hours ago'
-            },
-            {
-                id: 's2',
-                name: 'James Wilson',
-                email: 'jwilson@student.edu',
-                profilePic: 'https://randomuser.me/api/portraits/men/32.jpg',
-                grade: '11th Grade',
-                lastActive: '1 day ago'
-            },
-            {
-                id: 's3',
-                name: 'Sophia Lee',
-                email: 'slee@student.edu',
-                profilePic: 'https://randomuser.me/api/portraits/women/33.jpg',
-                grade: '11th Grade',
-                lastActive: '3 hours ago'
-            },
-            {
-                id: 's4',
-                name: 'Michael Brown',
-                email: 'mbrown@student.edu',
-                profilePic: 'https://randomuser.me/api/portraits/men/55.jpg',
-                grade: '11th Grade',
-                lastActive: '5 hours ago'
-            },
-            {
-                id: 's5',
-                name: 'Olivia Garcia',
-                email: 'ogarcia@student.edu',
-                profilePic: 'https://randomuser.me/api/portraits/women/66.jpg',
-                grade: '11th Grade',
-                lastActive: 'Just now'
-            },
-            {
-                id: 's6',
-                name: 'William Chen',
-                email: 'wchen@student.edu',
-                profilePic: 'https://randomuser.me/api/portraits/men/77.jpg',
-                grade: '11th Grade',
-                lastActive: '2 days ago'
-            },
-            {
-                id: 's7',
-                name: 'Ava Patel',
-                email: 'apatel@student.edu',
-                profilePic: 'https://randomuser.me/api/portraits/women/45.jpg',
-                grade: '11th Grade',
-                lastActive: '4 hours ago'
-            },
-            {
-                id: 's8',
-                name: 'Noah Johnson',
-                email: 'njohnson@student.edu',
-                profilePic: 'https://randomuser.me/api/portraits/men/15.jpg',
-                grade: '11th Grade',
-                lastActive: '1 hour ago'
-            }
-        ];
-        
-        // Update students grid
-        updateStudentsGrid(students);
-        
-        // Set up student search functionality
-        setupStudentSearch();
-    }, 1000);
+    // Use the Firebase implementation instead
+    fetchClassmatesFromFirebase(classId);
 }
 
 /**
@@ -1657,51 +1100,11 @@ function searchStudents(searchTerm) {
 }
 
 /**
- * Initialize the mind web visualization
+ * Initialize the mind web visualization (replaced with Firebase implementation)
  */
 function initMindWeb(classId) {
-    // Get container and clear loading indicator
-    const container = document.getElementById('mindweb-container');
-    container.innerHTML = '';
-    
-    // Create canvas element
-    const canvas = document.createElement('canvas');
-    canvas.id = 'mindweb-canvas';
-    container.appendChild(canvas);
-    
-    // In a real app, this would use a visualization library like D3.js or Vis.js
-    // For this demo, we'll create a simple canvas visualization
-    
-    // Set up canvas
-    const ctx = canvas.getContext('2d');
-    const width = container.clientWidth;
-    const height = container.clientHeight;
-    canvas.width = width;
-    canvas.height = height;
-    
-    // Mock mind web data
-    const nodes = [
-        { id: 'n1', label: 'DNA Structure', x: width / 2, y: height / 2, radius: 50, color: '#4361ee' },
-        { id: 'n2', label: 'Nucleotides', x: width / 2 - 200, y: height / 2 - 100, radius: 40, color: '#3a0ca3' },
-        { id: 'n3', label: 'Double Helix', x: width / 2 + 200, y: height / 2 - 100, radius: 40, color: '#7209b7' },
-        { id: 'n4', label: 'Base Pairs', x: width / 2 - 150, y: height / 2 + 150, radius: 40, color: '#f72585' },
-        { id: 'n5', label: 'Hydrogen Bonds', x: width / 2 + 150, y: height / 2 + 150, radius: 40, color: '#4cc9f0' },
-        { id: 'n6', label: 'Phosphate Backbone', x: width / 2 - 300, y: height / 2, radius: 40, color: '#4361ee' }
-    ];
-    
-    const edges = [
-        { from: 'n1', to: 'n2' },
-        { from: 'n1', to: 'n3' },
-        { from: 'n1', to: 'n4' },
-        { from: 'n4', to: 'n5' },
-        { from: 'n2', to: 'n6' }
-    ];
-    
-    // Draw mind web
-    drawMindWeb(ctx, nodes, edges);
-    
-    // Set up controls
-    setupMindWebControls(ctx, nodes, edges);
+    // Use the Firebase implementation instead
+    initMindWebFromFirebase(classId);
 }
 
 /**
@@ -1790,119 +1193,580 @@ function setupEditMode() {
     editButton.innerHTML = '<i class="fas fa-edit"></i> Edit Dashboard';
     dashboardGrid.appendChild(editButton);
     
-    // Add styles for the button
+    // Add enhanced styles for the button and edit mode
     const style = document.createElement('style');
     style.textContent = `
+        /* Edit Mode Toggle Button */
         .edit-mode-toggle {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            padding: 10px 15px;
-            background-color: var(--primary-color);
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #4361ee, #3a0ca3);
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 25px;
             cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
             z-index: 1000;
             transition: all 0.3s ease;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .edit-mode-toggle:hover {
-            background-color: var(--primary-dark);
             transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
         }
         
         .edit-mode-toggle.active {
-            background-color: #e74c3c;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
         }
         
+        .edit-mode-toggle.active:hover {
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+        }
+
+        /* Floating Action Buttons */
+        .fab-container {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            z-index: 999;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .edit-mode .fab-container {
+            display: flex;
+        }
+
+        .fab {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        }
+
+        .fab-add-assignment { background: linear-gradient(135deg, #4361ee, #3a0ca3); }
+        .fab-add-resource { background: linear-gradient(135deg, #7209b7, #5a189a); }
+        .fab-add-event { background: linear-gradient(135deg, #f72585, #e91e63); }
+        .fab-add-note { background: linear-gradient(135deg, #4cc9f0, #0077b6); }
+
+        .fab-tooltip {
+            position: absolute;
+            right: 65px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .fab:hover .fab-tooltip {
+            opacity: 1;
+        }
+        
+        /* Enhanced Editable Elements */
         .editable {
             position: relative;
+            transition: all 0.3s ease;
         }
         
         .editable:hover::after {
-            content: "Click to edit";
+            content: "✏️ Click to edit";
             position: absolute;
-            top: -20px;
-            left: 0;
-            background-color: rgba(0,0,0,0.7);
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #2c3e50, #34495e);
             color: white;
-            padding: 3px 8px;
-            border-radius: 3px;
+            padding: 6px 12px;
+            border-radius: 20px;
             font-size: 12px;
             opacity: 0;
-            transition: opacity 0.2s;
+            transition: opacity 0.3s ease;
+            white-space: nowrap;
+            z-index: 1000;
         }
         
         .edit-mode .editable:hover {
-            outline: 2px dashed var(--primary-color);
+            outline: 2px dashed #4361ee;
+            outline-offset: 4px;
             cursor: pointer;
+            background-color: rgba(67, 97, 238, 0.05);
+            border-radius: 8px;
         }
         
         .edit-mode .editable:hover::after {
             opacity: 1;
         }
         
-        .edit-form {
-            background-color: white;
-            padding: 15px;
-            border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin: 10px 0;
+        /* Delete Buttons */
+        .delete-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .edit-mode .delete-btn {
+            display: flex;
+        }
+
+        .delete-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
         }
         
-        .edit-form input, .edit-form textarea {
+        /* Enhanced Edit Forms */
+        .edit-form {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin: 16px 0;
+            border: 1px solid #e1e8ed;
+            position: relative;
+        }
+        
+        .edit-form::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #4361ee, #3a0ca3);
+            border-radius: 12px 12px 0 0;
+        }
+
+        .edit-form .form-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e1e8ed;
+        }
+
+        .edit-form .form-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0;
+        }
+        
+        .edit-form .form-group {
+            margin-bottom: 16px;
+        }
+
+        .edit-form label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .edit-form input, 
+        .edit-form textarea, 
+        .edit-form select {
             width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid var(--gray-300);
-            border-radius: 4px;
+            padding: 12px 16px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background-color: #fafbfc;
+        }
+
+        .edit-form input:focus, 
+        .edit-form textarea:focus, 
+        .edit-form select:focus {
+            outline: none;
+            border-color: #4361ee;
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
         }
         
         .edit-form textarea {
-            min-height: 100px;
+            min-height: 120px;
             resize: vertical;
+            font-family: inherit;
         }
         
         .edit-form .button-group {
             display: flex;
             justify-content: flex-end;
-            gap: 10px;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #e1e8ed;
         }
         
         .edit-form button {
-            padding: 5px 15px;
-            border-radius: 4px;
+            padding: 12px 24px;
+            border-radius: 8px;
             cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 14px;
         }
         
         .edit-form .save-btn {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, #4361ee, #3a0ca3);
             color: white;
-            border: none;
+        }
+
+        .edit-form .save-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
         }
         
         .edit-form .cancel-btn {
-            background-color: white;
-            border: 1px solid var(--gray-400);
+            background: white;
+            color: #6c757d;
+            border: 2px solid #e1e8ed;
+        }
+
+        .edit-form .cancel-btn:hover {
+            background: #f8f9fa;
+            border-color: #ced4da;
+        }
+
+        /* Confirmation Modal */
+        .confirmation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .confirmation-modal.active {
+            display: flex;
+        }
+
+        .confirmation-content {
+            background: white;
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 16px 48px rgba(0,0,0,0.2);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .confirmation-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+
+        .confirmation-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .confirmation-message {
+            color: #6c757d;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .confirmation-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn-confirm-delete {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-confirm-delete:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-cancel-delete {
+            background: white;
+            color: #6c757d;
+            padding: 12px 24px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cancel-delete:hover {
+            background: #f8f9fa;
+            border-color: #ced4da;
+        }
+
+        /* Loading States */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border-radius: inherit;
+            z-index: 100;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #e1e8ed;
+            border-top: 3px solid #4361ee;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Success/Error Feedback */
+        .feedback-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 10001;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            min-width: 300px;
+        }
+
+        .feedback-toast.show {
+            transform: translateX(0);
+        }
+
+        .feedback-toast.success {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+        }
+
+        .feedback-toast.error {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+                 .feedback-toast.warning {
+             background: linear-gradient(135deg, #f39c12, #e67e22);
+         }
+
+         .feedback-toast.info {
+             background: linear-gradient(135deg, #3498db, #2980b9);
+         }
+
+        /* Keyboard Shortcuts Hint */
+        .keyboard-hint {
+            position: fixed;
+            bottom: 80px;
+            left: 20px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+
+        .edit-mode .keyboard-hint {
+            opacity: 1;
+        }
+
+        /* Office Hours Edit Styles */
+        .office-hour-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .office-hour-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .office-hour-input:focus {
+            outline: none;
+            border-color: #4361ee;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        .remove-hour-btn {
+            padding: 8px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            height: 36px;
+        }
+
+        .remove-hour-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+        }
+
+        .add-hour-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .add-hour-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+        }
+
+        /* Enhanced Card Styles for Edit Mode */
+        .edit-mode .card, 
+        .edit-mode .assignment-card,
+        .edit-mode .resource-card,
+        .edit-mode .event-item,
+        .edit-mode .student-card {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .edit-mode .card:hover,
+        .edit-mode .assignment-card:hover,
+        .edit-mode .resource-card:hover,
+        .edit-mode .event-item:hover,
+        .edit-mode .student-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
     `;
     document.head.appendChild(style);
+    
+    // Add floating action buttons
+    createFloatingActionButtons(dashboardGrid);
+    
+    // Add confirmation modal
+    createConfirmationModal();
+    
+    // Add keyboard shortcuts hint
+    createKeyboardHint();
     
     // Add event listener to toggle edit mode
     editButton.addEventListener('click', function() {
         window.isEditMode = !window.isEditMode;
         this.classList.toggle('active');
-        
+
+        // Ensure header edit forms can overflow when editing
+        const header = document.querySelector('.class-header');
+        if (header) header.style.overflow = window.isEditMode ? 'visible' : 'hidden';
+
         if (window.isEditMode) {
             this.innerHTML = '<i class="fas fa-times"></i> Exit Edit Mode';
             document.body.classList.add('edit-mode');
             makeElementsEditable();
+            addDeleteButtons();
+            setupKeyboardShortcuts();
         } else {
             this.innerHTML = '<i class="fas fa-edit"></i> Edit Dashboard';
             document.body.classList.remove('edit-mode');
             removeEditableListeners();
+            removeDeleteButtons();
+            removeKeyboardShortcuts();
         }
     });
 }
@@ -1925,6 +1789,7 @@ function makeElementsEditable() {
     const teacherProfile = document.getElementById('teacher-profile');
     teacherProfile.classList.add('editable');
     teacherProfile.addEventListener('click', editTeacherProfile);
+    teacherProfile._editHandler = editTeacherProfile;
     
     // Make syllabus editable
     const syllabusContent = document.getElementById('syllabus-content');
@@ -1935,12 +1800,15 @@ function makeElementsEditable() {
     const officeHoursList = document.getElementById('office-hours-list');
     officeHoursList.classList.add('editable');
     officeHoursList.addEventListener('click', editOfficeHours);
+    officeHoursList._editHandler = editOfficeHours;
     
     // Make current unit editable
     const currentUnitContent = document.getElementById('current-unit-content');
     if (currentUnitContent) {
         currentUnitContent.classList.add('editable');
         currentUnitContent.addEventListener('click', editCurrentUnit);
+        // Store the handler for later removal
+        currentUnitContent._editHandler = editCurrentUnit;
     }
     
     // Add edit buttons to assignment cards
@@ -1963,33 +1831,47 @@ function editCurrentUnit() {
     if (!window.isEditMode) return;
     
     const unitContent = document.getElementById('current-unit-content');
+    if (!unitContent) return;
+    
     const originalContent = unitContent.innerHTML;
     
-    // Parse the current unit data
-    const title = unitContent.querySelector('h4')?.textContent || '';
-    const description = unitContent.querySelector('p')?.textContent || '';
-    const currentTopic = unitContent.querySelector('.topic-value')?.textContent || '';
+    // Parse the current unit data with better text extraction
+    const titleElement = unitContent.querySelector('h4');
+    const descriptionElement = unitContent.querySelector('p');
+    const topicElement = unitContent.querySelector('.topic-value');
+    
+    const title = titleElement ? titleElement.textContent.trim() : '';
+    const description = descriptionElement ? descriptionElement.textContent.trim() : '';
+    const currentTopic = topicElement ? topicElement.textContent.trim() : '';
+    
+    console.log('Unit data extracted:', { title, description, currentTopic }); // Debug log
     
     // Create edit form
     const form = document.createElement('form');
     form.className = 'edit-form';
     
+    const progressElement = document.getElementById('unit-progress-percent');
+    const currentProgress = progressElement ? progressElement.textContent.replace('%', '') : '0';
+    
     form.innerHTML = `
+        <div class="form-header">
+            <h3 class="form-title">Edit Current Unit</h3>
+        </div>
         <div class="form-group">
             <label>Unit Title</label>
-            <input type="text" id="unit-title-input" value="${title}" placeholder="Unit Title">
+            <input type="text" id="unit-title-input" placeholder="Unit Title">
         </div>
         <div class="form-group">
             <label>Description</label>
-            <textarea id="unit-description-input" placeholder="Unit Description">${description}</textarea>
+            <textarea id="unit-description-input" placeholder="Unit Description"></textarea>
         </div>
         <div class="form-group">
             <label>Current Topic</label>
-            <input type="text" id="unit-topic-input" value="${currentTopic}" placeholder="Current Topic">
+            <input type="text" id="unit-topic-input" placeholder="Current Topic">
         </div>
         <div class="form-group">
             <label>Progress (%)</label>
-            <input type="number" id="unit-progress-input" value="${document.getElementById('unit-progress-percent')?.textContent.replace('%', '') || 0}" min="0" max="100" step="1">
+            <input type="number" id="unit-progress-input" min="0" max="100" step="1">
         </div>
         <div class="button-group">
             <button type="button" class="cancel-btn">Cancel</button>
@@ -2000,6 +1882,17 @@ function editCurrentUnit() {
     unitContent.innerHTML = '';
     unitContent.appendChild(form);
     
+    // Set values via JavaScript properties instead of HTML attributes
+    form.querySelector('#unit-title-input').value = title;
+    form.querySelector('#unit-description-input').value = description;
+    form.querySelector('#unit-topic-input').value = currentTopic;
+    form.querySelector('#unit-progress-input').value = currentProgress;
+    
+    // Prevent clicks on form elements from bubbling up
+    form.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    
     // Add event listeners
     form.querySelector('.save-btn').addEventListener('click', function() {
         const newTitle = form.querySelector('#unit-title-input').value;
@@ -2009,11 +1902,11 @@ function editCurrentUnit() {
         
         // Update the UI
         unitContent.innerHTML = `
-            <h4>${newTitle}</h4>
-            <p>${newDescription}</p>
+            <h4>${escapeHtml(newTitle)}</h4>
+            <p>${escapeHtml(newDescription)}</p>
             <div class="current-topic">
                 <span class="topic-label">Current Topic:</span>
-                <span class="topic-value">${newTopic}</span>
+                <span class="topic-value">${escapeHtml(newTopic)}</span>
             </div>
         `;
         
@@ -2021,56 +1914,18 @@ function editCurrentUnit() {
         document.getElementById('unit-progress-percent').textContent = `${newProgress}%`;
         document.querySelector('.progress-bar-fill').style.width = `${newProgress}%`;
         
-        // In a real app, you would save this to the server here
-        // console.log('Updated unit:', { newTitle, newDescription, newTopic, newProgress });
+        // Update via API (simplified - just updating the current unit display for now)
+        // In a full implementation, you would need a specific API endpoint for unit updates
+        console.log('Unit updated locally:', { newTitle, newDescription, newTopic, newProgress });
         
-        // Update Firebase database
-        const classId = getClassIdFromUrl();
-        if (is_firebase_available()) {
-            db.collection('Classes').doc(classId).get().then(doc => {
-                if (doc.exists) {
-                    let classData = doc.data();
-                    let units = classData.units || [];
-                    // Assuming the first active unit or the first unit is being edited
-                    // A more robust solution would involve passing the unit ID
-                    let unitIndex = units.findIndex(unit => unit.status === 'active');
-                    if (unitIndex === -1 && units.length > 0) {
-                        unitIndex = 0; // Fallback to the first unit if no active one
-                    }
-
-                    if (unitIndex !== -1) {
-                        units[unitIndex].title = newTitle;
-                        units[unitIndex].description = newDescription;
-                        units[unitIndex].current_topic = newTopic;
-                        units[unitIndex].progress = parseInt(newProgress);
-                        units[unitIndex].updatedAt = firebase.firestore.FieldValue.serverTimestamp(); // Or a client-side timestamp
-
-                        db.collection('Classes').doc(classId).update({
-                            units: units,
-                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                        })
-                        .then(() => {
-                            console.log('Current unit updated successfully in Firebase!');
-                        })
-                        .catch(error => {
-                            console.error('Error updating current unit in Firebase:', error);
-                        });
-                    } else {
-                         console.error('Could not find the unit to update.');
-                    }
-                } else {
-                    console.error('Class document not found for updating unit.');
-                }
-            }).catch(error => {
-                console.error('Error fetching class document for unit update:', error);
-            });
-        } else {
-            console.log('Firebase not available. Skipping database update.');
-        }
+        // For now, we'll skip the backend update since it would require more complex API endpoints
+        // In a production app, you'd want to add endpoints like:
+        // PATCH /api/Classes/{classId}/units/{unitId} or similar
         
         // Re-add the editable class and event listener
         unitContent.classList.add('editable');
         unitContent.addEventListener('click', editCurrentUnit);
+        unitContent._editHandler = editCurrentUnit;
     });
     
     form.querySelector('.cancel-btn').addEventListener('click', function() {
@@ -2079,10 +1934,14 @@ function editCurrentUnit() {
         // Re-add the editable class and event listener
         unitContent.classList.add('editable');
         unitContent.addEventListener('click', editCurrentUnit);
+        unitContent._editHandler = editCurrentUnit;
     });
     
     // Prevent edit mode from being triggered again while editing
     unitContent.classList.remove('editable');
+    if (unitContent._editHandler) {
+        unitContent.removeEventListener('click', unitContent._editHandler);
+    }
 }
 
 /**
@@ -2265,25 +2124,35 @@ function editAssignmentItem(item) {
         // Add the edit button back
         addEditButtonsToAssignments();
         
-        // In a real app, you would save this to the server here
-        // console.log('Updated assignment:', { newTitle, newType, newDate, newStatus });
+        // Update via API
         const assignmentId = item.dataset.id; // Assuming item has data-id attribute
-        if (is_firebase_available() && assignmentId) {
-            db.collection('Assignments').doc(assignmentId).update({
+        if (assignmentId) {
+            fetch(`/api/Assignments/${assignmentId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
                 title: newTitle,
                 type: newType,
-                due_date: newDate, // Ensure this matches Firestore field name, might be dueDate (timestamp)
-                status: newStatus,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    due_date: newDate,
+                    status: newStatus
+                })
             })
-            .then(() => {
-                console.log(`Assignment ${assignmentId} updated successfully in Firebase!`);
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(`Assignment ${assignmentId} updated successfully via API!`);
             })
             .catch(error => {
-                console.error(`Error updating assignment ${assignmentId} in Firebase:`, error);
+                console.error(`Error updating assignment ${assignmentId} via API:`, error);
             });
         } else {
-            console.log('Firebase not available or assignment ID missing. Skipping database update.');
+            console.log('Assignment ID missing. Skipping database update.');
         }
     });
     
@@ -2398,29 +2267,37 @@ function editAssignmentCard(card) {
         // Add the edit button back
         addEditButtonsToAssignments();
         
-        // In a real app, you would save this to the server here
-        // console.log('Updated assignment card:', { 
-        //     newTitle, newDesc, newType, newPoints, newDate, newStatus 
-        // });
+        // Update via API
         const assignmentIdCard = card.getAttribute('data-id');
-        if (is_firebase_available() && assignmentIdCard) {
-            db.collection('Assignments').doc(assignmentIdCard).update({
+        if (assignmentIdCard) {
+            fetch(`/api/Assignments/${assignmentIdCard}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
                 title: newTitle,
                 description: newDesc,
                 type: newType,
                 points: parseInt(newPoints),
-                due_date: newDate, // Ensure this matches Firestore field name, might be dueDate (timestamp)
-                status: newStatus,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    due_date: newDate,
+                    status: newStatus
+                })
             })
-            .then(() => {
-                console.log(`Assignment card ${assignmentIdCard} updated successfully in Firebase!`);
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(`Assignment card ${assignmentIdCard} updated successfully via API!`);
             })
             .catch(error => {
-                console.error(`Error updating assignment card ${assignmentIdCard} in Firebase:`, error);
+                console.error(`Error updating assignment card ${assignmentIdCard} via API:`, error);
             });
         } else {
-            console.log('Firebase not available or assignment ID missing. Skipping database update.');
+            console.log('Assignment ID missing. Skipping database update.');
         }
     });
     
@@ -2576,12 +2453,9 @@ function editResourceCard(card) {
         // Add the edit button back
         addEditButtonsToResources();
         
-        // In a real app, you would save this to the server here
-        // console.log('Updated resource:', { 
-        //     newTitle, newDesc, newType, newThumbnail, newInfo, newDate 
-        // });
+        // Update via API
         const resourceId = card.getAttribute('data-id');
-        if (is_firebase_available() && resourceId) {
+        if (resourceId) {
             // Split newInfo into file_type and file_size or duration
             let file_type = null;
             let file_size = null;
@@ -2594,7 +2468,12 @@ function editResourceCard(card) {
                 file_size = infoParts[1] || null;
             }
 
-            db.collection('Resources').doc(resourceId).update({
+            fetch(`/api/Resources/${resourceId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
                 title: newTitle,
                 description: newDesc,
                 type: newType,
@@ -2602,17 +2481,23 @@ function editResourceCard(card) {
                 file_type: file_type,
                 file_size: file_size,
                 duration: duration,
-                date_added: newDate, // Ensure this matches Firestore field name
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    date_added: newDate
+                })
             })
-            .then(() => {
-                console.log(`Resource ${resourceId} updated successfully in Firebase!`);
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(`Resource ${resourceId} updated successfully via API!`);
             })
             .catch(error => {
-                console.error(`Error updating resource ${resourceId} in Firebase:`, error);
+                console.error(`Error updating resource ${resourceId} via API:`, error);
             });
         } else {
-            console.log('Firebase not available or resource ID missing. Skipping database update.');
+            console.log('Resource ID missing. Skipping database update.');
         }
     });
     
@@ -2631,29 +2516,40 @@ function editTeacherProfile() {
     if (!window.isEditMode) return;
     
     const teacherProfile = document.getElementById('teacher-profile');
+    if (!teacherProfile) return;
+    
     const originalContent = teacherProfile.innerHTML;
     
-    // Get current teacher data
-    const teacherImg = teacherProfile.querySelector('img').src;
-    const teacherName = teacherProfile.querySelector('h4').textContent;
-    const teacherEmail = teacherProfile.querySelector('p').textContent;
+    // Get current teacher data with null checks
+    const imgElement = teacherProfile.querySelector('img');
+    const nameElement = teacherProfile.querySelector('h4');
+    const emailElement = teacherProfile.querySelector('p');
+    
+    const teacherImg = imgElement ? imgElement.src : 'https://via.placeholder.com/64';
+    const teacherName = nameElement ? nameElement.textContent.trim() : '';
+    const teacherEmail = emailElement ? emailElement.textContent.trim() : '';
+    
+    console.log('Teacher data extracted:', { teacherImg, teacherName, teacherEmail }); // Debug log
     
     // Create edit form
     const form = document.createElement('form');
     form.className = 'edit-form';
     
     form.innerHTML = `
+        <div class="form-header">
+            <h3 class="form-title">Edit Teacher Profile</h3>
+        </div>
         <div class="form-group">
             <label>Profile Image URL</label>
-            <input type="text" id="teacher-img-input" value="${teacherImg}" placeholder="Image URL">
+            <input type="text" id="teacher-img-input" placeholder="Image URL">
         </div>
         <div class="form-group">
             <label>Teacher Name</label>
-            <input type="text" id="teacher-name-input" value="${teacherName}" placeholder="Teacher Name">
+            <input type="text" id="teacher-name-input" placeholder="Teacher Name">
         </div>
         <div class="form-group">
             <label>Email Address</label>
-            <input type="email" id="teacher-email-input" value="${teacherEmail}" placeholder="Email Address">
+            <input type="email" id="teacher-email-input" placeholder="Email Address">
         </div>
         <div class="button-group">
             <button type="button" class="cancel-btn">Cancel</button>
@@ -2664,6 +2560,16 @@ function editTeacherProfile() {
     teacherProfile.innerHTML = '';
     teacherProfile.appendChild(form);
     
+    // Set values via JavaScript properties instead of HTML attributes
+    form.querySelector('#teacher-img-input').value = teacherImg;
+    form.querySelector('#teacher-name-input').value = teacherName;
+    form.querySelector('#teacher-email-input').value = teacherEmail;
+    
+    // Prevent clicks on form elements from bubbling up
+    form.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    
     // Add event listeners
     form.querySelector('.save-btn').addEventListener('click', function() {
         const newImg = form.querySelector('#teacher-img-input').value;
@@ -2672,36 +2578,41 @@ function editTeacherProfile() {
         
         // Update the UI
         teacherProfile.innerHTML = `
-            <img src="${newImg}" alt="${newName}" class="teacher-img">
-            <h4>${newName}</h4>
-            <p>${newEmail}</p>
+            <img src="${escapeHtml(newImg)}" alt="${escapeHtml(newName)}" class="teacher-img">
+            <h4>${escapeHtml(newName)}</h4>
+            <p>${escapeHtml(newEmail)}</p>
         `;
         
-        // In a real app, you would save this to the server here
-        // console.log('Updated teacher profile:', { newImg, newName, newEmail });
-        
-        // Update Firebase database
+        // Update via API
         const classId = getClassIdFromUrl();
-        if (is_firebase_available()) {
-            db.collection('Classes').doc(classId).update({
+        fetch(`/api/Classes/${classId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
                 teacherProfilePic: newImg,
                 teacherName: newName,
-                teacherEmail: newEmail,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                teacherEmail: newEmail
             })
-            .then(() => {
-                console.log('Teacher profile updated successfully in Firebase!');
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+            })
+        .then(data => {
+            console.log('Teacher profile updated successfully via API!');
             })
             .catch(error => {
-                console.error('Error updating teacher profile in Firebase:', error);
+            console.error('Error updating teacher profile via API:', error);
             });
-        } else {
-            console.log('Firebase not available. Skipping database update.');
-        }
         
         // Re-add the editable class and event listener
         teacherProfile.classList.add('editable');
         teacherProfile.addEventListener('click', editTeacherProfile);
+        teacherProfile._editHandler = editTeacherProfile;
     });
     
     form.querySelector('.cancel-btn').addEventListener('click', function() {
@@ -2710,10 +2621,14 @@ function editTeacherProfile() {
         // Re-add the editable class and event listener
         teacherProfile.classList.add('editable');
         teacherProfile.addEventListener('click', editTeacherProfile);
+        teacherProfile._editHandler = editTeacherProfile;
     });
     
     // Prevent edit mode from being triggered again while editing
     teacherProfile.classList.remove('editable');
+    if (teacherProfile._editHandler) {
+        teacherProfile.removeEventListener('click', teacherProfile._editHandler);
+    }
 }
 
 /**
@@ -2723,32 +2638,27 @@ function editOfficeHours() {
     if (!window.isEditMode) return;
     
     const officeHoursList = document.getElementById('office-hours-list');
+    if (!officeHoursList) return;
+    
     const originalContent = officeHoursList.innerHTML;
     
     // Get current office hours
     const officeHours = [];
     officeHoursList.querySelectorAll('li').forEach(li => {
+        if (li.textContent) {
         officeHours.push(li.textContent);
+        }
     });
     
     // Create edit form
     const form = document.createElement('form');
     form.className = 'edit-form';
     
-    // Create initial fields
-    let officeHoursFields = '';
-    officeHours.forEach((hour, index) => {
-        officeHoursFields += `
-            <div class="office-hour-row" data-index="${index}">
-                <input type="text" class="office-hour-input" value="${hour}" placeholder="Day and Time">
-                <button type="button" class="remove-hour-btn"><i class="fas fa-times"></i></button>
-            </div>
-        `;
-    });
-    
     form.innerHTML = `
+        <div class="form-header">
+            <h3 class="form-title">Edit Office Hours</h3>
+        </div>
         <div class="office-hours-container">
-            ${officeHoursFields}
         </div>
         <button type="button" class="add-hour-btn"><i class="fas fa-plus"></i> Add Office Hour</button>
         <div class="button-group">
@@ -2759,6 +2669,34 @@ function editOfficeHours() {
     
     officeHoursList.innerHTML = '';
     officeHoursList.appendChild(form);
+    
+    // Create and populate office hour fields
+    const container = form.querySelector('.office-hours-container');
+    officeHours.forEach((hour, index) => {
+        const row = document.createElement('div');
+        row.className = 'office-hour-row';
+        row.dataset.index = index;
+        
+        row.innerHTML = `
+            <input type="text" class="office-hour-input" placeholder="Day and Time">
+            <button type="button" class="remove-hour-btn"><i class="fas fa-times"></i></button>
+        `;
+        
+        // Set value via JavaScript property
+        row.querySelector('.office-hour-input').value = hour;
+        
+        container.appendChild(row);
+        
+        // Add remove event listener
+        row.querySelector('.remove-hour-btn').addEventListener('click', function() {
+            row.remove();
+        });
+    });
+    
+    // Prevent clicks on form elements from bubbling up
+    form.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
     
     // Add event listener for adding new office hour
     form.querySelector('.add-hour-btn').addEventListener('click', function() {
@@ -2780,13 +2718,9 @@ function editOfficeHours() {
         newRow.querySelector('.remove-hour-btn').addEventListener('click', function() {
             newRow.remove();
         });
-    });
-    
-    // Add event listeners for existing remove buttons
-    form.querySelectorAll('.remove-hour-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            this.closest('.office-hour-row').remove();
-        });
+        
+        // Focus the new input
+        newRow.querySelector('.office-hour-input').focus();
     });
     
     // Add event listeners for save/cancel
@@ -2799,31 +2733,39 @@ function editOfficeHours() {
         });
         
         // Update the UI
-        officeHoursList.innerHTML = updatedHours.map(hour => `<li>${hour}</li>`).join('');
+        officeHoursList.innerHTML = updatedHours.map(hour => `<li>${escapeHtml(hour)}</li>`).join('');
         
         // In a real app, you would save this to the server here
         // console.log('Updated office hours:', updatedHours);
         
-        // Update Firebase database
+        // Update via API
         const classId = getClassIdFromUrl();
-        if (is_firebase_available()) {
-            db.collection('Classes').doc(classId).update({
-                teacherOfficeHours: updatedHours,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        fetch(`/api/Classes/${classId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                teacherOfficeHours: updatedHours
             })
-            .then(() => {
-                console.log('Office hours updated successfully in Firebase!');
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+            })
+        .then(data => {
+            console.log('Office hours updated successfully via API!');
             })
             .catch(error => {
-                console.error('Error updating office hours in Firebase:', error);
+            console.error('Error updating office hours via API:', error);
             });
-        } else {
-            console.log('Firebase not available. Skipping database update.');
-        }
         
         // Re-add the editable class and event listener
         officeHoursList.classList.add('editable');
         officeHoursList.addEventListener('click', editOfficeHours);
+        officeHoursList._editHandler = editOfficeHours;
     });
     
     form.querySelector('.cancel-btn').addEventListener('click', function() {
@@ -2832,10 +2774,14 @@ function editOfficeHours() {
         // Re-add the editable class and event listener
         officeHoursList.classList.add('editable');
         officeHoursList.addEventListener('click', editOfficeHours);
+        officeHoursList._editHandler = editOfficeHours;
     });
     
     // Prevent edit mode from being triggered again while editing
     officeHoursList.classList.remove('editable');
+    if (officeHoursList._editHandler) {
+        officeHoursList.removeEventListener('click', officeHoursList._editHandler);
+    }
 }
 
 /**
@@ -2860,46 +2806,80 @@ function createEditHandler(elementId, inputType, placeholder, isRichText = false
         if (!window.isEditMode) return;
         
         const element = document.getElementById(elementId) || this;
+        if (!element) return;
+        
         const originalContent = element.innerHTML;
-        let originalText = element.textContent.trim();
+        
+        // Better text extraction - for rich text elements, get innerHTML content
+        // For simple text elements, get textContent
+        let originalText = '';
+        if (isRichText) {
+            // For rich text, try to get the text from <p> tags or use textContent as fallback
+            const pElement = element.querySelector('p');
+            originalText = pElement ? pElement.textContent.trim() : element.textContent.trim();
+        } else {
+            originalText = element.textContent ? element.textContent.trim() : '';
+        }
+        
+        console.log(`Text extracted from ${elementId}:`, originalText); // Debug log
         
         // Create edit form
         const form = document.createElement('form');
         form.className = 'edit-form';
         
+        // Create form header
+        const formHeader = document.createElement('div');
+        formHeader.className = 'form-header';
+        formHeader.innerHTML = `<h3 class="form-title">Edit ${placeholder}</h3>`;
+        
+        // Create form group
+        const formGroup = document.createElement('div');
+        formGroup.className = 'form-group';
+        
+        const label = document.createElement('label');
+        label.textContent = placeholder;
+        
         let inputField;
         if (inputType === 'textarea') {
             inputField = document.createElement('textarea');
-            inputField.value = originalText;
         } else {
             inputField = document.createElement('input');
             inputField.type = 'text';
-            inputField.value = originalText;
         }
         
         inputField.placeholder = placeholder;
+        inputField.value = originalText; // Set value via JavaScript property
+        
+        formGroup.appendChild(label);
+        formGroup.appendChild(inputField);
         
         const buttonGroup = document.createElement('div');
         buttonGroup.className = 'button-group';
-        
-        const saveButton = document.createElement('button');
-        saveButton.type = 'button';
-        saveButton.className = 'save-btn';
-        saveButton.textContent = 'Save';
         
         const cancelButton = document.createElement('button');
         cancelButton.type = 'button';
         cancelButton.className = 'cancel-btn';
         cancelButton.textContent = 'Cancel';
         
+        const saveButton = document.createElement('button');
+        saveButton.type = 'button';
+        saveButton.className = 'save-btn';
+        saveButton.textContent = 'Save';
+        
         buttonGroup.appendChild(cancelButton);
         buttonGroup.appendChild(saveButton);
         
-        form.appendChild(inputField);
+        form.appendChild(formHeader);
+        form.appendChild(formGroup);
         form.appendChild(buttonGroup);
         
         element.innerHTML = '';
         element.appendChild(form);
+        
+        // Prevent clicks on form elements from bubbling up
+        form.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
         
         // Focus the input field
         inputField.focus();
@@ -2908,15 +2888,12 @@ function createEditHandler(elementId, inputType, placeholder, isRichText = false
         saveButton.addEventListener('click', function() {
             const newValue = inputField.value.trim();
             if (isRichText) {
-                element.innerHTML = `<p>${newValue}</p>`;
+                element.innerHTML = `<p>${escapeHtml(newValue)}</p>`;
             } else {
                 element.textContent = newValue;
             }
             
-            // In a real app, you would save this to the server here
-            // console.log(`Updated ${elementId} to: ${newValue}`);
-            
-            // Update Firebase database
+            // Update via API
             const classId = getClassIdFromUrl();
             const fieldToUpdate = {};
             if (elementId === 'class-title') {
@@ -2926,18 +2903,29 @@ function createEditHandler(elementId, inputType, placeholder, isRichText = false
             } else if (elementId === 'syllabus-content') {
                 fieldToUpdate['syllabus'] = newValue;
             }
-            fieldToUpdate['updatedAt'] = firebase.firestore.FieldValue.serverTimestamp();
             
-            if (is_firebase_available() && Object.keys(fieldToUpdate).length > 1) {
-                db.collection('Classes').doc(classId).update(fieldToUpdate)
-                .then(() => {
-                    console.log(`${elementId} updated successfully in Firebase!`);
+            if (Object.keys(fieldToUpdate).length > 0) {
+                fetch(`/api/Classes/${classId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(fieldToUpdate)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(`${elementId} updated successfully via API!`);
                 })
                 .catch(error => {
-                    console.error(`Error updating ${elementId} in Firebase:`, error);
+                    console.error(`Error updating ${elementId} via API:`, error);
                 });
             } else {
-                console.log('Firebase not available or no field to update. Skipping database update.');
+                console.log('No field to update. Skipping database update.');
             }
             
             // Re-add the editable class and event listener
@@ -3111,47 +3099,17 @@ function editChannel(channel) {
         // Add the edit button back
         addEditButtonsToChannels();
         
-        // In a real app, you would save this to the server here
-        // console.log('Updated channel:', { 
-        //     id: channelId, 
-        //     name: newName, 
-        //     isPrivate: newIsPrivate 
-        // });
-        const classId = getClassIdFromUrl();
-        if (is_firebase_available()) {
-            db.collection('Classes').doc(classId).get().then(doc => {
-                if (doc.exists) {
-                    let classData = doc.data();
-                    let channels = classData.channels || [];
-                    const channelIndex = channels.findIndex(ch => ch.id === channelId || ch.name === channelId); // Use ID preferably
-
-                    if (channelIndex !== -1) {
-                        channels[channelIndex].name = newName;
-                        channels[channelIndex].isPrivate = newIsPrivate;
-                        // channels[channelIndex].updatedAt = firebase.firestore.FieldValue.serverTimestamp(); // If channels have timestamps
-
-                        db.collection('Classes').doc(classId).update({
-                            channels: channels,
-                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                        })
-                        .then(() => {
-                            console.log(`Channel ${channelId} updated successfully in Firebase!`);
-                        })
-                        .catch(error => {
-                            console.error(`Error updating channel ${channelId} in Firebase:`, error);
-                        });
-                    } else {
-                         console.error('Could not find the channel to update in class data.');
-                    }
-                } else {
-                    console.error('Class document not found for updating channel.');
-                }
-            }).catch(error => {
-                console.error('Error fetching class document for channel update:', error);
-            });
-        } else {
-            console.log('Firebase not available. Skipping database update.');
-        }
+        // Update via API (simplified - just updating locally for now)
+        // In a full implementation, you would need a specific API endpoint for channel updates
+        console.log('Channel updated locally:', { 
+            id: channelId, 
+            name: newName, 
+            isPrivate: newIsPrivate 
+        });
+        
+        // For now, we'll skip the backend update since it would require more complex API endpoints
+        // In a production app, you'd want to add endpoints like:
+        // PATCH /api/Classes/{classId}/channels/{channelId} or similar
     });
     
     form.querySelector('.cancel-btn').addEventListener('click', function() {
@@ -3208,50 +3166,16 @@ function editCurrentChannel() {
         channelHeader.innerHTML = originalContent;
         document.getElementById('current-channel').textContent = newName;
         
-        // In a real app, you would save this to the server here
-        // console.log('Updated channel details:', { 
-        //     name: newName, 
-        //     description: newDesc 
-        // });
-        const classIdForHeader = getClassIdFromUrl();
-        // Assuming channelName (newName) is unique and can be used to find the channel
-        // A more robust solution uses channel ID, which needs to be available here
-        const currentChannelId = document.getElementById('current-channel').getAttribute('data-channel-id'); // Предполагается, что ID канала доступен
-
-        if (is_firebase_available()) {
-            db.collection('Classes').doc(classIdForHeader).get().then(doc => {
-                if (doc.exists) {
-                    let classData = doc.data();
-                    let channels = classData.channels || [];
-                    const channelIndex = channels.findIndex(ch => ch.id === currentChannelId || ch.name === newName ); 
-
-                    if (channelIndex !== -1) {
-                        channels[channelIndex].name = newName; // Update name
-                        channels[channelIndex].description = newDesc; // Update description
-                        // channels[channelIndex].updatedAt = firebase.firestore.FieldValue.serverTimestamp();
-
-                        db.collection('Classes').doc(classIdForHeader).update({
-                            channels: channels,
-                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                        })
-                        .then(() => {
-                            console.log(`Channel header for ${newName} updated successfully in Firebase!`);
-                        })
-                        .catch(error => {
-                            console.error(`Error updating channel header for ${newName} in Firebase:`, error);
-                        });
-                    } else {
-                         console.error('Could not find the channel to update its header in class data.');
-                    }
-                } else {
-                    console.error('Class document not found for updating channel header.');
-                }
-            }).catch(error => {
-                console.error('Error fetching class document for channel header update:', error);
-            });
-        } else {
-            console.log('Firebase not available. Skipping database update.');
-        }
+        // Update via API (simplified - just updating locally for now)
+        // In a full implementation, you would need a specific API endpoint for channel updates
+        console.log('Channel details updated locally:', { 
+            name: newName, 
+            description: newDesc 
+        });
+        
+        // For now, we'll skip the backend update since it would require more complex API endpoints
+        // In a production app, you'd want to add endpoints like:
+        // PATCH /api/Classes/{classId}/channels/{channelId} or similar
         
         // Add the edit button back
         addEditButtonsToChannels();
@@ -3405,37 +3329,36 @@ function editStudentCard(card) {
             alert(`Navigate to profile for student ${studentId}`);
         });
         
-        // In a real app, you would save this to the server here
-        // console.log('Updated student:', { 
-        //     newName, newEmail, newGrade, newImg 
-        // });
-        const studentId = card.getAttribute('data-id'); // This should be the actual Member document ID
-        if (is_firebase_available() && studentId) {
-            // Option 1: Update a denormalized student record within the Class.members array
-            // This would require fetching the Class, finding the student in the members array by userId/studentId,
-            // updating their details, and then saving the whole Class document back.
-            // This is complex if studentId on the card is not the direct ID for the Members collection.
-            console.log('Placeholder: Logic to update student in Class.members array would go here if applicable.');
-
-            // Option 2: Update the main Members collection document for this student
-            // This is more common if the student card has the student's main document ID.
-            db.collection('Members').doc(studentId).update({
+        // Update via API
+        const studentId = card.getAttribute('data-id');
+        if (studentId) {
+            fetch(`/api/Members/${studentId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
                 first_name: newName.split(' ')[0], // Assuming newName is "First Last"
                 last_name: newName.split(' ').slice(1).join(' '), // Assuming newName is "First Last"
                 email: newEmail,
-                grade: newGrade, // Ensure this field exists and matches in Members schema
-                profilePicUrl: newImg,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    grade: newGrade,
+                    profilePicUrl: newImg
+                })
             })
-            .then(() => {
-                console.log(`Student ${studentId} updated successfully in Members collection!`);
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(`Student ${studentId} updated successfully via API!`);
             })
             .catch(error => {
-                console.error(`Error updating student ${studentId} in Members collection:`, error);
-                // Potentially try to update denormalized data in Class.members as a fallback if intended
+                console.error(`Error updating student ${studentId} via API:`, error);
             });
         } else {
-            console.log('Firebase not available or student ID missing. Skipping database update.');
+            console.log('Student ID missing. Skipping database update.');
         }
     });
     
@@ -3448,28 +3371,25 @@ function editStudentCard(card) {
 } 
 
 /**
- * Fetch upcoming events from Firebase
+ * Fetch upcoming events from Flask API instead of Firebase directly
  */
 function fetchUpcomingEventsFromFirebase(classId) {
-    if (!is_firebase_available()) return;
-
-    db.collection('Events')
-        .where('classId', '==', classId)
-        .orderBy('startDate', 'asc')
-        .limit(3) // Only get the next 3 events
-        .get()
-        .then(querySnapshot => {
-            const events = [];
-            querySnapshot.forEach(doc => {
-                const eventData = doc.data();
-                eventData.id = doc.id;
-                
+    fetch(`/api/Events?classId=${classId}&limit=3&upcoming=true`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const events = data.events || [];
+            
+            // Format the events for UI compatibility
+            const formattedEvents = events.map(eventData => {
                 // Format date for display
                 let eventDate = 'Unknown';
                 if (eventData.startDate) {
-                    const startDate = eventData.startDate.toDate ? 
-                                     eventData.startDate.toDate() : 
-                                     new Date(eventData.startDate);
+                    const startDate = new Date(eventData.startDate);
                     
                     const today = new Date();
                     const tomorrow = new Date(today);
@@ -3493,17 +3413,17 @@ function fetchUpcomingEventsFromFirebase(classId) {
                 }
                 
                 // Create standardized event object
-                events.push({
-                    id: doc.id,
+                return {
+                    id: eventData.id,
                     title: eventData.title || 'Untitled Event',
                     date: eventDate,
                     time: eventData.time || formatTimeRange(eventData.startDate, eventData.endDate),
                     location: eventData.location || 'TBD',
                     type: eventData.type || 'event'
-                });
+                };
             });
             
-            updateUpcomingEvents(events);
+            updateUpcomingEvents(formattedEvents);
         })
         .catch(error => {
             console.error('Error fetching events:', error);
@@ -3531,31 +3451,25 @@ function formatTimeRange(startTime, endTime) {
 }
 
 /**
- * Fetch upcoming assignments from Firebase
+ * Fetch upcoming assignments from Flask API instead of Firebase directly
  */
 function fetchUpcomingAssignmentsFromFirebase(classId) {
-    if (!is_firebase_available()) return;
-    
     const today = new Date();
     
-    db.collection('Assignments')
-        .where('classId', '==', classId)
-        .where('dueDate', '>=', today)
-        .orderBy('dueDate', 'asc')
-        .limit(3) // Only get the next 3 assignments
-        .get()
-        .then(querySnapshot => {
-            const assignments = [];
-            querySnapshot.forEach(doc => {
-                const assignmentData = doc.data();
-                assignmentData.id = doc.id;
-                
+    fetch(`/api/Assignments?classId=${classId}&upcoming=true&limit=3`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(assignments => {
+            // Format the assignments for UI compatibility
+            const formattedAssignments = assignments.map(assignmentData => {
                 // Format time left
                 let timeLeft = 'Unknown';
                 if (assignmentData.dueDate) {
-                    const dueDate = assignmentData.dueDate.toDate ? 
-                                  assignmentData.dueDate.toDate() : 
-                                  new Date(assignmentData.dueDate);
+                    const dueDate = new Date(assignmentData.dueDate);
                     
                     const diffTime = Math.abs(dueDate - today);
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -3573,9 +3487,7 @@ function fetchUpcomingAssignmentsFromFirebase(classId) {
                 // Format due date
                 let formattedDueDate = 'Unknown';
                 if (assignmentData.dueDate) {
-                    const dueDate = assignmentData.dueDate.toDate ? 
-                                  assignmentData.dueDate.toDate() : 
-                                  new Date(assignmentData.dueDate);
+                    const dueDate = new Date(assignmentData.dueDate);
                                   
                     formattedDueDate = dueDate.toLocaleDateString('en-US', {
                         month: 'short',
@@ -3585,17 +3497,17 @@ function fetchUpcomingAssignmentsFromFirebase(classId) {
                 }
                 
                 // Create standardized assignment object
-                assignments.push({
-                    id: doc.id,
+                return {
+                    id: assignmentData.id,
                     title: assignmentData.title || 'Untitled Assignment',
                     due_date: formattedDueDate,
                     time_left: timeLeft,
                     type: assignmentData.type || 'homework',
                     status: assignmentData.status || 'not_started'
-                });
+                };
             });
             
-            updateUpcomingAssignments(assignments);
+            updateUpcomingAssignments(formattedAssignments);
         })
         .catch(error => {
             console.error('Error fetching assignments:', error);
@@ -3630,101 +3542,43 @@ function updateUpcomingEvents(events) {
 }
 
 /**
- * Fetch recent activity from Firebase
+ * Fetch recent activity from Flask API instead of Firebase directly
  */
 function fetchRecentActivityFromFirebase(classId) {
-    if (!is_firebase_available()) return;
-    
-    // Get recent assignments
-    const recentActivities = [];
-    const today = new Date();
-    
-    // Promise-based approach to combine multiple queries
-    Promise.all([
-        // Get recently graded assignments
-        db.collection('Grades')
-            .where('classId', '==', classId)
-            .orderBy('gradedAt', 'desc')
-            .limit(2)
-            .get(),
+    fetch(`/api/Classes/${classId}/recent-activities`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const activities = data.activities || [];
             
-        // Get recent resources
-        db.collection('Resources')
-            .where('classId', '==', classId)
-            .orderBy('createdAt', 'desc')
-            .limit(2)
-            .get(),
-            
-        // Get recent messages
-        db.collection('Messages')
-            .where('classId', '==', classId)
-            .orderBy('sentAt', 'desc')
-            .limit(2)
-            .get()
-    ])
-    .then(([gradesSnapshot, resourcesSnapshot, messagesSnapshot]) => {
-        // Process grades
-        gradesSnapshot.forEach(doc => {
-            const data = doc.data();
-            const gradedTime = data.gradedAt ? 
-                              data.gradedAt.toDate ? data.gradedAt.toDate() : new Date(data.gradedAt) : 
-                              new Date();
-            
-            recentActivities.push({
-                id: doc.id,
-                text: `${data.assignmentTitle || 'Assignment'} graded (${data.percentage || data.score || '?'}%)`,
-                time: formatRelativeTime(gradedTime, today),
-                icon: 'fas fa-flask',
-                type: 'grade'
+            // Format the activities for UI compatibility
+            const formattedActivities = activities.map(activity => {
+                let formattedTime = 'Unknown time';
+                if (activity.timestamp) {
+                    const timestamp = new Date(activity.timestamp);
+                    const now = new Date();
+                    formattedTime = formatRelativeTime(timestamp, now);
+                }
+                
+                return {
+                    id: activity.id,
+                    text: activity.text,
+                    time: formattedTime,
+                    icon: activity.icon || 'fas fa-info-circle',
+                    type: activity.type || 'general'
+                };
             });
-        });
-        
-        // Process resources
-        resourcesSnapshot.forEach(doc => {
-            const data = doc.data();
-            const createdTime = data.createdAt ? 
-                               data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt) : 
-                               new Date();
             
-            recentActivities.push({
-                id: doc.id,
-                text: `New resource added: ${data.title || 'Untitled Resource'}`,
-                time: formatRelativeTime(createdTime, today),
-                icon: getResourceIcon(data.type),
-                type: 'resource'
-            });
+            updateRecentActivity(formattedActivities);
+        })
+        .catch(error => {
+            console.error('Error fetching recent activities:', error);
+            updateRecentActivity([]);
         });
-        
-        // Process messages
-        messagesSnapshot.forEach(doc => {
-            const data = doc.data();
-            const sentTime = data.sentAt ? 
-                            data.sentAt.toDate ? data.sentAt.toDate() : new Date(data.sentAt) : 
-                            new Date();
-            
-            recentActivities.push({
-                id: doc.id,
-                text: `${data.senderName || 'Someone'} posted in ${getChannelName(data.channelId) || 'discussions'}`,
-                time: formatRelativeTime(sentTime, today),
-                icon: 'fas fa-comment-dots',
-                type: 'discussion'
-            });
-        });
-        
-        // Sort by time (most recent first) and limit to 4
-        recentActivities.sort((a, b) => {
-            const timeA = parseRelativeTime(a.time);
-            const timeB = parseRelativeTime(b.time);
-            return timeA - timeB;
-        });
-        
-        const limitedActivities = recentActivities.slice(0, 4);
-        updateRecentActivity(limitedActivities);
-    })
-    .catch(error => {
-        console.error('Error fetching recent activities:', error);
-        updateRecentActivity([]);
-    });
 }
 
 /**
@@ -3798,53 +3652,36 @@ function formatRelativeTime(date, now) {
 }
 
 /**
- * Fetch class stats from Firebase
+ * Fetch class stats from Flask API instead of Firebase directly
  */
 function fetchClassStatsFromFirebase(classId) {
-    if (!is_firebase_available()) return;
-    
-    // Use Promise.all to run multiple queries in parallel
-    Promise.all([
-        // Count assignments
-        db.collection('Assignments')
-            .where('classId', '==', classId)
-            .get(),
+    fetch(`/api/Classes/${classId}/stats`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const stats = data.stats || {
+                assignments: 0,
+                resources: 0,
+                discussions: 0,
+                average_grade: 'N/A'
+            };
             
-        // Count resources
-        db.collection('Resources')
-            .where('classId', '==', classId)
-            .get(),
-            
-        // Count messages
-        db.collection('Messages')
-            .where('classId', '==', classId)
-            .get(),
-            
-        // Get grades
-        db.collection('Grades')
-            .where('classId', '==', classId)
-            .get()
-    ])
-    .then(([assignmentsSnapshot, resourcesSnapshot, messagesSnapshot, gradesSnapshot]) => {
-        const stats = {
-            assignments: assignmentsSnapshot.size,
-            resources: resourcesSnapshot.size,
-            discussions: messagesSnapshot.size,
-            average_grade: calculateAverageGrade(gradesSnapshot)
-        };
-        
-        updateClassStats(stats);
-    })
-    .catch(error => {
-        console.error('Error fetching class stats:', error);
-        // Show placeholder stats
-        updateClassStats({
-            assignments: 0,
-            resources: 0,
-            discussions: 0,
-            average_grade: 'N/A'
+            updateClassStats(stats);
+        })
+        .catch(error => {
+            console.error('Error fetching class stats:', error);
+            // Show placeholder stats
+            updateClassStats({
+                assignments: 0,
+                resources: 0,
+                discussions: 0,
+                average_grade: 'N/A'
+            });
         });
-    });
 }
 
 /**
@@ -3875,14 +3712,9 @@ function calculateAverageGrade(gradesSnapshot) {
 }
 
 /**
- * Fetch assignments from Firebase for assignments tab
+ * Fetch assignments from Flask API instead of Firebase directly
  */
 function fetchAssignmentsFromFirebase(classId) {
-    if (!is_firebase_available()) {
-        document.getElementById('assignments-grid').innerHTML = '<div class="error-message">Unable to load assignments. Please check your connection.</div>';
-        return;
-    }
-    
     // Show loading state
     document.getElementById('assignments-grid').innerHTML = `
         <div class="loading-indicator">
@@ -3891,69 +3723,63 @@ function fetchAssignmentsFromFirebase(classId) {
         </div>
     `;
     
-    db.collection('Assignments')
-        .where('classId', '==', classId)
-        .get()
-        .then(querySnapshot => {
-            const assignments = [];
-            querySnapshot.forEach(doc => {
-                const data = doc.data();
-                data.id = doc.id;
-                
-                // Format dates and calculate time left
-                let formattedDueDate = 'No due date';
-                let timeLeft = '';
-                
-                if (data.dueDate) {
-                    const dueDate = data.dueDate.toDate ? data.dueDate.toDate() : new Date(data.dueDate);
-                    const now = new Date();
-                    
-                    formattedDueDate = dueDate.toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric'
-                    });
-                    
-                    const diffTime = Math.abs(dueDate - now);
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    
-                    if (dueDate < now) {
-                        timeLeft = 'Past due';
-                    } else if (diffDays === 0) {
-                        const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
-                        timeLeft = diffHours <= 1 ? 'Due soon' : `${diffHours} hours left`;
-                    } else if (diffDays === 1) {
-                        timeLeft = '1 day left';
-                    } else {
-                        timeLeft = `${diffDays} days left`;
-                    }
-                }
-                
-                // Ensure all required fields exist
-                const assignment = {
-                    id: data.id,
-                    title: data.title || 'Untitled Assignment',
-                    description: data.description || 'No description available.',
-                    due_date: formattedDueDate,
-                    time_left: timeLeft,
-                    type: data.type || 'homework',
-                    status: data.status || 'not_started',
-                    points: data.points || 0,
-                    allowed_formats: data.allowed_formats || 'PDF',
-                    resources: data.resources || []
-                };
-                
-                // Add time limit if available
-                if (data.time_limit) {
-                    assignment.time_limit = data.time_limit;
-                }
-                
-                assignments.push(assignment);
-            });
-            
+    fetch(`/api/Assignments?classId=${classId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(assignments => {
             if (assignments.length > 0) {
-                updateAssignmentsGrid(assignments);
-                setupAssignmentFilters(assignments);
+                // Format the assignments for UI compatibility
+                const formattedAssignments = assignments.map(assignment => {
+                    // Format dates and calculate time left
+                    let formattedDueDate = 'No due date';
+                    let timeLeft = '';
+                    
+                    if (assignment.dueDate) {
+                        const dueDate = new Date(assignment.dueDate);
+                        const now = new Date();
+                        
+                        formattedDueDate = dueDate.toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                        });
+                        
+                        const diffTime = Math.abs(dueDate - now);
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        
+                        if (dueDate < now) {
+                            timeLeft = 'Past due';
+                        } else if (diffDays === 0) {
+                            const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
+                            timeLeft = diffHours <= 1 ? 'Due soon' : `${diffHours} hours left`;
+                        } else if (diffDays === 1) {
+                            timeLeft = '1 day left';
+                        } else {
+                            timeLeft = `${diffDays} days left`;
+                        }
+                    }
+                    
+                    return {
+                        id: assignment.id,
+                        title: assignment.title || 'Untitled Assignment',
+                        description: assignment.description || 'No description available.',
+                        due_date: formattedDueDate,
+                        time_left: timeLeft,
+                        type: assignment.type || 'homework',
+                        status: assignment.status || 'not_started',
+                        points: assignment.points || 0,
+                        allowed_formats: assignment.allowed_formats || 'PDF',
+                        resources: assignment.resources || [],
+                        time_limit: assignment.time_limit
+                    };
+                });
+                
+                updateAssignmentsGrid(formattedAssignments);
+                setupAssignmentFilters(formattedAssignments);
             } else {
                 document.getElementById('assignments-grid').innerHTML = 
                     '<div class="no-items-message">No assignments found for this class.</div>';
@@ -3967,14 +3793,9 @@ function fetchAssignmentsFromFirebase(classId) {
 }
 
 /**
- * Fetch resources from Firebase for resources tab
+ * Fetch resources from Flask API instead of Firebase directly
  */
 function fetchResourcesFromFirebase(classId) {
-    if (!is_firebase_available()) {
-        document.getElementById('resources-grid').innerHTML = '<div class="error-message">Unable to load resources. Please check your connection.</div>';
-        return;
-    }
-    
     // Show loading state
     document.getElementById('resources-grid').innerHTML = `
         <div class="loading-indicator">
@@ -3983,45 +3804,33 @@ function fetchResourcesFromFirebase(classId) {
         </div>
     `;
     
-    db.collection('Resources')
-        .where('classId', '==', classId)
-        .get()
-        .then(querySnapshot => {
-            const resources = [];
-            querySnapshot.forEach(doc => {
-                const data = doc.data();
-                data.id = doc.id;
-                
-                // Format dates if needed
-                let dateAdded = 'Unknown date';
-                if (data.createdAt) {
-                    const createdDate = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
-                    dateAdded = createdDate.toLocaleDateString('en-US', {
-                        month: 'short', 
-                        day: 'numeric',
-                        year: 'numeric'
-                    });
-                } else if (data.date_added) {
-                    dateAdded = data.date_added;
-                }
-                
-                // Create consistent resource object
-                resources.push({
-                    id: data.id,
-                    title: data.title || 'Untitled Resource',
-                    description: data.description || 'No description available.',
-                    type: data.type || 'handouts',
-                    date_added: dateAdded,
-                    file_type: data.file_type || '',
-                    file_size: data.file_size || '',
-                    duration: data.duration || '',
-                    thumbnail: data.thumbnail || `https://via.placeholder.com/300x200/4361ee/ffffff?text=${data.type || 'Resource'}`
-                });
-            });
+    // Use Flask API endpoint instead of Firebase SDK
+    fetch(`/api/Resources?classId=${classId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const resources = data.resources || [];
             
             if (resources.length > 0) {
-                updateResourcesGrid(resources);
-                setupResourceFilters(resources);
+                // Format the resources for UI compatibility
+                const formattedResources = resources.map(resource => ({
+                    id: resource.id,
+                    title: resource.title || 'Untitled Resource',
+                    description: resource.description || 'No description available.',
+                    type: resource.type || 'handouts',
+                    date_added: resource.date_added || resource.createdAt || 'Unknown date',
+                    file_type: resource.file_type || '',
+                    file_size: resource.file_size || '',
+                    duration: resource.duration || '',
+                    thumbnail: resource.thumbnail || `https://via.placeholder.com/300x200/4361ee/ffffff?text=${resource.type || 'Resource'}`
+                }));
+                
+                updateResourcesGrid(formattedResources);
+                setupResourceFilters(formattedResources);
             } else {
                 document.getElementById('resources-grid').innerHTML = 
                     '<div class="no-items-message">No resources found for this class.</div>';
@@ -4035,7 +3844,7 @@ function fetchResourcesFromFirebase(classId) {
 }
 
 /**
- * Fetch channel messages from Firebase
+ * Fetch channel messages from Flask API instead of Firebase directly
  */
 function fetchChannelMessagesFromFirebase(classId, channelId) {
     // Show loading indicator
@@ -4047,33 +3856,28 @@ function fetchChannelMessagesFromFirebase(classId, channelId) {
     // Set up message sending
     setupMessageSending(classId, channelId);
     
-    if (!is_firebase_available()) {
-        document.getElementById('messages-container').innerHTML = 
-            '<div class="error-message">Unable to load messages. Please check your connection.</div>';
-        return;
-    }
-    
     // Update current channel display
     updateCurrentChannelDisplay(channelId, getChannelNameFromId(channelId));
     
-    // Fetch messages
-    db.collection('Messages')
-        .where('classId', '==', classId)
-        .where('channelId', '==', channelId)
-        .orderBy('sentAt', 'asc')
-        .get()
-        .then(querySnapshot => {
-            const messages = [];
+    // Fetch messages from API
+    fetch(`/api/Messages?classId=${classId}&channelId=${channelId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const messages = data.messages || [];
             
-            querySnapshot.forEach(doc => {
-                const data = doc.data();
-                
+            // Format the messages for UI compatibility
+            const formattedMessages = messages.map(message => {
                 // Format date and time
                 let messageTime = 'Unknown time';
                 let messageDate = 'Unknown date';
                 
-                if (data.sentAt) {
-                    const sentDate = data.sentAt.toDate ? data.sentAt.toDate() : new Date(data.sentAt);
+                if (message.sentAt) {
+                    const sentDate = new Date(message.sentAt);
                     const now = new Date();
                     
                     messageTime = sentDate.toLocaleTimeString('en-US', {
@@ -4104,18 +3908,18 @@ function fetchChannelMessagesFromFirebase(classId, channelId) {
                     }
                 }
                 
-                messages.push({
-                    id: doc.id,
-                    senderId: data.senderId || 'unknown',
-                    senderName: data.senderName || 'Unknown User',
-                    senderProfilePic: data.senderProfilePic || 'https://via.placeholder.com/64',
-                    content: data.content || '',
-                    time: data.time || messageTime,
-                    date: data.date || messageDate
-                });
+                return {
+                    id: message.id,
+                    senderId: message.senderId || 'unknown',
+                    senderName: message.senderName || 'Unknown User',
+                    senderProfilePic: message.senderProfilePic || 'https://via.placeholder.com/64',
+                    content: message.content || '',
+                    time: message.time || messageTime,
+                    date: message.date || messageDate
+                };
             });
             
-            updateMessagesContainer(messages);
+            updateMessagesContainer(formattedMessages);
         })
         .catch(error => {
             console.error('Error fetching messages:', error);
@@ -4144,17 +3948,9 @@ function getChannelNameFromId(channelId) {
 }
 
 /**
- * Fetch grades from Firebase
+ * Fetch grades from Flask API instead of Firebase directly
  */
 function fetchGradesFromFirebase(classId) {
-    if (!is_firebase_available()) {
-        document.getElementById('grades-table-body').innerHTML = 
-            '<tr><td colspan="6">Unable to load grades. Please check your connection.</td></tr>';
-        document.getElementById('grade-chart-container').innerHTML = 
-            '<div class="error-message">Unable to load grade chart. Please check your connection.</div>';
-        return;
-    }
-    
     // Show loading states
     document.getElementById('grades-table-body').innerHTML = `
         <tr class="skeleton-row">
@@ -4175,39 +3971,24 @@ function fetchGradesFromFirebase(classId) {
         </tr>
     `;
     
-    // Fetch grades
-    db.collection('Grades')
-        .where('classId', '==', classId)
-        // Add filter for current student if this is a student view
-        // .where('studentId', '==', currentUserId)
-        .orderBy('gradedAt', 'desc')
-        .get()
-        .then(querySnapshot => {
-            const grades = [];
-            const promises = [];
+    // Fetch grades from API
+    fetch(`/api/Grades?classId=${classId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const grades = data.grades || [];
             
-            querySnapshot.forEach(doc => {
-                const gradeData = doc.data();
-                
-                // Get the assignment details for each grade
-                const assignmentPromise = db.collection('Assignments')
-                    .doc(gradeData.assignmentId)
-                    .get()
-                    .then(assignmentDoc => {
-                        if (!assignmentDoc.exists) {
-                            console.warn(`Assignment ${gradeData.assignmentId} not found for grade ${doc.id}`);
-                            return null;
-                        }
-                        
-                        const assignmentData = assignmentDoc.data();
-                        
+            if (grades.length > 0) {
+                // Format the grades for UI compatibility
+                const formattedGrades = grades.map(gradeData => {
                         // Format due date
                         let dueDate = 'Unknown';
-                        if (assignmentData.dueDate) {
-                            const date = assignmentData.dueDate.toDate ? 
-                                         assignmentData.dueDate.toDate() : 
-                                         new Date(assignmentData.dueDate);
-                                         
+                    if (gradeData.dueDate) {
+                        const date = new Date(gradeData.dueDate);
                             dueDate = date.toLocaleDateString('en-US', {
                                 month: 'short',
                                 day: 'numeric',
@@ -4227,9 +4008,9 @@ function fetchGradesFromFirebase(classId) {
                         }
                         
                         return {
-                            id: doc.id,
-                            assignment: assignmentData.title || 'Unknown Assignment',
-                            type: assignmentData.type || 'unknown',
+                        id: gradeData.id,
+                        assignment: gradeData.assignmentTitle || 'Unknown Assignment',
+                        type: gradeData.assignmentType || 'unknown',
                             dueDate: dueDate,
                             status: gradeData.status || 'graded',
                             score: score,
@@ -4237,20 +4018,9 @@ function fetchGradesFromFirebase(classId) {
                         };
                     });
                 
-                promises.push(assignmentPromise);
-            });
-            
-            // Wait for all assignment promises to resolve
-            return Promise.all(promises);
-        })
-        .then(grades => {
-            // Filter out any null values (failed assignment lookups)
-            const validGrades = grades.filter(grade => grade !== null);
-            
-            if (validGrades.length > 0) {
-                updateGradesTable(validGrades);
-                updateGradeSummary(validGrades);
-                renderGradeChart(validGrades);
+                updateGradesTable(formattedGrades);
+                updateGradeSummary(formattedGrades);
+                renderGradeChart(formattedGrades);
             } else {
                 document.getElementById('grades-table-body').innerHTML = 
                     '<tr><td colspan="6">No grades found for this class.</td></tr>';
@@ -4268,15 +4038,9 @@ function fetchGradesFromFirebase(classId) {
 }
 
 /**
- * Fetch classmates from Firebase
+ * Fetch classmates from Flask API instead of Firebase directly
  */
 function fetchClassmatesFromFirebase(classId) {
-    if (!is_firebase_available()) {
-        document.getElementById('students-grid').innerHTML = 
-            '<div class="error-message">Unable to load students. Please check your connection.</div>';
-        return;
-    }
-    
     // Show loading state
     document.getElementById('students-grid').innerHTML = `
         <div class="loading-indicator">
@@ -4285,53 +4049,28 @@ function fetchClassmatesFromFirebase(classId) {
         </div>
     `;
     
-    // Get the class to find its members
-    db.collection('Classes').doc(classId).get()
-        .then(classDoc => {
-            if (!classDoc.exists) {
-                throw new Error('Class not found');
+    fetch(`/api/Classes/${classId}/members?role=student`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
-            const classData = classDoc.data();
-            const members = classData.members || [];
-            
-            // Only include students (not teachers or other roles)
-            const studentMembers = members.filter(member => member.role === 'student');
-            
-            if (studentMembers.length === 0) {
-                throw new Error('No students in this class');
-            }
-            
-            // Get the actual student data from the Members collection
-            const studentPromises = studentMembers.map(member => 
-                db.collection('Members').doc(member.userId).get()
-            );
-            
-            return Promise.all(studentPromises);
+            return response.json();
         })
-        .then(studentDocs => {
-            const students = [];
-            
-            studentDocs.forEach(doc => {
-                if (!doc.exists) return;
-                
-                const data = doc.data();
-                
-                // Build student object
-                students.push({
-                    id: doc.id,
-                    name: data.first_name && data.last_name ? 
-                         `${data.first_name} ${data.last_name}` : 
-                         data.username || 'Unknown Student',
-                    email: data.email || 'No email available',
-                    profilePic: data.profilePicUrl || 'https://via.placeholder.com/64',
-                    grade: data.grade || 'Unknown Grade',
-                    lastActive: formatLastActive(data.lastActive)
-                });
-            });
+        .then(data => {
+            const students = data.members || [];
             
             if (students.length > 0) {
-                updateStudentsGrid(students);
+                // Format the students for UI compatibility
+                const formattedStudents = students.map(student => ({
+                    id: student.id,
+                    name: student.name || 'Unknown Student',
+                    email: student.email || 'No email available',
+                    profilePic: student.profilePic || 'https://via.placeholder.com/64',
+                    grade: student.grade || 'Unknown Grade',
+                    lastActive: formatLastActive(student.lastActive)
+                }));
+                
+                updateStudentsGrid(formattedStudents);
                 setupStudentSearch();
             } else {
                 document.getElementById('students-grid').innerHTML = 
@@ -4374,7 +4113,7 @@ function formatLastActive(timestamp) {
 }
 
 /**
- * Initialize mind web from Firebase data
+ * Initialize mind web from Flask API instead of Firebase directly
  */
 function initMindWebFromFirebase(classId) {
     // Get container and clear loading indicator
@@ -4386,23 +4125,21 @@ function initMindWebFromFirebase(classId) {
         </div>
     `;
     
-    if (!is_firebase_available()) {
-        container.innerHTML = '<div class="error-message">Unable to load mind web. Please check your connection.</div>';
-        return;
-    }
-    
-    // Fetch mind web data from Firebase
-    db.collection('ClassMindWebs')
-        .where('classId', '==', classId)
-        .limit(1) // Get the first/primary mind web for this class
-        .get()
-        .then(querySnapshot => {
-            if (querySnapshot.empty) {
+    // Fetch mind web data from API
+    fetch(`/api/Classes/${classId}/mindweb`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const mindWebData = data.mindweb;
+            
+            if (!mindWebData || !mindWebData.nodes) {
                 container.innerHTML = '<div class="no-items-message">No mind web found for this class.</div>';
                 return;
             }
-            
-            const mindWebData = querySnapshot.docs[0].data();
             
             // Clear container
             container.innerHTML = '';
@@ -4491,12 +4228,11 @@ function updateMessagesContainer(messages) {
 }
 
 /**
- * Get current user ID (placeholder - in a real app would come from auth)
+ * Get current user ID from localStorage (same as profile and tree pages)
  */
 function getCurrentUserId() {
-    // In a real app, this would come from the authentication system
-    // For demo purposes, return a placeholder
-    return 'current-user';
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    return userData.id || localStorage.getItem('userId');
 }
 
 /**
@@ -4563,7 +4299,7 @@ function setupMessageSending(classId, channelId) {
 }
 
 /**
- * Send a message
+ * Send a message using Flask API instead of Firebase directly
  */
 function sendMessage(classId, channelId) {
     const messageInput = document.getElementById('message-input');
@@ -4573,11 +4309,6 @@ function sendMessage(classId, channelId) {
     
     // Clear input
     messageInput.value = '';
-    
-    if (!is_firebase_available()) {
-        console.error('Firebase is not available. Cannot send message.');
-        return;
-    }
     
     // Get current user info (placeholder)
     // In a real app, this would come from the authentication system
@@ -4596,7 +4327,7 @@ function sendMessage(classId, channelId) {
         senderName: currentUser.name,
         senderProfilePic: currentUser.profilePic,
         content: content,
-        sentAt: firebase.firestore.FieldValue.serverTimestamp(),
+        sentAt: now.toISOString(),
         time: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
         date: 'Just now'
     };
@@ -4626,49 +4357,54 @@ function sendMessage(classId, channelId) {
     // Scroll to bottom
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
     
-    // Save to Firebase
-    db.collection('Messages')
-        .add(messageData)
-        .then(docRef => {
-            console.log('Message sent successfully with ID:', docRef.id);
-            
-            // Update the temporary element with the real ID and remove sending state
-            messageElement.setAttribute('data-id', docRef.id);
-            messageElement.classList.remove('sending');
-            messageElement.querySelector('.sending-indicator').remove();
-        })
-        .catch(error => {
-            console.error('Error sending message:', error);
-            
-            // Show error in the UI
-            messageElement.classList.remove('sending');
-            messageElement.classList.add('error');
-            const indicator = messageElement.querySelector('.sending-indicator');
-            if (indicator) {
-                indicator.textContent = 'Failed to send';
-                indicator.className = 'error-indicator';
-            }
-        });
+    // Save using API
+    fetch('/api/Messages', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(messageData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Message sent successfully with ID:', data.id);
+        
+        // Update the temporary element with the real ID and remove sending state
+        messageElement.setAttribute('data-id', data.id);
+        messageElement.classList.remove('sending');
+        messageElement.querySelector('.sending-indicator').remove();
+    })
+    .catch(error => {
+        console.error('Error sending message:', error);
+        
+        // Show error in the UI
+        messageElement.classList.remove('sending');
+        messageElement.classList.add('error');
+        const indicator = messageElement.querySelector('.sending-indicator');
+        if (indicator) {
+            indicator.textContent = 'Failed to send';
+            indicator.className = 'error-indicator';
+        }
+    });
 }
 
 /**
- * Create a new channel
+ * Create a new channel via API
  */
 function createNewChannel(classId, channelName, description, isPrivate) {
-    if (!is_firebase_available()) {
-        console.error('Firebase is not available. Cannot create channel.');
-        return;
-    }
-    
-    const channelId = db.collection('Classes').doc().id; // Generate a unique ID
+    // Generate a temporary ID for UI purposes
+    const channelId = 'channel-' + Date.now();
     
     // Create the channel data
     const newChannelData = {
-        id: channelId,
         name: channelName,
         description: description,
         type: 'general', // Default type
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         createdBy: getCurrentUserId(), // Get current user ID
         isPrivate: isPrivate,
         allowedMembers: []
@@ -4682,20 +4418,30 @@ function createNewChannel(classId, channelName, description, isPrivate) {
         saveButton.disabled = true;
     }
 
-    // Update the class in Firebase
-    db.collection('Classes').doc(classId).update({
-        channels: firebase.firestore.FieldValue.arrayUnion(newChannelData),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    // Create the channel via API
+    fetch(`/api/Classes/${classId}/channels`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newChannelData)
     })
-    .then(() => {
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
         console.log(`Channel ${channelName} created successfully!`);
+        const actualChannelId = data.id || channelId;
         
         // Add to UI
         const channelsList = document.getElementById('channels-list');
         const newChannelElement = document.createElement('li');
         newChannelElement.className = 'channel';
         newChannelElement.setAttribute('data-channel', channelName); // For backwards compatibility
-        newChannelElement.setAttribute('data-channel-id', channelId);
+        newChannelElement.setAttribute('data-channel-id', actualChannelId);
         newChannelElement.innerHTML = `
             <span class="channel-icon">${isPrivate ? '🔒' : '#'}</span>
             <span class="channel-name">${channelName}</span>
@@ -4720,8 +4466,8 @@ function createNewChannel(classId, channelName, description, isPrivate) {
         newChannelElement.addEventListener('click', function() {
             document.querySelectorAll('.channel').forEach(ch => ch.classList.remove('active'));
             this.classList.add('active');
-            updateCurrentChannelDisplay(channelId, channelName);
-            fetchChannelMessagesFromFirebase(classId, channelId);
+            updateCurrentChannelDisplay(actualChannelId, channelName);
+            fetchChannelMessagesFromFirebase(classId, actualChannelId);
         });
         
         // Re-apply edit buttons if in edit mode
@@ -4744,4 +4490,424 @@ function createNewChannel(classId, channelName, description, isPrivate) {
             saveButton.disabled = false;
         }
     });
+} 
+
+/**
+ * Create floating action buttons for adding content
+ */
+function createFloatingActionButtons(container) {
+    const fabContainer = document.createElement('div');
+    fabContainer.className = 'fab-container';
+    
+    const fabButtons = [
+        {
+            className: 'fab fab-add-assignment',
+            icon: 'fas fa-clipboard-list',
+            tooltip: 'Add Assignment',
+            action: () => openAddModal('assignment')
+        },
+        {
+            className: 'fab fab-add-resource',
+            icon: 'fas fa-file-alt',
+            tooltip: 'Add Resource',
+            action: () => openAddModal('resource')
+        },
+        {
+            className: 'fab fab-add-event',
+            icon: 'fas fa-calendar-plus',
+            tooltip: 'Add Event',
+            action: () => openAddModal('event')
+        },
+        {
+            className: 'fab fab-add-note',
+            icon: 'fas fa-sticky-note',
+            tooltip: 'Add Note',
+            action: () => openAddModal('note')
+        }
+    ];
+    
+    fabButtons.forEach(fab => {
+        const button = document.createElement('button');
+        button.className = fab.className;
+        button.innerHTML = `
+            <i class="${fab.icon}"></i>
+            <div class="fab-tooltip">${fab.tooltip}</div>
+        `;
+        button.addEventListener('click', fab.action);
+        fabContainer.appendChild(button);
+    });
+    
+    container.appendChild(fabContainer);
+}
+
+/**
+ * Create confirmation modal for delete actions
+ */
+function createConfirmationModal() {
+    const modal = document.createElement('div');
+    modal.className = 'confirmation-modal';
+    modal.id = 'confirmation-modal';
+    
+    modal.innerHTML = `
+        <div class="confirmation-content">
+            <div class="confirmation-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="confirmation-title">Confirm Deletion</h3>
+            <p class="confirmation-message">
+                Are you sure you want to delete this item? This action cannot be undone.
+            </p>
+            <div class="confirmation-buttons">
+                <button class="btn-cancel-delete">Cancel</button>
+                <button class="btn-confirm-delete">Delete</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Add event listeners
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeConfirmationModal();
+        }
+    });
+    
+    modal.querySelector('.btn-cancel-delete').addEventListener('click', closeConfirmationModal);
+}
+
+/**
+ * Create keyboard shortcuts hint
+ */
+function createKeyboardHint() {
+    const hint = document.createElement('div');
+    hint.className = 'keyboard-hint';
+    hint.innerHTML = 'Press <strong>Esc</strong> to exit edit mode • <strong>Del</strong> to delete selected';
+    
+    document.body.appendChild(hint);
+}
+
+/**
+ * Add delete buttons to all relevant content
+ */
+function addDeleteButtons() {
+    // Add delete buttons to assignment cards
+    addDeleteButtonsToCards('.assignment-card', 'assignment');
+    addDeleteButtonsToCards('.assignment-item', 'assignment');
+    
+    // Add delete buttons to resource cards
+    addDeleteButtonsToCards('.resource-card', 'resource');
+    
+    // Add delete buttons to event items
+    addDeleteButtonsToCards('.event-item', 'event');
+    
+    // Add delete buttons to student cards (for removing from class)
+    addDeleteButtonsToCards('.student-card', 'student');
+    
+    // Add delete buttons to channels
+    addDeleteButtonsToCards('.channel', 'channel');
+    
+    // Add delete buttons to messages (if user owns them)
+    addDeleteButtonsToCards('.message.current-user-message', 'message');
+}
+
+/**
+ * Add delete buttons to specific card types
+ */
+function addDeleteButtonsToCards(selector, type) {
+    const cards = document.querySelectorAll(selector);
+    
+    cards.forEach(card => {
+        // Skip if delete button already exists
+        if (card.querySelector('.delete-btn')) return;
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+        deleteBtn.setAttribute('data-type', type);
+        deleteBtn.setAttribute('data-id', card.getAttribute('data-id') || generateTempId());
+        
+        deleteBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            
+            const itemType = this.getAttribute('data-type');
+            const itemId = this.getAttribute('data-id');
+            const itemName = getItemName(card, itemType);
+            
+            showConfirmationModal(itemType, itemName, () => {
+                deleteItem(itemType, itemId, card);
+            });
+        });
+        
+        card.style.position = 'relative';
+        card.appendChild(deleteBtn);
+    });
+}
+
+/**
+ * Remove delete buttons
+ */
+function removeDeleteButtons() {
+    document.querySelectorAll('.delete-btn').forEach(btn => btn.remove());
+}
+
+/**
+ * Get item name for confirmation dialog
+ */
+function getItemName(card, type) {
+    switch (type) {
+        case 'assignment':
+            return card.querySelector('.assignment-title')?.textContent || 'this assignment';
+        case 'resource':
+            return card.querySelector('.resource-title')?.textContent || 'this resource';
+        case 'event':
+            return card.querySelector('.event-title')?.textContent || 'this event';
+        case 'student':
+            return card.querySelector('.student-name')?.textContent || 'this student';
+        case 'channel':
+            return card.querySelector('.channel-name')?.textContent || 'this channel';
+        case 'message':
+            return 'this message';
+        default:
+            return 'this item';
+    }
+}
+
+/**
+ * Show confirmation modal
+ */
+function showConfirmationModal(itemType, itemName, onConfirm) {
+    const modal = document.getElementById('confirmation-modal');
+    const title = modal.querySelector('.confirmation-title');
+    const message = modal.querySelector('.confirmation-message');
+    const confirmBtn = modal.querySelector('.btn-confirm-delete');
+    
+    title.textContent = `Delete ${capitalizeFirstLetter(itemType)}`;
+    message.textContent = `Are you sure you want to delete "${itemName}"? This action cannot be undone.`;
+    
+    // Remove existing listeners and add new one
+    const newConfirmBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+    
+    newConfirmBtn.addEventListener('click', function() {
+        onConfirm();
+        closeConfirmationModal();
+    });
+    
+    modal.classList.add('active');
+}
+
+/**
+ * Close confirmation modal
+ */
+function closeConfirmationModal() {
+    document.getElementById('confirmation-modal').classList.remove('active');
+}
+
+/**
+ * Delete item with loading state and feedback
+ */
+function deleteItem(itemType, itemId, cardElement) {
+    // Show loading state
+    showLoadingOverlay(cardElement);
+    
+    // Simulate API call (replace with actual API endpoint)
+    const apiEndpoint = getDeleteEndpoint(itemType, itemId);
+    
+    fetch(apiEndpoint, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Remove element with animation
+        cardElement.style.transition = 'all 0.3s ease';
+        cardElement.style.transform = 'translateX(-100%)';
+        cardElement.style.opacity = '0';
+        
+        setTimeout(() => {
+            cardElement.remove();
+            showFeedbackToast('success', `${capitalizeFirstLetter(itemType)} deleted successfully`);
+        }, 300);
+    })
+    .catch(error => {
+        console.error(`Error deleting ${itemType}:`, error);
+        hideLoadingOverlay(cardElement);
+        showFeedbackToast('error', `Failed to delete ${itemType}. Please try again.`);
+    });
+}
+
+/**
+ * Get delete endpoint for item type
+ */
+function getDeleteEndpoint(itemType, itemId) {
+    const classId = getClassIdFromUrl();
+    
+    switch (itemType) {
+        case 'assignment':
+            return `/api/Assignments/${itemId}`;
+        case 'resource':
+            return `/api/Resources/${itemId}`;
+        case 'event':
+            return `/api/Events/${itemId}`;
+        case 'student':
+            return `/api/Classes/${classId}/members/${itemId}`;
+        case 'channel':
+            return `/api/Classes/${classId}/channels/${itemId}`;
+        case 'message':
+            return `/api/Messages/${itemId}`;
+        default:
+            throw new Error(`Unknown item type: ${itemType}`);
+    }
+}
+
+/**
+ * Show loading overlay on element
+ */
+function showLoadingOverlay(element) {
+    let overlay = element.querySelector('.loading-overlay');
+    
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'loading-overlay';
+        overlay.innerHTML = '<div class="loading-spinner"></div>';
+        element.appendChild(overlay);
+    }
+    
+    overlay.classList.add('active');
+}
+
+/**
+ * Hide loading overlay
+ */
+function hideLoadingOverlay(element) {
+    const overlay = element.querySelector('.loading-overlay');
+    if (overlay) {
+        overlay.classList.remove('active');
+    }
+}
+
+/**
+ * Show feedback toast
+ */
+function showFeedbackToast(type, message) {
+    // Remove existing toasts
+    document.querySelectorAll('.feedback-toast').forEach(toast => toast.remove());
+    
+    const toast = document.createElement('div');
+    toast.className = `feedback-toast ${type}`;
+    toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'exclamation-triangle'}"></i>
+        ${message}
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Show toast
+    setTimeout(() => toast.classList.add('show'), 100);
+    
+    // Hide toast after 4 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
+
+/**
+ * Setup keyboard shortcuts
+ */
+function setupKeyboardShortcuts() {
+    document.addEventListener('keydown', handleKeyboardShortcuts);
+}
+
+/**
+ * Remove keyboard shortcuts
+ */
+function removeKeyboardShortcuts() {
+    document.removeEventListener('keydown', handleKeyboardShortcuts);
+}
+
+/**
+ * Handle keyboard shortcuts
+ */
+function handleKeyboardShortcuts(e) {
+    if (!window.isEditMode) return;
+    
+    switch (e.key) {
+        case 'Escape':
+            e.preventDefault();
+            document.getElementById('toggle-edit-mode').click();
+            break;
+            
+        case 'Delete':
+        case 'Backspace':
+            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+                // Delete currently selected/focused item
+                const focusedElement = document.querySelector('.card:focus, .assignment-card:focus, .resource-card:focus');
+                if (focusedElement) {
+                    const deleteBtn = focusedElement.querySelector('.delete-btn');
+                    if (deleteBtn) deleteBtn.click();
+                }
+            }
+            break;
+            
+        case 'n':
+            if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                // Show add options (you can expand this)
+                showFeedbackToast('info', 'Use the floating action buttons to add content');
+            }
+            break;
+    }
+}
+
+/**
+ * Open add modal for different content types
+ */
+function openAddModal(type) {
+    switch (type) {
+        case 'assignment':
+            showFeedbackToast('info', 'Assignment creation modal would open here');
+            // TODO: Implement assignment creation modal
+            break;
+        case 'resource':
+            showFeedbackToast('info', 'Resource upload modal would open here');
+            // TODO: Implement resource upload modal
+            break;
+        case 'event':
+            showFeedbackToast('info', 'Event creation modal would open here');
+            // TODO: Implement event creation modal
+            break;
+        case 'note':
+            showFeedbackToast('info', 'Note creation modal would open here');
+            // TODO: Implement note creation modal
+            break;
+    }
+}
+
+/**
+ * Generate temporary ID for elements without IDs
+ */
+function generateTempId() {
+    return 'temp-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+}
+
+/**
+ * Escape HTML special characters
+ */
+function escapeHtml(text) {
+    if (typeof text !== 'string') return text;
+    
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 } 

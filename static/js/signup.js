@@ -55,22 +55,53 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Hide account section, show verification section
-        accountSection.classList.remove('active');
-        verificationSection.classList.add('active');
+        // Disable next button and show loading
+        nextBtn.disabled = true;
+        nextBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Sending Code...';
         
-        // Update progress indicators
-        accountStep.classList.add('active');
-        verificationStep.classList.add('active');
-        progressLine.classList.add('active');
-        
-        // Send verification code (simulated)
-        sendVerificationCode(emailInput.value);
-        
-        // Focus first code input
-        if (codeInputs.length > 0) {
-            codeInputs[0].focus();
-        }
+        // Send verification code to email
+        fetch('/api/send-verification-code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: emailInput.value
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                // Success - proceed to verification step
+                accountSection.classList.remove('active');
+                verificationSection.classList.add('active');
+                
+                // Update progress indicators
+                accountStep.classList.add('active');
+                verificationStep.classList.add('active');
+                progressLine.classList.add('active');
+                
+                // Focus first code input
+                if (codeInputs.length > 0) {
+                    codeInputs[0].focus();
+                }
+                
+                // Show success message
+                showSuccessToast(data.message);
+            } else {
+                // Handle error
+                showErrorToast(data.error || 'Failed to send verification code');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorToast('Failed to send verification code. Please try again.');
+        })
+        .finally(() => {
+            // Reset next button
+            nextBtn.disabled = false;
+            nextBtn.innerHTML = 'Next';
+        });
     }
     
     function goToAccount(e) {
@@ -274,14 +305,35 @@ document.addEventListener('DOMContentLoaded', function() {
         resendCodeBtn.disabled = true;
         resendCodeBtn.textContent = 'Sending...';
         
-        // Simulate API call delay
-        setTimeout(() => {
-            sendVerificationCode(emailInput.value);
-            
-            // Reset button
-            resendCodeBtn.disabled = false;
-            resendCodeBtn.textContent = 'Resend';
-        }, 1500);
+        // Send verification code to email
+        fetch('/api/send-verification-code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: emailInput.value
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                showSuccessToast('Verification code sent successfully!');
+            } else {
+                showErrorToast(data.error || 'Failed to resend verification code');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorToast('Failed to resend verification code. Please try again.');
+        })
+        .finally(() => {
+            // Reset button after delay
+            setTimeout(() => {
+                resendCodeBtn.disabled = false;
+                resendCodeBtn.textContent = 'Resend';
+            }, 1500);
+        });
     }
     
     // Particle animation
@@ -324,46 +376,91 @@ document.addEventListener('DOMContentLoaded', function() {
             verifyBtn.disabled = true;
             verifyBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Verifying...';
             
-            // Get form data
-            const userData = {
-                first_name: firstNameInput.value,
-                last_name: lastNameInput.value,
-                email: emailInput.value,
-                username: document.getElementById('username').value || '',
-                grade: document.getElementById('grade').value,
-                password: passwordInput.value, // Note: In production, password should be hashed on the server
-                verification_code: verificationCodeInput.value,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            };
-            
-            // Send data to server to create user
-            fetch('/api/Members', {
+            // First verify the email code
+            fetch('/api/verify-code', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(userData)
+                body: JSON.stringify({
+                    email: emailInput.value,
+                    code: verificationCodeInput.value
+                })
             })
             .then(response => response.json())
             .then(data => {
-                if (data.id) {
-                    // Success - store user ID and redirect to onboarding
-                    localStorage.setItem('userId', data.id);
-                    window.location.href = '/onboarding';
+                if (data.message) {
+                    // Email verification successful, now complete signup
+                    verifyBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Creating Account...';
+                    
+                    const userData = {
+                        first_name: firstNameInput.value,
+                        last_name: lastNameInput.value,
+                        email: emailInput.value,
+                        username: document.getElementById('username').value || '',
+                        password: passwordInput.value,
+                        grade: ''  // Add grade field if needed
+                    };
+                    
+                    // Complete signup
+                    return fetch('/api/signup-complete', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(userData)
+                    });
                 } else {
-                    // Handle error
-                    alert('Error creating account: ' + (data.error || 'Unknown error'));
-                    verifyBtn.disabled = false;
-                    verifyBtn.innerHTML = 'Verify & Continue';
+                    throw new Error(data.error || 'Email verification failed');
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.user_id) {
+                    // Success - redirect to success page
+                    showSuccessToast('Account created successfully! Redirecting...');
+                    setTimeout(() => {
+                        window.location.href = data.redirect_url || '/success';
+                    }, 1500);
+                } else {
+                    throw new Error(data.error || 'Failed to create account');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Error creating account. Please try again.');
+                showErrorToast(error.message || 'Error during signup. Please try again.');
                 verifyBtn.disabled = false;
                 verifyBtn.innerHTML = 'Verify & Continue';
             });
         });
+    }
+
+    // Helper functions for toast messages
+    function showSuccessToast(message) {
+        const toast = document.createElement('div');
+        toast.className = 'success-toast';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.add('fade-out');
+            setTimeout(() => {
+                toast.remove();
+            }, 500);
+        }, 3000);
+    }
+    
+    function showErrorToast(message) {
+        const toast = document.createElement('div');
+        toast.className = 'error-toast';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.add('fade-out');
+            setTimeout(() => {
+                toast.remove();
+            }, 500);
+        }, 4000);
     }
 }); 
