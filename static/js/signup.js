@@ -417,10 +417,10 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 if (data.user_id) {
-                    // Success - redirect to success page
-                    showSuccessToast('Account created successfully! Redirecting...');
+                    // Success - redirect to tutorial version of MyWeb page
+                    showSuccessToast('Account created successfully! Starting your guided tour...');
                     setTimeout(() => {
-                        window.location.href = data.redirect_url || '/success';
+                        window.location.href = data.redirect_url || '/tree?tutorial=true';
                     }, 1500);
                 } else {
                     throw new Error(data.error || 'Failed to create account');

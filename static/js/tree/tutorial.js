@@ -6,7 +6,7 @@
 class TutorialSystem {
     constructor() {
         this.currentStep = 0;
-        this.totalSteps = 12;
+        this.totalSteps = 10;
         this.isActive = false;
         this.stepCallbacks = new Map();
         this.originalNodeCreation = null;
@@ -16,14 +16,12 @@ class TutorialSystem {
             'welcome',
             'toolbar', 
             'motivator',
-            'place-motivator',
             'edit-motivator',
             'learning-objective',
-            'place-learning',
+            'edit-learning',
             'voice-intro',
             'voice-demo',
             'connections',
-            'node-features',
             'complete'
         ];
         
@@ -53,7 +51,6 @@ class TutorialSystem {
         this.showStep(0);
         this.updateProgress();
         this.setupEventListeners();
-        this.interceptNodeCreation();
         
         // Add tutorial-specific styles to body
         document.body.classList.add('tutorial-active');
@@ -71,13 +68,7 @@ class TutorialSystem {
             this.handleClick(e);
         });
         
-        // Listen for canvas clicks
-        const canvas = document.querySelector('.tree-container');
-        if (canvas) {
-            canvas.addEventListener('click', (e) => {
-                this.handleCanvasClick(e);
-            });
-        }
+
         
         // Listen for hover on nodes to show edit option
         document.addEventListener('mouseover', (e) => {
@@ -90,6 +81,9 @@ class TutorialSystem {
                 this.setSpotlight(this.currentSpotlightSelector, this.currentSpotlightPosition, this.currentSpotlightSize);
             }
         });
+
+        // Watch for actual node title changes
+        this.setupNodeTitleObserver();
     }
     
     handleClick(e) {
@@ -97,61 +91,83 @@ class TutorialSystem {
         
         // Handle motivator button click
         if (step === 'motivator' && e.target.closest('.btn-motivator')) {
-            e.preventDefault();
+            // Don't prevent default - let the system create the node
             this.completedActions.add('motivator-clicked');
-            this.highlightCanvas();
-            this.nextStep();
+            this.completedActions.add('motivator-placed');
+            setTimeout(() => this.nextStep(), 500); // Small delay to let node appear
         }
         
         // Handle learning objective button click
         if (step === 'learning-objective' && e.target.closest('.btn-learningObjective')) {
-            e.preventDefault();
+            // Don't prevent default - let the system create the node
             this.completedActions.add('learning-clicked');
-            this.highlightCanvas();
-            this.nextStep();
+            this.completedActions.add('learning-placed');
+            setTimeout(() => this.nextStep(), 500); // Small delay to let node appear
         }
         
-        // Handle learning objective node click for voice mode
-        if (step === 'voice-intro' && e.target.closest('.node-learningObjective')) {
-            e.preventDefault();
+        // Handle voice button click
+        if (step === 'voice-intro' && e.target.closest('.btn-voice-record')) {
+            // Don't prevent default - let the voice system activate
             this.completedActions.add('voice-activated');
-            this.simulateVoiceMode();
-            this.nextStep();
+            setTimeout(() => this.nextStep(), 1000); // Give time for voice modal to appear
         }
     }
     
-    handleCanvasClick(e) {
-        const step = this.steps[this.currentStep];
-        
-        // Handle node placement
-        if (step === 'place-motivator' && this.completedActions.has('motivator-clicked')) {
-            if (!e.target.closest('.node') && !e.target.closest('.tutorial-overlay')) {
-                this.createTutorialNode('motivator', e.clientX, e.clientY);
-                this.completedActions.add('motivator-placed');
-                this.nextStep();
-            }
-        }
-        
-        if (step === 'place-learning' && this.completedActions.has('learning-clicked')) {
-            if (!e.target.closest('.node') && !e.target.closest('.tutorial-overlay')) {
-                this.createTutorialNode('learningObjective', e.clientX, e.clientY);
-                this.completedActions.add('learning-placed');
-                this.nextStep();
-            }
-        }
-    }
+
     
     handleHover(e) {
-        const step = this.steps[this.currentStep];
-        
-        if (step === 'edit-motivator' && e.target.closest('.node-motivator')) {
-            // Only trigger once
-            if (!this.completedActions.has('motivator-edited')) {
-                this.completedActions.add('motivator-edited');
-                this.simulateNodeEditOnHover(e.target.closest('.node'));
-                setTimeout(() => this.nextStep(), 2000);
-            }
-        }
+        // Tutorial no longer auto-simulates - user must actually interact
+        // We'll listen for actual title changes through DOM observation
+    }
+
+    setupNodeTitleObserver() {
+        // Watch for changes in node titles
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                    const target = mutation.target;
+                    
+                    // Check if this is a node title that changed
+                    const nodeTitle = target.closest ? target.closest('.node-title') : 
+                                    (target.classList && target.classList.contains('node-title') ? target : null);
+                    
+                    if (nodeTitle) {
+                        const node = nodeTitle.closest('.node');
+                        const step = this.steps[this.currentStep];
+                        
+                        // Check if user renamed the motivator node
+                        if (step === 'edit-motivator' && node && node.classList.contains('node-motivator')) {
+                            const newTitle = nodeTitle.textContent.trim();
+                            if (newTitle && newTitle !== 'My Goal' && !this.completedActions.has('motivator-edited')) {
+                                this.completedActions.add('motivator-edited');
+                                this.showQuickSuccessMessage('Great! You renamed your motivator.');
+                                setTimeout(() => this.nextStep(), 1500);
+                            }
+                        }
+                        
+                        // Check if user renamed the learning objective node
+                        if (step === 'edit-learning' && node && node.classList.contains('node-learningObjective')) {
+                            const newTitle = nodeTitle.textContent.trim();
+                            if (newTitle && newTitle !== 'Learn Something New' && !this.completedActions.has('learning-edited')) {
+                                this.completedActions.add('learning-edited');
+                                this.showQuickSuccessMessage('Perfect! You customized your learning objective.');
+                                setTimeout(() => this.nextStep(), 1500);
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+        // Start observing the entire document for changes
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+            characterData: true
+        });
+
+        // Store observer for cleanup if needed
+        this.titleObserver = observer;
     }
     
     createTutorialNode(type, clientX, clientY) {
@@ -309,46 +325,7 @@ class TutorialSystem {
         }
     }
     
-    simulateVoiceMode() {
-        const node = document.querySelector('.node-learningObjective');
-        if (node) {
-            // Add voice active class
-            node.classList.add('voice-active');
-            
-            // Create voice indicator
-            const indicator = document.createElement('div');
-            indicator.className = 'voice-mode-indicator';
-            indicator.innerHTML = `
-                <div class="voice-pulse"></div>
-                <span>Voice Mode Active</span>
-            `;
-            indicator.style.cssText = `
-                position: absolute;
-                top: -40px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: linear-gradient(135deg, #4ecdc4, #44a08d);
-                color: white;
-                padding: 8px 16px;
-                border-radius: 20px;
-                font-size: 12px;
-                font-weight: 500;
-                box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
-                animation: voice-indicator-appear 0.5s ease;
-                z-index: 1000;
-            `;
-            
-            node.appendChild(indicator);
-            
-            // Remove after demonstration
-            setTimeout(() => {
-                if (indicator.parentNode) {
-                    indicator.remove();
-                }
-                node.classList.remove('voice-active');
-            }, 3000);
-        }
-    }
+
     
     addCelebrationEffect(element) {
         // Create celebration particles
@@ -431,20 +408,7 @@ class TutorialSystem {
         }
     }
     
-    interceptNodeCreation() {
-        // Intercept normal node creation during tutorial
-        const originalCreateNode = window.createNode;
-        if (originalCreateNode) {
-            this.originalNodeCreation = originalCreateNode;
-            window.createNode = (...args) => {
-                if (this.isActive && this.currentStep < this.steps.length - 1) {
-                    // Prevent normal node creation during tutorial
-                    return null;
-                }
-                return this.originalNodeCreation(...args);
-            };
-        }
-    }
+
     
     showStep(stepIndex) {
         // Hide all steps
@@ -495,66 +459,39 @@ class TutorialSystem {
                 this.setSpotlight('.btn-motivator', 'left', 80);
                 this.highlightElement('.btn-motivator', 10000);
                 break;
-            case 'place-motivator':
-                this.setSpotlight('.tree-container', 'center', 200);
-                this.highlightCanvas();
-                break;
             case 'edit-motivator':
-                let motivatorNode = document.querySelector('.node-motivator');
-                if (!motivatorNode) {
-                    // Create the motivator node automatically if it doesn't exist
-                    const canvas = document.querySelector('.tree-container');
-                    const rect = canvas.getBoundingClientRect();
-                    const centerX = rect.left + rect.width / 2;
-                    const centerY = rect.top + rect.height / 2;
-                    motivatorNode = this.createTutorialNode('motivator', centerX, centerY);
-                    this.completedActions.add('motivator-placed');
-                    
-                    // Wait for node to be fully rendered before setting spotlight
-                    setTimeout(() => {
+                // Spotlight on the created motivator node
+                setTimeout(() => {
+                    const motivatorNode = document.querySelector('.node-motivator');
+                    if (motivatorNode) {
                         this.setSpotlight('.node-motivator', 'right', 100);
                         this.highlightElement('.node-motivator', 10000);
-                    }, 200);
-                } else {
-                    this.setSpotlight('.node-motivator', 'right', 100);
-                    this.highlightElement('.node-motivator', 10000);
-                }
+                    }
+                }, 500);
                 break;
             case 'learning-objective':
                 this.setSpotlight('.btn-learningObjective', 'left', 80);
                 this.highlightElement('.btn-learningObjective', 10000);
                 break;
-            case 'place-learning':
-                this.setSpotlight('.tree-container', 'center', 200);
-                this.highlightCanvas();
-                break;
-            case 'voice-intro':
-                let learningNode = document.querySelector('.node-learningObjective');
-                if (!learningNode) {
-                    // Create the learning objective node automatically if it doesn't exist
-                    const canvas = document.querySelector('.tree-container');
-                    const rect = canvas.getBoundingClientRect();
-                    const centerX = rect.left + rect.width / 2;
-                    const centerY = rect.top + rect.height / 2 + 120; // Offset below motivator
-                    learningNode = this.createTutorialNode('learningObjective', centerX, centerY);
-                    this.completedActions.add('learning-placed');
-                    
-                    // Wait for node to be fully rendered before setting spotlight
-                    setTimeout(() => {
+            case 'edit-learning':
+                // Spotlight on the created learning objective node
+                setTimeout(() => {
+                    const learningNode = document.querySelector('.node-learningObjective');
+                    if (learningNode) {
                         this.setSpotlight('.node-learningObjective', 'right', 100);
                         this.highlightElement('.node-learningObjective', 10000);
-                    }, 200);
-                } else {
-                    this.setSpotlight('.node-learningObjective', 'right', 100);
-                    this.highlightElement('.node-learningObjective', 10000);
-                }
+                    }
+                }, 500);
+                break;
+            case 'voice-intro':
+                this.setSpotlight('.btn-voice-record', 'right', 80);
+                this.highlightElement('.btn-voice-record', 10000);
                 break;
             case 'voice-demo':
                 this.setSpotlight('.btn-voice-record', 'right', 80);
                 this.highlightElement('.btn-voice-record', 5000);
                 break;
             case 'connections':
-            case 'node-features':
             case 'complete':
                 this.setSpotlight(null); // No spotlight for final steps
                 break;
@@ -630,10 +567,7 @@ class TutorialSystem {
                 overlay.style.display = 'none';
                 document.body.classList.remove('tutorial-active');
                 
-                // Restore normal functionality
-                if (this.originalNodeCreation) {
-                    window.createNode = this.originalNodeCreation;
-                }
+
                 
                 // Show regular intro overlay
                 const introOverlay = document.querySelector('.intro-overlay');
@@ -654,6 +588,36 @@ class TutorialSystem {
         this.showSuccessMessage();
     }
     
+    showQuickSuccessMessage(text) {
+        const message = document.createElement('div');
+        message.className = 'tutorial-quick-success';
+        message.innerHTML = `
+            <div class="quick-success-content">
+                <i class="fas fa-check-circle"></i>
+                <span>${text}</span>
+            </div>
+        `;
+        message.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 25000;
+            animation: quick-success-slide 0.4s ease-out;
+        `;
+        
+        document.body.appendChild(message);
+        
+        setTimeout(() => {
+            message.style.animation = 'quick-success-slide-out 0.4s ease-in forwards';
+            setTimeout(() => message.remove(), 400);
+        }, 2000);
+    }
+
     showSuccessMessage() {
         const message = document.createElement('div');
         message.className = 'tutorial-success-message';
@@ -747,6 +711,28 @@ const additionalStyles = `
     }
 }
 
+@keyframes quick-success-slide {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes quick-success-slide-out {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
 .tutorial-node {
     z-index: 1001 !important;
 }
@@ -755,7 +741,7 @@ const additionalStyles = `
     cursor: default !important;
 }
 
-.tutorial-active .tool-button:not(.btn-motivator):not(.btn-learningObjective) {
+.tutorial-active .tool-button:not(.btn-motivator):not(.btn-learningObjective):not(.btn-voice-record) {
     opacity: 0.5;
     pointer-events: none;
 }
