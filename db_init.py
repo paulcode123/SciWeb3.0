@@ -32,4 +32,5 @@ if not firebase_admin._apps:
         print("Firebase functionality will be disabled.")
 
 def is_firebase_available():
-    return firebase_available 
+    return firebase_available
+#
