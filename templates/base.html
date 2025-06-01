@@ -25,6 +25,8 @@
             <li><a href="/" class="{% if request.path == '/' %}active{% endif %}">Home</a></li>
             <li><a href="/tree" class="{% if request.path == '/tree' %}active{% endif %}">My Web</a></li>
             <li><a href="/schedule" class="{% if request.path == '/schedule' %}active{% endif %}">Schedule</a></li>
+            <li><a href="/counselor" class="{% if request.path == '/counselor' %}active{% endif %}">Counselor</a></li>
+            <li><a href="/nhs" class="{% if request.path.startswith('/nhs') %}active{% endif %}">NHS</a></li>
             <li id="auth-nav-item">
                 <!-- This will be replaced by JavaScript based on login state -->
                 <a href="/signup" class="{% if request.path == '/signup' %}active{% endif %}" id="signup-link">Sign Up</a>
