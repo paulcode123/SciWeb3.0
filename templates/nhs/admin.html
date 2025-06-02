@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+
+{% block title %}NHS Admin Dashboard - SciWeb 3.0{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/nhs.css') }}">
+<style>
+/* Animated background with moving pink dots */
+.animated-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+    background: linear-gradient(135deg, #ffeef8 0%, #fff5fd 50%, #f8f9ff 100%);
+}
+
+.floating-dot {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 26, 117, 0.6), rgba(255, 26, 117, 0.2));
+    animation: float 10s infinite ease-in-out;
+    box-shadow: 0 0 20px rgba(255, 26, 117, 0.3);
+}
+
+.floating-dot:nth-child(1) {
+    width: 80px;
+    height: 80px;
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+    animation-duration: 12s;
+}
+
+.floating-dot:nth-child(2) {
+    width: 60px;
+    height: 60px;
+    top: 60%;
+    left: 80%;
+    animation-delay: 2s;
+    animation-duration: 15s;
+}
+
+.floating-dot:nth-child(3) {
+    width: 100px;
+    height: 100px;
+    top: 80%;
+    left: 20%;
+    animation-delay: 4s;
+    animation-duration: 18s;
+}
+
+.floating-dot:nth-child(4) {
+    width: 40px;
+    height: 40px;
+    top: 30%;
+    left: 70%;
+    animation-delay: 1s;
+    animation-duration: 10s;
+}
+
+.floating-dot:nth-child(5) {
+    width: 70px;
+    height: 70px;
+    top: 10%;
+    left: 50%;
+    animation-delay: 3s;
+    animation-duration: 14s;
+}
+
+.floating-dot:nth-child(6) {
+    width: 50px;
+    height: 50px;
+    top: 70%;
+    left: 60%;
+    animation-delay: 5s;
+    animation-duration: 16s;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px) translateX(0px) scale(1);
+        opacity: 0.3;
+    }
+    25% {
+        transform: translateY(-30px) translateX(20px) scale(1.1);
+        opacity: 0.7;
+    }
+    50% {
+        transform: translateY(-60px) translateX(-15px) scale(0.9);
+        opacity: 0.9;
+    }
+    75% {
+        transform: translateY(-20px) translateX(25px) scale(1.05);
+        opacity: 0.5;
+    }
+}
+
+body.dark-mode .animated-background {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+}
+
+body.dark-mode .floating-dot {
+    background: radial-gradient(circle at 30% 30%, rgba(255, 26, 117, 0.4), rgba(255, 26, 117, 0.1));
+    box-shadow: 0 0 20px rgba(255, 26, 117, 0.2);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Animated Background -->
+<div class="animated-background">
+    <div class="floating-dot"></div>
+    <div class="floating-dot"></div>
+    <div class="floating-dot"></div>
+    <div class="floating-dot"></div>
+    <div class="floating-dot"></div>
+    <div class="floating-dot"></div>
+</div>
+
+<!-- NHS Hero Section -->
+<section class="nhs-hero">
+    <h1><i class="fas fa-shield-alt"></i> NHS Admin Dashboard</h1>
+    <p>Manage National Honor Society members, credits, and operations</p>
+</section>
+
+<div class="nhs-container">
+    <!-- Admin Stats -->
+    <div class="nhs-stats">
+        <div class="nhs-stat-card">
+            <div class="nhs-stat-value">156</div>
+            <div class="nhs-stat-label">Total Members</div>
+        </div>
+        <div class="nhs-stat-card">
+            <div class="nhs-stat-value">23</div>
+            <div class="nhs-stat-label">Pending Applications</div>
+        </div>
+        <div class="nhs-stat-card">
+            <div class="nhs-stat-value">47</div>
+            <div class="nhs-stat-label">Credits Pending Review</div>
+        </div>
+        <div class="nhs-stat-card">
+            <div class="nhs-stat-value">89%</div>
+            <div class="nhs-stat-label">Completion Rate</div>
+        </div>
+    </div>
+
+    <!-- Admin Actions Grid -->
+    <div class="nhs-grid">
+        <!-- Member Management -->
+        <div class="nhs-card">
+            <div class="nhs-card-header">
+                <h2 class="nhs-card-title"><i class="fas fa-users"></i> Member Management</h2>
+            </div>
+            <div class="nhs-card-body">
+                <p>Manage current NHS members, review applications, and handle membership status.</p>
+                <div style="margin-top: 1rem;">
+                    <a href="/nhs/members" class="nhs-btn nhs-btn-primary" style="margin-right: 0.5rem;">View Members</a>
+                    <a href="#" class="nhs-btn nhs-btn-secondary">Add Member</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Credit Review -->
+        <div class="nhs-card">
+            <div class="nhs-card-header">
+                <h2 class="nhs-card-title"><i class="fas fa-clipboard-check"></i> Credit Review</h2>
+            </div>
+            <div class="nhs-card-body">
+                <p>Review and approve service hour submissions from NHS members.</p>
+                <div style="margin-top: 1rem;">
+                    <a href="#" class="nhs-btn nhs-btn-accent" style="margin-right: 0.5rem;">Review Credits</a>
+                    <a href="#" class="nhs-btn nhs-btn-secondary">Export Report</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Management -->
+        <div class="nhs-card">
+            <div class="nhs-card-header">
+                <h2 class="nhs-card-title"><i class="fas fa-calendar-alt"></i> Event Management</h2>
+            </div>
+            <div class="nhs-card-body">
+                <p>Create and manage NHS events, service projects, and meetings.</p>
+                <div style="margin-top: 1rem;">
+                    <a href="#" class="nhs-btn nhs-btn-gold" style="margin-right: 0.5rem;">Manage Events</a>
+                    <a href="#" class="nhs-btn nhs-btn-secondary">New Event</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports & Analytics -->
+        <div class="nhs-card">
+            <div class="nhs-card-header">
+                <h2 class="nhs-card-title"><i class="fas fa-chart-bar"></i> Reports & Analytics</h2>
+            </div>
+            <div class="nhs-card-body">
+                <p>Generate reports on member progress, credit completion, and overall NHS statistics.</p>
+                <div style="margin-top: 1rem;">
+                    <a href="#" class="nhs-btn nhs-btn-primary" style="margin-right: 0.5rem;">View Reports</a>
+                    <a href="#" class="nhs-btn nhs-btn-secondary">Export Data</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Communication -->
+        <div class="nhs-card">
+            <div class="nhs-card-header">
+                <h2 class="nhs-card-title"><i class="fas fa-bullhorn"></i> Communication</h2>
+            </div>
+            <div class="nhs-card-body">
+                <p>Send announcements, reminders, and updates to NHS members.</p>
+                <div style="margin-top: 1rem;">
+                    <a href="#" class="nhs-btn nhs-btn-accent" style="margin-right: 0.5rem;">Send Message</a>
+                    <a href="#" class="nhs-btn nhs-btn-secondary">View History</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Settings -->
+        <div class="nhs-card">
+            <div class="nhs-card-header">
+                <h2 class="nhs-card-title"><i class="fas fa-cog"></i> System Settings</h2>
+            </div>
+            <div class="nhs-card-body">
+                <p>Configure NHS requirements, credit values, and system preferences.</p>
+                <div style="margin-top: 1rem;">
+                    <a href="#" class="nhs-btn nhs-btn-primary" style="margin-right: 0.5rem;">Settings</a>
+                    <a href="#" class="nhs-btn nhs-btn-secondary">Backup Data</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="nhs-card" style="margin-top: 2rem;">
+        <div class="nhs-card-header">
+            <h2 class="nhs-card-title">Recent Admin Activity</h2>
+        </div>
+        <div class="nhs-card-body">
+            <table class="nhs-table">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Action</th>
+                        <th>User</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>2 hours ago</td>
+                        <td>Approved 5 credit submissions</td>
+                        <td>Admin</td>
+                        <td><span class="nhs-badge nhs-badge-success">Completed</span></td>
+                    </tr>
+                    <tr>
+                        <td>4 hours ago</td>
+                        <td>Added new member: Sarah Johnson</td>
+                        <td>Admin</td>
+                        <td><span class="nhs-badge nhs-badge-success">Completed</span></td>
+                    </tr>
+                    <tr>
+                        <td>1 day ago</td>
+                        <td>Created event: Community Clean-up</td>
+                        <td>Admin</td>
+                        <td><span class="nhs-badge nhs-badge-success">Completed</span></td>
+                    </tr>
+                    <tr>
+                        <td>2 days ago</td>
+                        <td>Generated monthly report</td>
+                        <td>System</td>
+                        <td><span class="nhs-badge nhs-badge-success">Completed</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Add any admin-specific JavaScript here
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('NHS Admin Dashboard loaded');
+});
+</script>
+{% endblock %} 

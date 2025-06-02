@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+
+{% block title %}NHS Members - SciWeb 3.0{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/nhs.css') }}">
+<style>
+/* Animated background with moving pink dots */
+.animated-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+    background: linear-gradient(135deg, #ffeef8 0%, #fff5fd 50%, #f8f9ff 100%);
+}
+
+.floating-dot {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 26, 117, 0.6), rgba(255, 26, 117, 0.2));
+    animation: float 10s infinite ease-in-out;
+    box-shadow: 0 0 20px rgba(255, 26, 117, 0.3);
+}
+
+.floating-dot:nth-child(1) { width: 80px; height: 80px; top: 20%; left: 10%; animation-delay: 0s; animation-duration: 12s; }
+.floating-dot:nth-child(2) { width: 60px; height: 60px; top: 60%; left: 80%; animation-delay: 2s; animation-duration: 15s; }
+.floating-dot:nth-child(3) { width: 100px; height: 100px; top: 80%; left: 20%; animation-delay: 4s; animation-duration: 18s; }
+.floating-dot:nth-child(4) { width: 40px; height: 40px; top: 30%; left: 70%; animation-delay: 1s; animation-duration: 10s; }
+.floating-dot:nth-child(5) { width: 70px; height: 70px; top: 10%; left: 50%; animation-delay: 3s; animation-duration: 14s; }
+.floating-dot:nth-child(6) { width: 50px; height: 50px; top: 70%; left: 60%; animation-delay: 5s; animation-duration: 16s; }
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) translateX(0px) scale(1); opacity: 0.3; }
+    25% { transform: translateY(-30px) translateX(20px) scale(1.1); opacity: 0.7; }
+    50% { transform: translateY(-60px) translateX(-15px) scale(0.9); opacity: 0.9; }
+    75% { transform: translateY(-20px) translateX(25px) scale(1.05); opacity: 0.5; }
+}
+
+body.dark-mode .animated-background { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); }
+body.dark-mode .floating-dot { background: radial-gradient(circle at 30% 30%, rgba(255, 26, 117, 0.4), rgba(255, 26, 117, 0.1)); box-shadow: 0 0 20px rgba(255, 26, 117, 0.2); }
+
+.member-card {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+    background: var(--nhs-card-bg);
+    border-radius: 12px;
+    box-shadow: var(--nhs-shadow);
+    margin-bottom: 1rem;
+    border: 1px solid var(--nhs-border);
+    transition: transform 0.3s ease;
+}
+
+.member-card:hover {
+    transform: translateY(-2px);
+}
+
+.member-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin-right: 1rem;
+    object-fit: cover;
+}
+
+.member-info {
+    flex: 1;
+}
+
+.member-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.member-details {
+    color: var(--nhs-text-light);
+    font-size: 0.9rem;
+}
+
+.member-stats {
+    text-align: right;
+    margin-left: 1rem;
+}
+
+.member-credits {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--nhs-primary);
+}
+
+.member-progress {
+    font-size: 0.8rem;
+    color: var(--nhs-text-light);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Animated Background -->
+<div class="animated-background">
+    <div class="floating-dot"></div>
+    <div class="floating-dot"></div>
+    <div class="floating-dot"></div>
+    <div class="floating-dot"></div>
+    <div class="floating-dot"></div>
+    <div class="floating-dot"></div>
+</div>
+
+<!-- NHS Hero Section -->
+<section class="nhs-hero">
+    <h1><i class="fas fa-users"></i> NHS Members</h1>
+    <p>View and manage National Honor Society membership</p>
+</section>
+
+<div class="nhs-container">
+    <!-- Member Stats -->
+    <div class="nhs-stats">
+        <div class="nhs-stat-card">
+            <div class="nhs-stat-value">156</div>
+            <div class="nhs-stat-label">Active Members</div>
+        </div>
+        <div class="nhs-stat-card">
+            <div class="nhs-stat-value">34</div>
+            <div class="nhs-stat-label">New This Year</div>
+        </div>
+        <div class="nhs-stat-card">
+            <div class="nhs-stat-value">23</div>
+            <div class="nhs-stat-label">Graduating Seniors</div>
+        </div>
+        <div class="nhs-stat-card">
+            <div class="nhs-stat-value">4.2</div>
+            <div class="nhs-stat-label">Avg GPA</div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="nhs-card">
+        <div class="nhs-card-header">
+            <h2 class="nhs-card-title">Member Directory</h2>
+            <div style="display: flex; gap: 1rem;">
+                <input type="text" placeholder="Search members..." style="padding: 0.5rem; border-radius: 6px; border: 1px solid var(--nhs-border);">
+                <select style="padding: 0.5rem; border-radius: 6px; border: 1px solid var(--nhs-border);">
+                    <option>All Grades</option>
+                    <option>Grade 9</option>
+                    <option>Grade 10</option>
+                    <option>Grade 11</option>
+                    <option>Grade 12</option>
+                </select>
+            </div>
+        </div>
+        <div class="nhs-card-body">
+            <!-- Member List -->
+            <div class="member-card">
+                <img src="https://randomuser.me/api/portraits/women/1.jpg" alt="Sarah Johnson" class="member-avatar">
+                <div class="member-info">
+                    <div class="member-name">Sarah Johnson</div>
+                    <div class="member-details">Grade 12 • President • sarah.johnson@school.edu</div>
+                </div>
+                <div class="member-stats">
+                    <div class="member-credits">32.5</div>
+                    <div class="member-progress">Credits</div>
+                </div>
+                <div style="margin-left: 1rem;">
+                    <span class="nhs-badge nhs-badge-gold">President</span>
+                </div>
+            </div>
+
+            <div class="member-card">
+                <img src="https://randomuser.me/api/portraits/men/2.jpg" alt="Michael Chen" class="member-avatar">
+                <div class="member-info">
+                    <div class="member-name">Michael Chen</div>
+                    <div class="member-details">Grade 11 • Vice President • michael.chen@school.edu</div>
+                </div>
+                <div class="member-stats">
+                    <div class="member-credits">28.0</div>
+                    <div class="member-progress">Credits</div>
+                </div>
+                <div style="margin-left: 1rem;">
+                    <span class="nhs-badge nhs-badge-accent">VP</span>
+                </div>
+            </div>
+
+            <div class="member-card">
+                <img src="https://randomuser.me/api/portraits/women/3.jpg" alt="Emma Wilson" class="member-avatar">
+                <div class="member-info">
+                    <div class="member-name">Emma Wilson</div>
+                    <div class="member-details">Grade 11 • Secretary • emma.wilson@school.edu</div>
+                </div>
+                <div class="member-stats">
+                    <div class="member-credits">26.5</div>
+                    <div class="member-progress">Credits</div>
+                </div>
+                <div style="margin-left: 1rem;">
+                    <span class="nhs-badge nhs-badge-primary">Secretary</span>
+                </div>
+            </div>
+
+            <div class="member-card">
+                <img src="https://randomuser.me/api/portraits/men/4.jpg" alt="David Rodriguez" class="member-avatar">
+                <div class="member-info">
+                    <div class="member-name">David Rodriguez</div>
+                    <div class="member-details">Grade 12 • Treasurer • david.rodriguez@school.edu</div>
+                </div>
+                <div class="member-stats">
+                    <div class="member-credits">30.0</div>
+                    <div class="member-progress">Credits</div>
+                </div>
+                <div style="margin-left: 1rem;">
+                    <span class="nhs-badge nhs-badge-warning">Treasurer</span>
+                </div>
+            </div>
+
+            <div class="member-card">
+                <img src="https://randomuser.me/api/portraits/women/5.jpg" alt="Olivia Martinez" class="member-avatar">
+                <div class="member-info">
+                    <div class="member-name">Olivia Martinez</div>
+                    <div class="member-details">Grade 10 • Member • olivia.martinez@school.edu</div>
+                </div>
+                <div class="member-stats">
+                    <div class="member-credits">18.5</div>
+                    <div class="member-progress">Credits</div>
+                </div>
+                <div style="margin-left: 1rem;">
+                    <span class="nhs-badge nhs-badge-success">Active</span>
+                </div>
+            </div>
+
+            <div class="member-card">
+                <img src="https://randomuser.me/api/portraits/men/6.jpg" alt="James Thompson" class="member-avatar">
+                <div class="member-info">
+                    <div class="member-name">James Thompson</div>
+                    <div class="member-details">Grade 11 • Member • james.thompson@school.edu</div>
+                </div>
+                <div class="member-stats">
+                    <div class="member-credits">22.0</div>
+                    <div class="member-progress">Credits</div>
+                </div>
+                <div style="margin-left: 1rem;">
+                    <span class="nhs-badge nhs-badge-success">Active</span>
+                </div>
+            </div>
+
+            <div class="member-card">
+                <img src="https://randomuser.me/api/portraits/women/7.jpg" alt="Sophia Lee" class="member-avatar">
+                <div class="member-info">
+                    <div class="member-name">Sophia Lee</div>
+                    <div class="member-details">Grade 9 • New Member • sophia.lee@school.edu</div>
+                </div>
+                <div class="member-stats">
+                    <div class="member-credits">8.5</div>
+                    <div class="member-progress">Credits</div>
+                </div>
+                <div style="margin-left: 1rem;">
+                    <span class="nhs-badge nhs-badge-primary">New</span>
+                </div>
+            </div>
+
+            <div class="member-card">
+                <img src="https://randomuser.me/api/portraits/men/8.jpg" alt="Alexander Kim" class="member-avatar">
+                <div class="member-info">
+                    <div class="member-name">Alexander Kim</div>
+                    <div class="member-details">Grade 12 • Member • alexander.kim@school.edu</div>
+                </div>
+                <div class="member-stats">
+                    <div class="member-credits">35.0</div>
+                    <div class="member-progress">Credits</div>
+                </div>
+                <div style="margin-left: 1rem;">
+                    <span class="nhs-badge nhs-badge-success">Active</span>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="nhs-btn nhs-btn-secondary" style="margin: 0 0.5rem;">Previous</button>
+                <span style="margin: 0 1rem; color: var(--nhs-text);">Page 1 of 20</span>
+                <button class="nhs-btn nhs-btn-secondary" style="margin: 0 0.5rem;">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="nhs-card">
+        <div class="nhs-card-header">
+            <h2 class="nhs-card-title">Quick Actions</h2>
+        </div>
+        <div class="nhs-card-body">
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <button class="nhs-btn nhs-btn-primary">Add New Member</button>
+                <button class="nhs-btn nhs-btn-accent">Export Member List</button>
+                <button class="nhs-btn nhs-btn-gold">Send Group Message</button>
+                <button class="nhs-btn nhs-btn-secondary">Generate Report</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('NHS Members page loaded');
+    
+    // Add search functionality
+    const searchInput = document.querySelector('input[placeholder="Search members..."]');
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            // In a real app, this would filter the member list
+            console.log('Searching for:', e.target.value);
+        });
+    }
+});
+</script>
+{% endblock %} 
