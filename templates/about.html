@@ -1,0 +1,509 @@
+{% extends "base.html" %}
+
+{% block title %}About Us - SciWeb 3.0{% endblock %}
+
+{% block head %}
+<style>
+.about-hero {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    color: white;
+    padding: 4rem 2rem;
+    text-align: center;
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.about-hero::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" patternUnits="userSpaceOnUse" width="10" height="10"><circle cx="5" cy="5" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>') repeat;
+    pointer-events: none;
+}
+
+.about-hero h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 1;
+}
+
+.about-hero p {
+    font-size: 1.3rem;
+    max-width: 800px;
+    margin: 0 auto;
+    opacity: 0.95;
+    position: relative;
+    z-index: 1;
+}
+
+.about-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem 3rem;
+}
+
+.mission-section {
+    background: var(--bg-light);
+    border-radius: 20px;
+    padding: 3rem;
+    margin-bottom: 4rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+body.dark-mode .mission-section {
+    background: var(--bg-dark-accent);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.mission-content {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--text-dark);
+    text-align: center;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+body.dark-mode .mission-content {
+    color: var(--text-light);
+}
+
+.mission-highlight {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.team-section {
+    margin-bottom: 3rem;
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.team-card {
+    background: var(--bg-light);
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+body.dark-mode .team-card {
+    background: var(--bg-dark-accent);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.team-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+body.dark-mode .team-card:hover {
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+}
+
+.team-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--primary), var(--accent), var(--primary-light));
+}
+
+.team-photo {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    margin: 0 auto 1.5rem;
+    border: 4px solid var(--primary);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    object-fit: cover;
+}
+
+.team-name {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+}
+
+body.dark-mode .team-name {
+    color: var(--text-light);
+}
+
+.team-role {
+    font-size: 1rem;
+    color: var(--primary);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.team-bio {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.team-links {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.team-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.team-link:hover {
+    background: var(--primary-dark);
+    transform: scale(1.1);
+}
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--text-dark);
+    position: relative;
+}
+
+body.dark-mode .section-title {
+    color: var(--text-light);
+}
+
+.section-title::after {
+    content: "";
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    border-radius: 2px;
+}
+
+.values-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin: 3rem 0;
+}
+
+.value-card {
+    background: var(--bg-light);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    border: 2px solid transparent;
+    transition: border-color 0.3s ease, transform 0.3s ease;
+}
+
+body.dark-mode .value-card {
+    background: var(--bg-dark-accent);
+}
+
+.value-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-5px);
+}
+
+.value-icon {
+    font-size: 3rem;
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+.value-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 1rem;
+}
+
+body.dark-mode .value-title {
+    color: var(--text-light);
+}
+
+.value-description {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+    .about-hero h1 {
+        font-size: 2.2rem;
+    }
+    
+    .about-hero p {
+        font-size: 1.1rem;
+    }
+    
+    .mission-section {
+        padding: 2rem;
+    }
+    
+    .team-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .values-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="about-hero">
+    <h1><i class="fas fa-rocket"></i> About SciWeb 3.0</h1>
+    <p>Empowering the next generation of New York students through innovative learning connections</p>
+</section>
+
+<div class="about-container">
+    <!-- Mission Statement -->
+    <section class="mission-section">
+        <div class="mission-content">
+            <p>
+                <span class="mission-highlight">SciWeb 3.0</span> is more than just an educational platform—it's a movement toward 
+                <span class="mission-highlight">equitable access</span> and revolutionary learning experiences. We believe that every 
+                student in New York deserves the opportunity to excel, regardless of their background, location, or circumstances.
+            </p>
+            <p>
+                Our platform <span class="mission-highlight">transcends traditional barriers</span> by creating meaningful connections 
+                between students, educators, and learning resources across the state. Through innovative technology and collaborative 
+                learning environments, we're <span class="mission-highlight">innovating the way students connect</span> with knowledge, 
+                with each other, and with their academic futures.
+            </p>
+            <p>
+                By fostering a community where <span class="mission-highlight">collaboration over competition</span> drives success, 
+                SciWeb 3.0 is transforming education from an isolated experience into a connected, supportive network that empowers 
+                every student to reach their full potential and build the future they envision.
+            </p>
+        </div>
+    </section>
+
+    <!-- Core Values -->
+    <section>
+        <h2 class="section-title">Our Core Values</h2>
+        <div class="values-grid">
+            <div class="value-card">
+                <div class="value-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 class="value-title">Equity & Inclusion</h3>
+                <p class="value-description">
+                    Breaking down barriers and ensuring every student has access to quality educational resources and opportunities.
+                </p>
+            </div>
+            
+            <div class="value-card">
+                <div class="value-icon">
+                    <i class="fas fa-lightbulb"></i>
+                </div>
+                <h3 class="value-title">Innovation</h3>
+                <p class="value-description">
+                    Continuously evolving our platform with cutting-edge technology to enhance the learning experience.
+                </p>
+            </div>
+            
+            <div class="value-card">
+                <div class="value-icon">
+                    <i class="fas fa-network-wired"></i>
+                </div>
+                <h3 class="value-title">Connection</h3>
+                <p class="value-description">
+                    Building bridges between students, educators, and communities to create a supportive learning ecosystem.
+                </p>
+            </div>
+            
+            <div class="value-card">
+                <div class="value-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <h3 class="value-title">Excellence</h3>
+                <p class="value-description">
+                    Empowering students to achieve their highest potential through personalized and adaptive learning paths.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Meet the Team -->
+    <section class="team-section">
+        <h2 class="section-title">Meet Our Team</h2>
+        <div class="team-grid">
+            <!-- Founder/CEO -->
+            <div class="team-card">
+                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Aaron Thompson" class="team-photo">
+                <h3 class="team-name">Aaron Thompson</h3>
+                <p class="team-role">Founder & CEO</p>
+                <p class="team-bio">
+                    Passionate educator and technologist dedicated to democratizing access to quality education. Aaron founded SciWeb 3.0 
+                    with the vision of creating equitable learning opportunities for all New York students.
+                </p>
+                <div class="team-links">
+                    <a href="#" class="team-link"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="team-link"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="team-link"><i class="fas fa-envelope"></i></a>
+                </div>
+            </div>
+
+            <!-- CTO -->
+            <div class="team-card">
+                <img src="https://randomuser.me/api/portraits/women/45.jpg" alt="Dr. Sarah Chen" class="team-photo">
+                <h3 class="team-name">Dr. Sarah Chen</h3>
+                <p class="team-role">Chief Technology Officer</p>
+                <p class="team-bio">
+                    Former MIT researcher with expertise in AI and educational technology. Sarah leads our technical innovation, 
+                    ensuring our platform remains at the forefront of educational technology.
+                </p>
+                <div class="team-links">
+                    <a href="#" class="team-link"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="team-link"><i class="fab fa-github"></i></a>
+                    <a href="#" class="team-link"><i class="fas fa-envelope"></i></a>
+                </div>
+            </div>
+
+            <!-- Head of Education -->
+            <div class="team-card">
+                <img src="https://randomuser.me/api/portraits/men/28.jpg" alt="Michael Rodriguez" class="team-photo">
+                <h3 class="team-name">Michael Rodriguez</h3>
+                <p class="team-role">Head of Education</p>
+                <p class="team-bio">
+                    Veteran educator with 15+ years in New York public schools. Michael ensures our platform meets the real needs 
+                    of students and teachers across diverse educational environments.
+                </p>
+                <div class="team-links">
+                    <a href="#" class="team-link"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="team-link"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="team-link"><i class="fas fa-envelope"></i></a>
+                </div>
+            </div>
+
+            <!-- UX Design Lead -->
+            <div class="team-card">
+                <img src="https://randomuser.me/api/portraits/women/31.jpg" alt="Emma Wilson" class="team-photo">
+                <h3 class="team-name">Emma Wilson</h3>
+                <p class="team-role">UX Design Lead</p>
+                <p class="team-bio">
+                    Creative design strategist focused on inclusive, accessible user experiences. Emma ensures our platform is 
+                    intuitive and welcoming for students of all backgrounds and abilities.
+                </p>
+                <div class="team-links">
+                    <a href="#" class="team-link"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="team-link"><i class="fab fa-dribbble"></i></a>
+                    <a href="#" class="team-link"><i class="fas fa-envelope"></i></a>
+                </div>
+            </div>
+
+            <!-- Community Outreach -->
+            <div class="team-card">
+                <img src="https://randomuser.me/api/portraits/women/22.jpg" alt="Aaliyah Johnson" class="team-photo">
+                <h3 class="team-name">Aaliyah Johnson</h3>
+                <p class="team-role">Community Outreach Director</p>
+                <p class="team-bio">
+                    Dedicated advocate for educational equity with deep roots in New York communities. Aaliyah builds partnerships 
+                    and ensures our platform serves students from all backgrounds.
+                </p>
+                <div class="team-links">
+                    <a href="#" class="team-link"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="team-link"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="team-link"><i class="fas fa-envelope"></i></a>
+                </div>
+            </div>
+
+            <!-- Data Science Lead -->
+            <div class="team-card">
+                <img src="https://randomuser.me/api/portraits/men/41.jpg" alt="David Kim" class="team-photo">
+                <h3 class="team-name">David Kim</h3>
+                <p class="team-role">Data Science Lead</p>
+                <p class="team-bio">
+                    Analytics expert passionate about using data to improve educational outcomes. David develops insights that help 
+                    personalize learning experiences and measure student success.
+                </p>
+                <div class="team-links">
+                    <a href="#" class="team-link"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="team-link"><i class="fab fa-github"></i></a>
+                    <a href="#" class="team-link"><i class="fas fa-envelope"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section style="text-align: center; margin: 4rem 0; padding: 3rem; background: linear-gradient(135deg, var(--primary-light), var(--accent)); border-radius: 20px; color: white;">
+        <h2 style="font-size: 2rem; margin-bottom: 1rem;">Join Our Mission</h2>
+        <p style="font-size: 1.2rem; margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+            Together, we're building a future where every student has the opportunity to succeed. 
+            Join our community and be part of the educational revolution.
+        </p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="/signup" class="btn btn-secondary" style="background: white; color: var(--primary); padding: 1rem 2rem; border-radius: 50px; text-decoration: none; font-weight: 600; transition: transform 0.3s ease;">
+                Get Started Today
+            </a>
+            <a href="/contact" class="btn btn-outline" style="border: 2px solid white; color: white; padding: 1rem 2rem; border-radius: 50px; text-decoration: none; font-weight: 600; transition: all 0.3s ease;">
+                Contact Us
+            </a>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add smooth hover animations for team cards
+    const teamCards = document.querySelectorAll('.team-card');
+    teamCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-10px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+
+    // Add parallax effect to hero section
+    window.addEventListener('scroll', function() {
+        const hero = document.querySelector('.about-hero');
+        const scrolled = window.pageYOffset;
+        const parallax = scrolled * 0.5;
+        
+        if (hero) {
+            hero.style.transform = `translateY(${parallax}px)`;
+        }
+    });
+});
+</script>
+{% endblock %} 

@@ -2687,6 +2687,11 @@ def mindweb(test_id):
     
     return render_template('mindweb.html', test_id=test_id, **test_data)
 
+@app.route('/about')
+def about():
+    """About Us page with mission statement and team information"""
+    return render_template('about.html')
+
 @app.route('/motivation')
 def motivation_stream():
     return render_template('motivation_stream.html')
