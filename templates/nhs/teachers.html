@@ -564,30 +564,5 @@ body.dark-mode .glowing-speck { background: rgba(255, 26, 117, 0.7); box-shadow:
 {% endblock %}
 
 {% block scripts %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('NHS Teachers Portal loaded');
-    
-    // Add click handlers for approval buttons
-    document.querySelectorAll('.nhs-btn').forEach(button => {
-        if (button.textContent.includes('Approve')) {
-            button.addEventListener('click', function() {
-                // In a real app, this would send an API request
-                console.log('Approving credit submission');
-                button.textContent = 'Approved';
-                button.className = 'nhs-btn nhs-btn-success';
-                button.disabled = true;
-            });
-        } else if (button.textContent.includes('Reject')) {
-            button.addEventListener('click', function() {
-                // In a real app, this would send an API request
-                console.log('Rejecting credit submission');
-                button.textContent = 'Rejected';
-                button.className = 'nhs-btn nhs-btn-danger';
-                button.disabled = true;
-            });
-        }
-    });
-});
-</script>
+<script src="{{ url_for('static', filename='js/nhs/teachers.js') }}"></script>
 {% endblock %} 

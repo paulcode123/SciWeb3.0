@@ -287,12 +287,6 @@
     </footer>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    <script>
-        // Simple form handling for demo
-        document.getElementById('credit-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            alert('Credit submission received! It will be reviewed by NHS advisors.');
-        });
-    </script>
+    <script src="{{ url_for('static', filename='js/nhs/credit.js') }}"></script>
 </body>
 </html> 

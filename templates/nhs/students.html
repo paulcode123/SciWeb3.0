@@ -474,6 +474,7 @@ body.dark-mode .glowing-speck { background: rgba(255, 26, 117, 0.7); box-shadow:
 {% endblock %}
 
 {% block scripts %}
+<script src="{{ url_for('static', filename='js/nhs/students.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     console.log('NHS Students Portal loaded');

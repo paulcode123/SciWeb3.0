@@ -2696,5 +2696,449 @@ def about():
 def motivation_stream():
     return render_template('motivation_stream.html')
 
+# NHS API Endpoints for Database Storage
+
+@app.route('/api/nhs/credits/submit', methods=['POST'])
+def submit_nhs_credit():
+    """Submit NHS service credit for review"""
+    auth_check = require_login()
+    if auth_check: 
+        return jsonify({"error": "Authentication required"}), 401
+    
+    try:
+        data = request.get_json()
+        user_id = session.get('user_id')
+        
+        # Validate required fields
+        required_fields = ['service_type', 'activity_title', 'date', 'hours', 'description', 'supervisor', 'supervisor_email']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({"error": f"{field.replace('_', ' ').title()} is required"}), 400
+        
+        # Create credit submission document
+        credit_data = {
+            'id': str(uuid.uuid4()),
+            'student_id': user_id,
+            'service_type': data['service_type'],
+            'activity_title': data['activity_title'],
+            'date': data['date'],
+            'hours': float(data['hours']),
+            'location': data.get('location', ''),
+            'description': data['description'],
+            'supervisor': data['supervisor'],
+            'supervisor_email': data['supervisor_email'],
+            'status': 'pending',
+            'submitted_at': datetime.datetime.now(),
+            'reviewed_at': None,
+            'reviewed_by': None,
+            'reviewer_comments': '',
+            'created_at': datetime.datetime.now(),
+            'updated_at': datetime.datetime.now()
+        }
+        
+        # Save to database
+        if is_firebase_available():
+            db.collection('NHS_Credits').document(credit_data['id']).set(credit_data)
+        
+        # Update student's NHS statistics
+        if is_firebase_available():
+            student_ref = db.collection('Members').document(user_id)
+            student_doc = student_ref.get()
+            
+            if student_doc.exists:
+                student_data = student_doc.to_dict()
+                nhs_stats = student_data.get('nhs_stats', {
+                    'total_credits': 0,
+                    'pending_credits': 0,
+                    'approved_credits': 0,
+                    'rejected_credits': 0,
+                    'credits_by_type': {}
+                })
+                
+                # Update pending credits
+                nhs_stats['pending_credits'] += credit_data['hours']
+                
+                # Update credits by type
+                service_type = credit_data['service_type']
+                if service_type not in nhs_stats['credits_by_type']:
+                    nhs_stats['credits_by_type'][service_type] = {'pending': 0, 'approved': 0}
+                nhs_stats['credits_by_type'][service_type]['pending'] += credit_data['hours']
+                
+                # Update student document
+                student_ref.update({
+                    'nhs_stats': nhs_stats,
+                    'updated_at': datetime.datetime.now()
+                })
+        
+        return jsonify({
+            "success": True,
+            "message": "Credit submission successful",
+            "credit_id": credit_data['id']
+        }), 200
+        
+    except Exception as e:
+        print(f"Error submitting NHS credit: {str(e)}")
+        return jsonify({"error": "Failed to submit credit"}), 500
+
+@app.route('/api/nhs/credits/review', methods=['POST'])
+def review_nhs_credit():
+    """Review and approve/reject NHS credit submission (teachers only)"""
+    auth_check = require_login()
+    if auth_check:
+        return jsonify({"error": "Authentication required"}), 401
+    
+    try:
+        data = request.get_json()
+        user_id = session.get('user_id')
+        
+        # Check if user is a teacher/admin
+        if is_firebase_available():
+            user_ref = db.collection('Members').document(user_id)
+            user_doc = user_ref.get()
+            
+            if not user_doc.exists:
+                return jsonify({"error": "User not found"}), 404
+            
+            user_data = user_doc.to_dict()
+            if user_data.get('userType') not in ['teacher', 'admin']:
+                return jsonify({"error": "Insufficient permissions"}), 403
+        
+        # Validate required fields
+        required_fields = ['credit_id', 'action', 'comments']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({"error": f"{field} is required"}), 400
+        
+        credit_id = data['credit_id']
+        action = data['action']  # 'approve' or 'reject'
+        comments = data['comments']
+        
+        if action not in ['approve', 'reject']:
+            return jsonify({"error": "Invalid action"}), 400
+        
+        # Update credit document
+        if is_firebase_available():
+            credit_ref = db.collection('NHS_Credits').document(credit_id)
+            credit_doc = credit_ref.get()
+            
+            if not credit_doc.exists:
+                return jsonify({"error": "Credit submission not found"}), 404
+            
+            credit_data = credit_doc.to_dict()
+            
+            # Update credit status
+            update_data = {
+                'status': 'approved' if action == 'approve' else 'rejected',
+                'reviewed_at': datetime.datetime.now(),
+                'reviewed_by': user_id,
+                'reviewer_comments': comments,
+                'updated_at': datetime.datetime.now()
+            }
+            
+            credit_ref.update(update_data)
+            
+            # Update student's NHS statistics
+            student_id = credit_data['student_id']
+            hours = credit_data['hours']
+            service_type = credit_data['service_type']
+            
+            student_ref = db.collection('Members').document(student_id)
+            student_doc = student_ref.get()
+            
+            if student_doc.exists:
+                student_data = student_doc.to_dict()
+                nhs_stats = student_data.get('nhs_stats', {
+                    'total_credits': 0,
+                    'pending_credits': 0,
+                    'approved_credits': 0,
+                    'rejected_credits': 0,
+                    'credits_by_type': {}
+                })
+                
+                # Remove from pending
+                nhs_stats['pending_credits'] = max(0, nhs_stats['pending_credits'] - hours)
+                
+                # Add to appropriate category
+                if action == 'approve':
+                    nhs_stats['approved_credits'] += hours
+                    nhs_stats['total_credits'] += hours
+                else:
+                    nhs_stats['rejected_credits'] += hours
+                
+                # Update credits by type
+                if service_type in nhs_stats['credits_by_type']:
+                    nhs_stats['credits_by_type'][service_type]['pending'] = max(0, 
+                        nhs_stats['credits_by_type'][service_type]['pending'] - hours)
+                    
+                    if action == 'approve':
+                        nhs_stats['credits_by_type'][service_type]['approved'] += hours
+                
+                # Update student document
+                student_ref.update({
+                    'nhs_stats': nhs_stats,
+                    'updated_at': datetime.datetime.now()
+                })
+        
+        return jsonify({
+            "success": True,
+            "message": f"Credit {action}d successfully"
+        }), 200
+        
+    except Exception as e:
+        print(f"Error reviewing NHS credit: {str(e)}")
+        return jsonify({"error": "Failed to review credit"}), 500
+
+@app.route('/api/nhs/credits/list', methods=['GET'])
+def list_nhs_credits():
+    """Get NHS credits for a user or all credits for teachers"""
+    auth_check = require_login()
+    if auth_check:
+        return jsonify({"error": "Authentication required"}), 401
+    
+    try:
+        user_id = session.get('user_id')
+        
+        # Get query parameters
+        student_id = request.args.get('student_id')
+        status = request.args.get('status')  # pending, approved, rejected
+        limit = int(request.args.get('limit', 50))
+        
+        if not is_firebase_available():
+            return jsonify({"credits": []}), 200
+        
+        # Check user permissions
+        user_ref = db.collection('Members').document(user_id)
+        user_doc = user_ref.get()
+        
+        if not user_doc.exists:
+            return jsonify({"error": "User not found"}), 404
+        
+        user_data = user_doc.to_dict()
+        user_type = user_data.get('userType', 'student')
+        
+        # Build query
+        query = db.collection('NHS_Credits')
+        
+        # If student, only show their credits
+        if user_type == 'student':
+            query = query.where('student_id', '==', user_id)
+        # If teacher/admin requesting specific student
+        elif student_id:
+            query = query.where('student_id', '==', student_id)
+        
+        # Filter by status if specified
+        if status:
+            query = query.where('status', '==', status)
+        
+        # Order by submission date (newest first) and limit
+        query = query.order_by('submitted_at', direction='DESCENDING').limit(limit)
+        
+        # Execute query
+        credits = []
+        for doc in query.stream():
+            credit_data = doc.to_dict()
+            credit_data['id'] = doc.id
+            
+            # Get student name for teacher view
+            if user_type in ['teacher', 'admin'] and credit_data.get('student_id'):
+                student_ref = db.collection('Members').document(credit_data['student_id'])
+                student_doc = student_ref.get()
+                if student_doc.exists:
+                    student_data = student_doc.to_dict()
+                    credit_data['student_name'] = f"{student_data.get('first_name', '')} {student_data.get('last_name', '')}"
+                    credit_data['student_email'] = student_data.get('email', '')
+            
+            credits.append(credit_data)
+        
+        return jsonify({
+            "success": True,
+            "credits": credits
+        }), 200
+        
+    except Exception as e:
+        print(f"Error listing NHS credits: {str(e)}")
+        return jsonify({"error": "Failed to fetch credits"}), 500
+
+@app.route('/api/nhs/events/create', methods=['POST'])
+def create_nhs_event():
+    """Create NHS event (teachers/admins only)"""
+    auth_check = require_login()
+    if auth_check:
+        return jsonify({"error": "Authentication required"}), 401
+    
+    try:
+        data = request.get_json()
+        user_id = session.get('user_id')
+        
+        # Check if user is a teacher/admin
+        if is_firebase_available():
+            user_ref = db.collection('Members').document(user_id)
+            user_doc = user_ref.get()
+            
+            if not user_doc.exists:
+                return jsonify({"error": "User not found"}), 404
+            
+            user_data = user_doc.to_dict()
+            if user_data.get('userType') not in ['teacher', 'admin']:
+                return jsonify({"error": "Insufficient permissions"}), 403
+        
+        # Validate required fields
+        required_fields = ['title', 'description', 'date', 'time', 'location', 'event_type']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({"error": f"{field.replace('_', ' ').title()} is required"}), 400
+        
+        # Create event document
+        event_data = {
+            'id': str(uuid.uuid4()),
+            'title': data['title'],
+            'description': data['description'],
+            'date': data['date'],
+            'time': data['time'],
+            'location': data['location'],
+            'event_type': data['event_type'],  # community_service, fundraising, meeting, etc.
+            'max_participants': data.get('max_participants'),
+            'credit_hours': data.get('credit_hours', 0),
+            'created_by': user_id,
+            'created_at': datetime.datetime.now(),
+            'updated_at': datetime.datetime.now(),
+            'status': 'active',
+            'participants': [],
+            'waitlist': []
+        }
+        
+        # Save to database
+        if is_firebase_available():
+            db.collection('NHS_Events').document(event_data['id']).set(event_data)
+        
+        return jsonify({
+            "success": True,
+            "message": "Event created successfully",
+            "event_id": event_data['id']
+        }), 200
+        
+    except Exception as e:
+        print(f"Error creating NHS event: {str(e)}")
+        return jsonify({"error": "Failed to create event"}), 500
+
+@app.route('/api/nhs/events/signup', methods=['POST'])
+def signup_nhs_event():
+    """Sign up for NHS event"""
+    auth_check = require_login()
+    if auth_check:
+        return jsonify({"error": "Authentication required"}), 401
+    
+    try:
+        data = request.get_json()
+        user_id = session.get('user_id')
+        event_id = data.get('event_id')
+        
+        if not event_id:
+            return jsonify({"error": "Event ID is required"}), 400
+        
+        if not is_firebase_available():
+            return jsonify({"error": "Database unavailable"}), 500
+        
+        # Get event document
+        event_ref = db.collection('NHS_Events').document(event_id)
+        event_doc = event_ref.get()
+        
+        if not event_doc.exists:
+            return jsonify({"error": "Event not found"}), 404
+        
+        event_data = event_doc.to_dict()
+        participants = event_data.get('participants', [])
+        waitlist = event_data.get('waitlist', [])
+        max_participants = event_data.get('max_participants')
+        
+        # Check if already signed up
+        if user_id in participants or user_id in waitlist:
+            return jsonify({"error": "Already signed up for this event"}), 400
+        
+        # Add to participants or waitlist
+        if max_participants and len(participants) >= max_participants:
+            waitlist.append({
+                'user_id': user_id,
+                'signed_up_at': datetime.datetime.now()
+            })
+            message = "Added to waitlist"
+        else:
+            participants.append({
+                'user_id': user_id,
+                'signed_up_at': datetime.datetime.now(),
+                'status': 'registered'
+            })
+            message = "Successfully signed up"
+        
+        # Update event document
+        event_ref.update({
+            'participants': participants,
+            'waitlist': waitlist,
+            'updated_at': datetime.datetime.now()
+        })
+        
+        return jsonify({
+            "success": True,
+            "message": message
+        }), 200
+        
+    except Exception as e:
+        print(f"Error signing up for NHS event: {str(e)}")
+        return jsonify({"error": "Failed to sign up for event"}), 500
+
+@app.route('/api/nhs/members/stats', methods=['GET'])
+def get_nhs_member_stats():
+    """Get NHS member statistics"""
+    auth_check = require_login()
+    if auth_check:
+        return jsonify({"error": "Authentication required"}), 401
+    
+    try:
+        user_id = session.get('user_id')
+        
+        if not is_firebase_available():
+            # Return mock data if database unavailable
+            return jsonify({
+                "success": True,
+                "stats": {
+                    "total_credits": 18.5,
+                    "pending_credits": 3.0,
+                    "approved_credits": 18.5,
+                    "rejected_credits": 2.0,
+                    "credits_by_type": {
+                        "community": {"approved": 8.5, "pending": 1.0},
+                        "tutoring": {"approved": 6.0, "pending": 2.0},
+                        "leadership": {"approved": 4.0, "pending": 0.0}
+                    },
+                    "rank": 12,
+                    "goal": 25
+                }
+            }), 200
+        
+        # Get user's NHS statistics
+        user_ref = db.collection('Members').document(user_id)
+        user_doc = user_ref.get()
+        
+        if not user_doc.exists:
+            return jsonify({"error": "User not found"}), 404
+        
+        user_data = user_doc.to_dict()
+        nhs_stats = user_data.get('nhs_stats', {
+            'total_credits': 0,
+            'pending_credits': 0,
+            'approved_credits': 0,
+            'rejected_credits': 0,
+            'credits_by_type': {}
+        })
+        
+        return jsonify({
+            "success": True,
+            "stats": nhs_stats
+        }), 200
+        
+    except Exception as e:
+        print(f"Error getting NHS member stats: {str(e)}")
+        return jsonify({"error": "Failed to fetch stats"}), 500
+
 if __name__ == '__main__':
     app.run(debug=True, host='localhost', port=8080)
