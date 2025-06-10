@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SciWeb 3.0 - NHS Service Opportunities</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nhs.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="logo">
+            <div class="logo-text">SciWeb</div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/tree">Tree</a></li>
+            <li><a href="/schedule">Schedule</a></li>
+            <li><a href="/counselor">Counselor</a></li>
+            <li><a href="/nhs">NHS</a></li>
+            <li><a href="/signup">Sign Up</a></li>
+        </ul>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
+    </nav>
+
+    <!-- NHS Hero Section -->
+    <section class="nhs-hero" style="padding: 2rem;">
+        <h1>Service Opportunities</h1>
+        <p>Find and join meaningful service projects in your community</p>
+    </section>
+
+    <div class="nhs-container">
+        <!-- Search and Filter Section -->
+        <div class="nhs-card">
+            <div class="nhs-card-header">
+                <h2 class="nhs-card-title">Find Opportunities</h2>
+            </div>
+            <div class="nhs-card-body">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="nhs-form-group">
+                        <label class="nhs-form-label" for="search">Search</label>
+                        <input class="nhs-form-input" type="text" id="search" placeholder="Search opportunities...">
+                    </div>
+                    <div class="nhs-form-group">
+                        <label class="nhs-form-label" for="category">Category</label>
+                        <select class="nhs-form-select" id="category">
+                            <option value="">All Categories</option>
+                            <option value="community">Community Service</option>
+                            <option value="tutoring">Tutoring</option>
+                            <option value="leadership">Leadership</option>
+                            <option value="environmental">Environmental</option>
+                            <option value="healthcare">Healthcare</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Featured Opportunities -->
+        <div class="nhs-card" style="margin-top: 1.5rem;">
+            <div class="nhs-card-header">
+                <h2 class="nhs-card-title">Opportunities</h2>
+            </div>
+            <div class="nhs-card-body">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                    <!-- Community Garden -->
+                    <div class="nhs-card" style="margin-bottom: 0;">
+                        <div style="padding: 1rem;">
+                            <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">
+                                <i class="fas fa-seedling"></i> Community Garden
+                            </h3>
+                            <p><strong>Location:</strong> School Garden</p>
+                            <p><strong>Schedule:</strong> Saturdays, 9am-12pm</p>
+                            <p><strong>Credits:</strong> 3 hours per session</p>
+                            <p><strong>Description:</strong> Help maintain our school's community garden. Tasks include planting, weeding, and harvesting produce for local food banks.</p>
+                            <p><strong>Contact:</strong> Mrs. Peterson (mpeterson@school.edu)</p>
+                            <button class="nhs-btn nhs-btn-primary" style="width: 100%; margin-top: 1rem;">
+                                <i class="fas fa-hand-point-right"></i> Sign Up
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Peer Tutoring Program -->
+                    <div class="nhs-card" style="margin-bottom: 0;">
+                        <div style="padding: 1rem;">
+                            <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">
+                                <i class="fas fa-book-reader"></i> Peer Tutoring
+                            </h3>
+                            <p><strong>Location:</strong> School Library</p>
+                            <p><strong>Schedule:</strong> Mon-Thu, 3:30-5:30pm</p>
+                            <p><strong>Credits:</strong> 2 hours per session</p>
+                            <p><strong>Description:</strong> Provide academic support to fellow students in various subjects. Training provided.</p>
+                            <p><strong>Contact:</strong> Mr. Johnson (jjohnson@school.edu)</p>
+                            <button class="nhs-btn nhs-btn-primary" style="width: 100%; margin-top: 1rem;">
+                                <i class="fas fa-hand-point-right"></i> Sign Up
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Food Drive -->
+                    <div class="nhs-card" style="margin-bottom: 0;">
+                        <div style="padding: 1rem;">
+                            <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">
+                                <i class="fas fa-hands-helping"></i> Spring Food Drive
+                            </h3>
+                            <p><strong>Location:</strong> Various Locations</p>
+                            <p><strong>Schedule:</strong> April 15-30</p>
+                            <p><strong>Credits:</strong> 1-5 hours</p>
+                            <p><strong>Description:</strong> Help collect, sort, and distribute food donations for local families in need.</p>
+                            <p><strong>Contact:</strong> Ms. Williams (mwilliams@school.edu)</p>
+                            <button class="nhs-btn nhs-btn-primary" style="width: 100%; margin-top: 1rem;">
+                                <i class="fas fa-hand-point-right"></i> Sign Up
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Events -->
+        <div class="nhs-card" style="margin-top: 1.5rem;">
+            <div class="nhs-card-header">
+                <h2 class="nhs-card-title">Upcoming Events</h2>
+            </div>
+            <div class="nhs-card-body">
+                <table class="nhs-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Event</th>
+                            <th>Location</th>
+                            <th>In School?</th>
+                            <th>Contact</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>May 1, 2025</td>
+                            <td>Beach Cleanup</td>
+                            <td>City Beach</td>
+                            <td>4</td>
+                            <td>Email</td>
+                        </tr>
+                        <tr>
+                            <td>May 5, 2025</td>
+                            <td>Senior Center Tech Help</td>
+                            <td>Golden Years Center</td>
+                            <td>3</td>
+                            <td><button class="nhs-btn nhs-btn-secondary">Join</button></td>
+                        </tr>
+                        <tr>
+                            <td>May 10, 2025</td>
+                            <td>Science Fair Mentoring</td>
+                            <td>School Gym</td>
+                            <td>5</td>
+                            <td><button class="nhs-btn nhs-btn-secondary">Join</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Submit New Opportunity -->
+        <div class="nhs-card" style="margin-top: 1.5rem;">
+            <div class="nhs-card-header">
+                <h2 class="nhs-card-title">Submit New Opportunity</h2>
+            </div>
+            <div class="nhs-card-body">
+                <p>Know any opportunities that are not listed here? A teacher offering service hours during SGI or a school even looking for volunteers. Submit them here and
+                    we'll review them and add them to the list!
+                </p>
+                
+                <form id="submit-opportunity-form">
+                    <div class="nhs-form-group">
+                        <label class="nhs-form-label" for="opportunity-title">Title</label>
+                        <input class="nhs-form-input" type="text" id="opportunity-title" placeholder="Enter opportunity title" required>
+                    </div>
+                    
+                    <div class="nhs-form-group">
+                        <label class="nhs-form-label" for="opportunity-location">Location</label>
+                        <input class="nhs-form-input" type="text" id="opportunity-location" placeholder="Where will this take place?" required>
+                    </div>
+                    
+                    <div class="nhs-form-group">
+                        <label class="nhs-form-label" for="opportunity-description">Description</label>
+                        <textarea class="nhs-form-textarea" id="opportunity-description" rows="3" placeholder="Describe the opportunity and what volunteers will do" required></textarea>
+                    </div>
+                    
+                    <div class="nhs-form-group">
+                        <label class="nhs-form-label" for="opportunity-contact">Contact Information</label>
+                        <input class="nhs-form-input" type="text" id="opportunity-contact" placeholder="Name and email of the contact person" required>
+                    </div>
+                    
+                    <button type="submit" class="nhs-btn nhs-btn-accent" style="width: 100%; margin-top: 1rem;">
+                        <i class="fas fa-plus-circle"></i> Submit Opportunity
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-info">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="footer-logo">
+                <p>Building the future of education together.</p>
+            </div>
+            <div class="footer-links">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/tree">Tree</a></li>
+                    <li><a href="/schedule">Schedule</a></li>
+                    <li><a href="/counselor">Counselor</a></li>
+                    <li><a href="/nhs">NHS</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h3>NHS Resources</h3>
+                <ul>
+                    <li><a href="/nhs/credits">Credit Submission</a></li>
+                    <li><a href="/nhs/tutoring">Tutoring Program</a></li>
+                    <li><a href="#">Leadership Opportunities</a></li>
+                    <li><a href="#">Service Projects</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h3>Connect</h3>
+                <ul>
+                    <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
+                    <li><a href="#"><i class="fab fa-github"></i> GitHub</a></li>
+                    <li><a href="#"><i class="fab fa-discord"></i> Discord</a></li>
+                    <li><a href="#"><i class="fas fa-envelope"></i> Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 SciWeb. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/nhs/opportunities.js') }}"></script>
+</body>
+</html> 

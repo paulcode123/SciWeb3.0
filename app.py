@@ -2642,6 +2642,10 @@ def nhs_credits():
     # In a real application, this would handle credit submission and approval
     return render_template('nhs/credits.html')
 
+@app.route('/nhs/opportunities')
+def nhs_opportunities():
+    return render_template('nhs/opportunities.html')
+
 @app.route('/nhs/tutoring', methods=['GET', 'POST'])
 def nhs_tutoring():
     # In a real application, this would handle tutoring session registration
