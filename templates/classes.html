@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}My Classes - SciWeb 3.0{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/classes.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="classes-container">
+    <!-- Header Section -->
+    <div class="classes-header">
+        <div class="header-content">
+            <h1>My Classes</h1>
+            <p class="subtitle">Manage your enrolled classes and create new ones</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-outline" id="join-class-btn">
+                <i class="fas fa-plus-circle"></i>
+                Join Class
+            </button>
+            <button class="btn btn-primary" id="create-class-btn">
+                <i class="fas fa-chalkboard-teacher"></i>
+                Create Class
+            </button>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <div class="filter-controls">
+            <select id="role-filter" class="filter-select">
+                <option value="">All Roles</option>
+                <option value="student">Student</option>
+                <option value="teacher">Teacher</option>
+            </select>
+            <select id="subject-filter" class="filter-select">
+                <option value="">All Subjects</option>
+                <option value="Math">Mathematics</option>
+                <option value="Science">Science</option>
+                <option value="English">English</option>
+                <option value="History">History</option>
+                <option value="Computer Science">Computer Science</option>
+                <option value="Other">Other</option>
+            </select>
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="class-search" placeholder="Search classes...">
+            </div>
+        </div>
+    </div>
+
+    <!-- Classes Grid -->
+    <div class="classes-grid" id="classes-grid">
+        <!-- Loading state -->
+        <div class="loading-state" id="loading-state">
+            <div class="loading-spinner"></div>
+            <p>Loading your classes...</p>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" id="empty-state" style="display: none;">
+        <div class="empty-icon">
+            <i class="fas fa-graduation-cap"></i>
+        </div>
+        <h3>No Classes Found</h3>
+        <p>You haven't joined any classes yet. Create a new class or join one using a class code.</p>
+        <div class="empty-actions">
+            <button class="btn btn-primary" onclick="showCreateClassModal()">
+                <i class="fas fa-plus"></i>
+                Create Class
+            </button>
+            <button class="btn btn-outline" onclick="showJoinClassModal()">
+                <i class="fas fa-sign-in-alt"></i>
+                Join Class
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Create Class Modal -->
+<div class="modal" id="create-class-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Create New Class</h3>
+            <button class="close-btn" onclick="hideCreateClassModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="create-class-form">
+                <div class="form-group">
+                    <label for="class-name">Class Name*</label>
+                    <input type="text" id="class-name" name="name" required placeholder="e.g., AP Biology">
+                </div>
+                <div class="form-group">
+                    <label for="class-description">Description*</label>
+                    <textarea id="class-description" name="description" required placeholder="Brief description of the class"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="class-subject">Subject*</label>
+                        <select id="class-subject" name="subject" required>
+                            <option value="">Select Subject</option>
+                            <option value="Math">Mathematics</option>
+                            <option value="Science">Science</option>
+                            <option value="English">English</option>
+                            <option value="History">History</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="class-period">Period</label>
+                        <input type="text" id="class-period" name="period" placeholder="e.g., 3rd Period">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="class-year-group">Year Group</label>
+                    <input type="text" id="class-year-group" name="year_group" placeholder="e.g., 9-12">
+                </div>
+                <div class="form-group">
+                    <label for="class-visibility">Visibility</label>
+                    <select id="class-visibility" name="visibility">
+                        <option value="school">School Only</option>
+                        <option value="public">Public</option>
+                        <option value="private">Private</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="hideCreateClassModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Class</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Join Class Modal -->
+<div class="modal" id="join-class-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Join Class</h3>
+            <button class="close-btn" onclick="hideJoinClassModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="join-class-form">
+                <div class="form-group">
+                    <label for="join-code">Class Code*</label>
+                    <input type="text" id="join-code" name="join_code" required placeholder="Enter 6-character class code" maxlength="6">
+                    <small class="form-help">Ask your teacher for the class code</small>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="hideJoinClassModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Join Class</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Container -->
+<div id="notification-container"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/classes.js') }}"></script>
+{% endblock %} 

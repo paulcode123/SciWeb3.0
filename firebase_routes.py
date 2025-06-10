@@ -1557,6 +1557,26 @@ def get_class_mind_webs():
         print(f"Error fetching class mind webs: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+@firebase_routes.route('/Classes/<class_id>', methods=['GET'])
+@firebase_required
+def get_class(class_id):
+    """Get a specific class by ID"""
+    try:
+        # Get the class document
+        class_doc = db.collection('Classes').document(class_id).get()
+        
+        if not class_doc.exists:
+            return jsonify({"error": "Class not found"}), 404
+        
+        class_data = class_doc.to_dict()
+        class_data['id'] = class_id
+        
+        return jsonify({class_id: class_data}), 200
+        
+    except Exception as e:
+        print(f"Error fetching class {class_id}: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
 @firebase_routes.route('/Classes/<class_id>/stats', methods=['GET'])
 @firebase_required
 def get_class_stats(class_id):

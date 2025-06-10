@@ -3140,5 +3140,543 @@ def get_nhs_member_stats():
         print(f"Error getting NHS member stats: {str(e)}")
         return jsonify({"error": "Failed to fetch stats"}), 500
 
+# NHS API Endpoints for Database Storage
+
+# Additional Class Management API Endpoints
+
+@app.route('/api/classes', methods=['GET'])
+def get_all_classes():
+    """Get all classes with optional filtering"""
+    auth_check = require_login()
+    if auth_check:
+        return jsonify({"error": "Authentication required"}), 401
+    
+    try:
+        user_id = session.get('user_id')
+        
+        if not is_firebase_available():
+            # Return mock data if database unavailable
+            return jsonify({
+                "success": True,
+                "classes": [
+                    {
+                        "id": "sample-ap-biology",
+                        "name": "AP Biology",
+                        "description": "Advanced Placement Biology",
+                        "teacher": "Dr. Alex Rodriguez",
+                        "period": "2nd Period"
+                    }
+                ]
+            }), 200
+        
+        # Get query parameters
+        user_role = request.args.get('role')  # teacher, student
+        subject = request.args.get('subject')
+        
+        # Start with base query
+        query = db.collection('Classes')
+        
+        # Apply filters if provided
+        if subject:
+            query = query.where('subject', '==', subject)
+        
+        # Execute query
+        docs = query.stream()
+        
+        classes = []
+        for doc in docs:
+            class_data = doc.to_dict()
+            class_data['id'] = doc.id
+            
+            # Check if user is a member of this class
+            members = class_data.get('members', [])
+            user_member = None
+            for member in members:
+                if member.get('userId') == user_id:
+                    user_member = member
+                    break
+            
+            # If filtering by role, only include classes where user has that role
+            if user_role and (not user_member or user_member.get('role') != user_role):
+                continue
+            
+            # Add user's role in this class
+            if user_member:
+                class_data['user_role'] = user_member.get('role')
+                class_data['user_status'] = user_member.get('status')
+            
+            classes.append(class_data)
+        
+        return jsonify({
+            "success": True,
+            "classes": classes
+        }), 200
+        
+    except Exception as e:
+        print(f"Error fetching classes: {str(e)}")
+        return jsonify({"error": "Failed to fetch classes"}), 500
+
+@app.route('/api/classes', methods=['POST'])
+def create_class():
+    """Create a new class (teachers/admins only)"""
+    auth_check = require_login()
+    if auth_check:
+        return jsonify({"error": "Authentication required"}), 401
+    
+    try:
+        data = request.get_json()
+        user_id = session.get('user_id')
+        
+        # Check if user is a teacher/admin
+        if is_firebase_available():
+            user_ref = db.collection('Members').document(user_id)
+            user_doc = user_ref.get()
+            
+            if not user_doc.exists:
+                return jsonify({"error": "User not found"}), 404
+            
+            user_data = user_doc.to_dict()
+            if user_data.get('userType') not in ['teacher', 'admin']:
+                return jsonify({"error": "Only teachers and admins can create classes"}), 403
+        
+        # Validate required fields
+        required_fields = ['name', 'description', 'subject']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({"error": f"{field.replace('_', ' ').title()} is required"}), 400
+        
+        # Generate class ID
+        class_id = str(uuid.uuid4())
+        
+        # Get teacher information
+        teacher_name = f"{user_data.get('first_name', '')} {user_data.get('last_name', '')}".strip()
+        teacher_email = user_data.get('email', '')
+        
+        # Create class document
+        class_data = {
+            'id': class_id,
+            'name': data['name'],
+            'description': data['description'],
+            'subject': data['subject'],
+            'teacherId': user_id,
+            'teacherName': teacher_name,
+            'teacherEmail': teacher_email,
+            'teacherProfilePic': user_data.get('profilePicUrl', ''),
+            'teacherOfficeHours': data.get('office_hours', []),
+            'period': data.get('period', ''),
+            'yearGroup': data.get('year_group', ''),
+            'studentCount': 0,
+            'createdAt': datetime.datetime.now(),
+            'updatedAt': datetime.datetime.now(),
+            'syllabus': data.get('syllabus', ''),
+            'syllabusFileUrl': data.get('syllabus_file_url', ''),
+            'members': [
+                {
+                    'userId': user_id,
+                    'role': 'teacher',
+                    'joinedAt': datetime.datetime.now(),
+                    'status': 'active'
+                }
+            ],
+            'channels': [
+                {
+                    'id': 'general',
+                    'name': 'general',
+                    'description': 'General class discussion',
+                    'type': 'general',
+                    'createdAt': datetime.datetime.now(),
+                    'createdBy': user_id,
+                    'isPrivate': False,
+                    'allowedMembers': []
+                },
+                {
+                    'id': 'announcements',
+                    'name': 'announcements',
+                    'description': 'Important class announcements',
+                    'type': 'announcement',
+                    'createdAt': datetime.datetime.now(),
+                    'createdBy': user_id,
+                    'isPrivate': False,
+                    'allowedMembers': []
+                }
+            ],
+            'units': [],
+            'settings': {
+                'joinCode': ''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', k=6)),
+                'visibility': data.get('visibility', 'school'),
+                'gradingSystem': {
+                    'A': 90,
+                    'B': 80,
+                    'C': 70,
+                    'D': 60,
+                    'F': 0
+                }
+            },
+            'recentActivities': [],
+            'stats': {
+                'assignments': 0,
+                'resources': 0,
+                'discussions': 0,
+                'average_grade': 'N/A'
+            }
+        }
+        
+        # Save to database
+        if is_firebase_available():
+            db.collection('Classes').document(class_id).set(class_data)
+            
+            # Add class to teacher's classes list
+            teacher_ref = db.collection('Members').document(user_id)
+            teacher_doc = teacher_ref.get()
+            
+            if teacher_doc.exists:
+                teacher_data = teacher_doc.to_dict()
+                teacher_classes = teacher_data.get('classes', [])
+                
+                # Add class to teacher's list
+                teacher_classes.append({
+                    'id': class_id,
+                    'name': data['name'],
+                    'teacher': teacher_name,
+                    'period': data.get('period', ''),
+                    'role': 'teacher',
+                    'createdAt': datetime.datetime.now(),
+                    'updatedAt': datetime.datetime.now()
+                })
+                
+                teacher_ref.update({
+                    'classes': teacher_classes,
+                    'updatedAt': datetime.datetime.now()
+                })
+        
+        return jsonify({
+            "success": True,
+            "message": "Class created successfully",
+            "class_id": class_id,
+            "class_data": class_data
+        }), 201
+        
+    except Exception as e:
+        print(f"Error creating class: {str(e)}")
+        return jsonify({"error": "Failed to create class"}), 500
+
+@app.route('/api/classes/<class_id>', methods=['PUT'])
+def update_class(class_id):
+    """Update class information (teachers/admins only)"""
+    auth_check = require_login()
+    if auth_check:
+        return jsonify({"error": "Authentication required"}), 401
+    
+    try:
+        data = request.get_json()
+        user_id = session.get('user_id')
+        
+        if not is_firebase_available():
+            return jsonify({"error": "Database unavailable"}), 500
+        
+        # Get class document
+        class_ref = db.collection('Classes').document(class_id)
+        class_doc = class_ref.get()
+        
+        if not class_doc.exists:
+            return jsonify({"error": "Class not found"}), 404
+        
+        class_data = class_doc.to_dict()
+        
+        # Check if user is the teacher or admin
+        user_ref = db.collection('Members').document(user_id)
+        user_doc = user_ref.get()
+        
+        if not user_doc.exists:
+            return jsonify({"error": "User not found"}), 404
+        
+        user_data = user_doc.to_dict()
+        
+        # Check permissions (must be class teacher or admin)
+        if class_data.get('teacherId') != user_id and user_data.get('userType') != 'admin':
+            return jsonify({"error": "Insufficient permissions"}), 403
+        
+        # Update allowed fields
+        update_data = {}
+        allowed_fields = ['name', 'description', 'subject', 'period', 'year_group', 'syllabus', 'office_hours']
+        
+        for field in allowed_fields:
+            if field in data:
+                if field == 'year_group':
+                    update_data['yearGroup'] = data[field]
+                elif field == 'office_hours':
+                    update_data['teacherOfficeHours'] = data[field]
+                else:
+                    update_data[field] = data[field]
+        
+        # Always update the timestamp
+        update_data['updatedAt'] = datetime.datetime.now()
+        
+        # Update class document
+        class_ref.update(update_data)
+        
+        return jsonify({
+            "success": True,
+            "message": "Class updated successfully"
+        }), 200
+        
+    except Exception as e:
+        print(f"Error updating class: {str(e)}")
+        return jsonify({"error": "Failed to update class"}), 500
+
+@app.route('/api/classes/join', methods=['POST'])
+def join_class_by_code():
+    """Join a class using join code"""
+    auth_check = require_login()
+    if auth_check:
+        return jsonify({"error": "Authentication required"}), 401
+    
+    try:
+        data = request.get_json()
+        user_id = session.get('user_id')
+        join_code = data.get('join_code')
+        
+        if not join_code:
+            return jsonify({"error": "Join code is required"}), 400
+        
+        if not is_firebase_available():
+            return jsonify({"error": "Database unavailable"}), 500
+        
+        # Find class by join code
+        classes_query = db.collection('Classes').where('settings.joinCode', '==', join_code).limit(1)
+        classes = list(classes_query.stream())
+        
+        if not classes:
+            return jsonify({"error": "Invalid join code"}), 404
+        
+        class_doc = classes[0]
+        class_data = class_doc.to_dict()
+        class_id = class_doc.id
+        
+        # Check if user is already a member
+        members = class_data.get('members', [])
+        for member in members:
+            if member.get('userId') == user_id:
+                return jsonify({"error": "You are already a member of this class"}), 400
+        
+        # Get user information
+        user_ref = db.collection('Members').document(user_id)
+        user_doc = user_ref.get()
+        
+        if not user_doc.exists:
+            return jsonify({"error": "User not found"}), 404
+        
+        user_data = user_doc.to_dict()
+        user_name = f"{user_data.get('first_name', '')} {user_data.get('last_name', '')}".strip()
+        
+        # Add user to class members
+        new_member = {
+            'userId': user_id,
+            'role': 'student',
+            'joinedAt': datetime.datetime.now(),
+            'status': 'active'
+        }
+        
+        members.append(new_member)
+        
+        # Update class document
+        class_ref = db.collection('Classes').document(class_id)
+        class_ref.update({
+            'members': members,
+            'studentCount': len([m for m in members if m.get('role') == 'student']),
+            'updatedAt': datetime.datetime.now()
+        })
+        
+        # Add class to user's classes list
+        user_classes = user_data.get('classes', [])
+        user_classes.append({
+            'id': class_id,
+            'name': class_data.get('name'),
+            'teacher': class_data.get('teacherName'),
+            'period': class_data.get('period', ''),
+            'role': 'student',
+            'createdAt': datetime.datetime.now(),
+            'updatedAt': datetime.datetime.now()
+        })
+        
+        user_ref.update({
+            'classes': user_classes,
+            'updatedAt': datetime.datetime.now()
+        })
+        
+        return jsonify({
+            "success": True,
+            "message": f"Successfully joined {class_data.get('name')}",
+            "class_data": class_data
+        }), 200
+        
+    except Exception as e:
+        print(f"Error joining class: {str(e)}")
+        return jsonify({"error": "Failed to join class"}), 500
+
+@app.route('/api/classes/<class_id>/leave', methods=['POST'])
+def leave_class(class_id):
+    """Leave a class (students only)"""
+    auth_check = require_login()
+    if auth_check:
+        return jsonify({"error": "Authentication required"}), 401
+    
+    try:
+        user_id = session.get('user_id')
+        
+        if not is_firebase_available():
+            return jsonify({"error": "Database unavailable"}), 500
+        
+        # Get class document
+        class_ref = db.collection('Classes').document(class_id)
+        class_doc = class_ref.get()
+        
+        if not class_doc.exists:
+            return jsonify({"error": "Class not found"}), 404
+        
+        class_data = class_doc.to_dict()
+        
+        # Check if user is a member
+        members = class_data.get('members', [])
+        user_member = None
+        for member in members:
+            if member.get('userId') == user_id:
+                user_member = member
+                break
+        
+        if not user_member:
+            return jsonify({"error": "You are not a member of this class"}), 400
+        
+        # Teachers cannot leave their own class
+        if user_member.get('role') == 'teacher':
+            return jsonify({"error": "Teachers cannot leave their own class"}), 403
+        
+        # Remove user from class members
+        updated_members = [m for m in members if m.get('userId') != user_id]
+        
+        # Update class document
+        class_ref.update({
+            'members': updated_members,
+            'studentCount': len([m for m in updated_members if m.get('role') == 'student']),
+            'updatedAt': datetime.datetime.now()
+        })
+        
+        # Remove class from user's classes list
+        user_ref = db.collection('Members').document(user_id)
+        user_doc = user_ref.get()
+        
+        if user_doc.exists:
+            user_data = user_doc.to_dict()
+            user_classes = user_data.get('classes', [])
+            updated_user_classes = [c for c in user_classes if c.get('id') != class_id]
+            
+            user_ref.update({
+                'classes': updated_user_classes,
+                'updatedAt': datetime.datetime.now()
+            })
+        
+        return jsonify({
+            "success": True,
+            "message": "Successfully left the class"
+        }), 200
+        
+    except Exception as e:
+        print(f"Error leaving class: {str(e)}")
+        return jsonify({"error": "Failed to leave class"}), 500
+
+@app.route('/api/classes/<class_id>', methods=['DELETE'])
+def delete_class(class_id):
+    """Delete a class (teachers/admins only)"""
+    auth_check = require_login()
+    if auth_check:
+        return jsonify({"error": "Authentication required"}), 401
+    
+    try:
+        user_id = session.get('user_id')
+        
+        if not is_firebase_available():
+            return jsonify({"error": "Database unavailable"}), 500
+        
+        # Get class document
+        class_ref = db.collection('Classes').document(class_id)
+        class_doc = class_ref.get()
+        
+        if not class_doc.exists:
+            return jsonify({"error": "Class not found"}), 404
+        
+        class_data = class_doc.to_dict()
+        
+        # Check if user is the teacher or admin
+        user_ref = db.collection('Members').document(user_id)
+        user_doc = user_ref.get()
+        
+        if not user_doc.exists:
+            return jsonify({"error": "User not found"}), 404
+        
+        user_data = user_doc.to_dict()
+        
+        # Check permissions (must be class teacher or admin)
+        if class_data.get('teacherId') != user_id and user_data.get('userType') != 'admin':
+            return jsonify({"error": "Insufficient permissions"}), 403
+        
+        # Remove class from all members' class lists
+        members = class_data.get('members', [])
+        for member in members:
+            member_id = member.get('userId')
+            if member_id:
+                member_ref = db.collection('Members').document(member_id)
+                member_doc = member_ref.get()
+                
+                if member_doc.exists:
+                    member_data = member_doc.to_dict()
+                    member_classes = member_data.get('classes', [])
+                    updated_member_classes = [c for c in member_classes if c.get('id') != class_id]
+                    
+                    member_ref.update({
+                        'classes': updated_member_classes,
+                        'updatedAt': datetime.datetime.now()
+                    })
+        
+        # Delete related data
+        collections_to_clean = ['Assignments', 'Resources', 'Events', 'Messages', 'Grades', 'ClassMindWebs']
+        
+        for collection_name in collections_to_clean:
+            docs = db.collection(collection_name).where('classId', '==', class_id).stream()
+            for doc in docs:
+                doc.reference.delete()
+        
+        # Delete the class document
+        class_ref.delete()
+        
+        return jsonify({
+            "success": True,
+            "message": "Class deleted successfully"
+        }), 200
+        
+    except Exception as e:
+        print(f"Error deleting class: {str(e)}")
+        return jsonify({"error": "Failed to delete class"}), 500
+
+@app.route('/classes')
+def classes_page():
+    """Classes listing page"""
+    auth_check = require_login()
+    if auth_check: return auth_check
+    return render_template('classes.html')
+
+@app.route('/create-class')
+def create_class_page():
+    """Create class page"""
+    auth_check = require_login()
+    if auth_check: return auth_check
+    return render_template('create_class.html')
+
+@app.route('/join-class') 
+def join_class_page():
+    """Join class page"""
+    auth_check = require_login()
+    if auth_check: return auth_check
+    return render_template('join_class.html')
+
 if __name__ == '__main__':
     app.run(debug=True, host='localhost', port=8080)
