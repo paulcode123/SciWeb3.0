@@ -183,6 +183,11 @@ body.dark-mode .nhs-form-textarea {
     color: #333;
 }
 
+.nhs-btn-success {
+    background-color: var(--nhs-success);
+    color: white;
+}
+
 .nhs-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);

@@ -9,13 +9,29 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Handle event signup buttons
     document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('event-signup-btn')) {
+        if (e.target.id === 'event-signup-1' || e.target.id === 'event-signup-2') {
             const eventId = e.target.dataset.eventId;
             if (eventId) {
-                signupForEvent(eventId);
+                signupForEvent(eventId, e.target);
             }
+        } else if (e.target.id === 'event-calendar-1') {
+            const eventId = e.target.dataset.eventId;
+            addToCalendar(eventId, e.target);
+        } else if (e.target.id === 'browse-opportunities') {
+            browseOpportunities();
         }
     });
+    
+    // Animate progress ring on load
+    setTimeout(() => {
+        const progressFill = document.querySelector('.progress-ring-fill');
+        if (progressFill) {
+            const progress = 74; // 74% progress
+            const circumference = 2 * Math.PI * 45; // radius = 45
+            const offset = circumference - (progress / 100) * circumference;
+            progressFill.style.strokeDashoffset = offset;
+        }
+    }, 500);
 });
 
 async function loadStudentStats() {
@@ -154,7 +170,7 @@ function updateRecentActivityTable(credits) {
     });
 }
 
-async function signupForEvent(eventId) {
+async function signupForEvent(eventId, button) {
     try {
         const response = await fetch('/api/nhs/events/signup', {
             method: 'POST',
@@ -172,7 +188,6 @@ async function signupForEvent(eventId) {
             showNotification(result.message, 'success');
             
             // Update button text
-            const button = document.querySelector(`button[data-event-id="${eventId}"]`);
             if (button) {
                 button.textContent = 'Signed Up!';
                 button.disabled = true;
@@ -253,4 +268,55 @@ function showNotification(message, type = 'info') {
             }
         }, 300);
     });
+}
+
+function addToCalendar(eventId, button) {
+    // Create a simple calendar event
+    const eventDetails = {
+        'nhs-meeting': {
+            title: 'NHS Monthly Meeting',
+            date: '2025-04-30',
+            time: '15:30',
+            location: 'Library Conference Room'
+        }
+    };
+    
+    const event = eventDetails[eventId];
+    if (event) {
+        // Create calendar URL (Google Calendar format)
+        const startDate = new Date(`${event.date}T${event.time}:00`);
+        const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // 1 hour later
+        
+        const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z/${endDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z&location=${encodeURIComponent(event.location)}`;
+        
+        // Open calendar in new tab
+        window.open(googleCalendarUrl, '_blank');
+        
+        // Update button
+        button.textContent = 'Added to Calendar!';
+        button.disabled = true;
+        button.classList.remove('nhs-btn-accent');
+        button.classList.add('nhs-btn-success');
+        
+        showNotification('Event added to calendar!', 'success');
+    }
+}
+
+function browseOpportunities() {
+    // Show opportunities modal or redirect
+    showNotification('Browsing volunteer opportunities...', 'info');
+    
+    // For now, just show a notification with some opportunities
+    setTimeout(() => {
+        const opportunities = [
+            'Community Garden - Saturdays 9AM-12PM',
+            'Peer Tutoring - Monday-Thursday after school',
+            'Food Drive - Ongoing donations needed',
+            'Senior Center Visits - Weekends',
+            'Environmental Cleanup - Monthly events'
+        ];
+        
+        const message = 'Available Opportunities:\n\n' + opportunities.join('\n');
+        alert(message);
+    }, 500);
 } 
