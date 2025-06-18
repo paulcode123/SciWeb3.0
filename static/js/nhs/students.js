@@ -9,6 +9,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Handle event signup buttons
     document.addEventListener('click', function(e) {
+        // Prevent default behavior for all NHS buttons
+        if (e.target.classList.contains('nhs-btn')) {
+            e.preventDefault();
+        }
+        
         if (e.target.id === 'event-signup-1' || e.target.id === 'event-signup-2') {
             const eventId = e.target.dataset.eventId;
             if (eventId) {
@@ -19,6 +24,8 @@ document.addEventListener('DOMContentLoaded', function() {
             addToCalendar(eventId, e.target);
         } else if (e.target.id === 'browse-opportunities') {
             browseOpportunities();
+        } else if (e.target.id === 'view-all-activity') {
+            viewAllActivity();
         }
     });
     
@@ -319,4 +326,30 @@ function browseOpportunities() {
         const message = 'Available Opportunities:\n\n' + opportunities.join('\n');
         alert(message);
     }, 500);
+}
+
+function viewAllActivity() {
+    showNotification('Loading complete activity history...', 'info');
+    
+    // In a real application, this would show a modal or navigate to a detailed activity page
+    setTimeout(() => {
+        showNotification('Activity history loaded. Showing all activities.', 'success');
+        
+        // For demo purposes, show an alert with activity summary
+        const activitySummary = `
+NHS Activity Summary:
+
+Recent Activities:
+• City Food Bank Volunteer - 3.0 hrs (Pending)
+• Biology Tutoring Session - 2.0 hrs (Approved)
+• Earth Day Planning Committee - 1.5 hrs (Approved)
+• Senior Center Visit - 2.5 hrs (Needs Revision)
+• Math Tutoring Session - 1.5 hrs (Approved)
+
+Total Approved Credits: 18.5 / 25
+Pending Review: 3.0 hrs
+        `;
+        
+        alert(activitySummary.trim());
+    }, 1000);
 } 

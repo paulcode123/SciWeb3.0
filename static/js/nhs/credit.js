@@ -78,16 +78,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Handle credit review actions (for teachers)
+    // Handle credit review actions (for teachers) and other button clicks
     document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('approve-credit-btn')) {
+        // Prevent default behavior for all NHS buttons
+        if (e.target.classList.contains('nhs-btn')) {
             e.preventDefault();
+        }
+        
+        if (e.target.classList.contains('approve-credit-btn')) {
             const creditId = e.target.dataset.creditId;
             reviewCredit(creditId, 'approve');
         } else if (e.target.classList.contains('reject-credit-btn')) {
-            e.preventDefault();
             const creditId = e.target.dataset.creditId;
             reviewCredit(creditId, 'reject');
+        } else if (e.target.id === 'view-all-submissions') {
+            viewAllSubmissions();
+        } else if (e.target.id === 'view-full-requirements') {
+            viewFullRequirements();
+        } else if (e.target.id === 'browse-all-opportunities') {
+            browseAllOpportunities();
         }
     });
     
@@ -292,4 +301,112 @@ function showNotification(message, type = 'info') {
             }
         }, 300);
     });
+}
+
+function viewAllSubmissions() {
+    showNotification('Loading complete submission history...', 'info');
+    
+    setTimeout(() => {
+        const submissions = `
+NHS Credit Submission History:
+
+Recent Submissions:
+• Apr 20, 2025 - City Food Bank Volunteer (3.0 hrs) - Pending
+• Apr 15, 2025 - Biology Tutoring (2.0 hrs) - Approved
+• Apr 10, 2025 - Earth Day Planning Committee (1.5 hrs) - Approved
+• Apr 5, 2025 - Senior Center Visit (2.5 hrs) - Rejected
+
+Previous Submissions:
+• Mar 28, 2025 - Math Tutoring Session (1.5 hrs) - Approved
+• Mar 20, 2025 - Library Book Drive (2.0 hrs) - Approved
+• Mar 15, 2025 - Science Fair Judging (3.0 hrs) - Approved
+• Mar 10, 2025 - Community Garden Work (2.5 hrs) - Approved
+
+Total Approved Credits: 12.0 / 25
+Pending Review: 3.0 hrs
+        `;
+        
+        alert(submissions.trim());
+        showNotification('Complete submission history loaded!', 'success');
+    }, 1000);
+}
+
+function viewFullRequirements() {
+    showNotification('Loading NHS credit requirements...', 'info');
+    
+    setTimeout(() => {
+        const requirements = `
+NHS Service Credit Requirements:
+
+Annual Requirements (25 Total Credits):
+• Community Service: 10 hours minimum
+• School Service/Tutoring: 5 hours minimum  
+• Additional Service: 10 hours (any category)
+
+Credit Categories:
+• Community Service: Environmental, social services, charity work
+• School Service: Tutoring, mentoring, school events
+• Leadership: Officer roles, committee leadership
+• Fundraising: Organizing charitable fundraisers
+• Mentoring: Peer support programs
+
+Credit Values:
+• Standard Service: 1 hour = 1 credit
+• Leadership Roles: May earn 1.25x credits
+• Event Organization: May earn 1.5x credits
+
+Documentation Required:
+• Supervisor contact information
+• Activity description and outcomes
+• Date, time, and location
+• Verification from supervising adult
+
+Approval Process:
+• Submit within 30 days of activity
+• NHS advisor reviews within 1 week
+• Appeals process available for rejections
+        `;
+        
+        alert(requirements.trim());
+        showNotification('Full requirements loaded!', 'success');
+    }, 1000);
+}
+
+function browseAllOpportunities() {
+    showNotification('Loading volunteer opportunities...', 'info');
+    
+    setTimeout(() => {
+        const opportunities = `
+Available NHS Service Opportunities:
+
+Community Service:
+• Community Garden - Saturdays 9AM-12PM (Contact: Mrs. Peterson)
+• Food Bank Volunteer - Weekends (Contact: City Food Bank)
+• Senior Center Visits - Flexible schedule (Contact: Ms. Davis)
+• Environmental Cleanup - Monthly events (Contact: Parks Dept)
+• Habitat for Humanity - Weekend builds (Contact: Local chapter)
+
+School Service:
+• Peer Tutoring - Mon-Thu after school (Contact: Mr. Johnson)
+• Library Assistant - Flexible hours (Contact: Ms. Rodriguez)
+• New Student Mentoring - Ongoing (Contact: Counseling Office)
+• Science Fair Judging - March event (Contact: Science Dept)
+• Graduation Ceremony Help - May event (Contact: Main Office)
+
+Leadership Opportunities:
+• NHS Committee Positions - Apply now
+• Event Planning Committee - Ongoing
+• Fundraising Coordinator - Seasonal
+• Community Outreach Leader - Year-round
+
+How to Get Started:
+1. Contact the listed supervisor
+2. Discuss your availability and interests
+3. Complete any required training
+4. Begin logging your service hours
+        `;
+        
+        alert(opportunities.trim());
+        showNotification('Opportunities loaded! Contact supervisors to get started.', 'success');
+    }, 1000);
 } 

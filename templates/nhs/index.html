@@ -370,12 +370,12 @@
                     <a href="/nhs/tutoring" class="nhs-btn nhs-btn-accent">
                         <i class="fas fa-book-reader"></i> Sign Up for Tutoring
                     </a>
-                    <a href="#" class="nhs-btn nhs-btn-secondary">
+                    <button class="nhs-btn nhs-btn-secondary" id="view-events-calendar">
                         <i class="fas fa-calendar-alt"></i> View Events Calendar
-                    </a>
-                    <a href="#" class="nhs-btn nhs-btn-gold" style="background-color: var(--nhs-gold);">
+                    </button>
+                    <button class="nhs-btn nhs-btn-gold" style="background-color: var(--nhs-gold);" id="view-application-guidelines">
                         <i class="fas fa-file-alt"></i> Application Guidelines
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
@@ -384,9 +384,9 @@
         <div class="nhs-card">
             <div class="nhs-card-header">
                 <h2 class="nhs-card-title">Upcoming NHS Events</h2>
-                <a href="#" class="nhs-btn nhs-btn-secondary" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+                <button class="nhs-btn nhs-btn-secondary" style="font-size: 0.9rem; padding: 0.5rem 1rem;" id="view-all-events">
                     <i class="fas fa-calendar-alt"></i> View All
-                </a>
+                </button>
             </div>
             <div class="nhs-card-body">
                 <table class="nhs-table">
@@ -471,5 +471,6 @@
     </footer>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/nhs/index.js') }}"></script>
 </body>
 </html> 

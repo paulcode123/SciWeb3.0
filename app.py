@@ -67,6 +67,15 @@ The SciWeb Team
         print(f"Error creating verification email: {e}")
         return False
 
+def generate_class_join_code():
+    """Generate a 6-character alphanumeric join code for classes"""
+    import string
+    import random
+    characters = string.ascii_uppercase + string.digits
+    # Exclude potentially confusing characters
+    characters = characters.replace('0', '').replace('O', '').replace('1', '').replace('I', '')
+    return ''.join(random.choice(characters) for _ in range(6))
+
 # Function to initialize sample class data
 def init_sample_class_data():
     print("Initializing sample class data...")
@@ -3188,6 +3197,140 @@ def get_nhs_member_stats():
         print(f"Error getting NHS member stats: {str(e)}")
         return jsonify({"error": "Failed to fetch stats"}), 500
 
+@app.route('/api/nhs/events/list', methods=['GET'])
+def list_nhs_events():
+    """Get NHS events list"""
+    auth_check = require_login()
+    if auth_check:
+        # Return mock data for testing when not authenticated
+        return jsonify({
+            "success": True,
+            "events": [
+                {
+                    "id": "demo-event-1",
+                    "title": "Community Food Bank Volunteer Day",
+                    "description": "Help organize and distribute food to families in need",
+                    "date": "2025-05-15",
+                    "time": "9:00 AM - 2:00 PM",
+                    "location": "Downtown Food Bank",
+                    "event_type": "community_service",
+                    "credit_hours": 5,
+                    "max_participants": 20,
+                    "current_participants": 12
+                },
+                {
+                    "id": "demo-event-2", 
+                    "title": "NHS Monthly Meeting",
+                    "description": "Discuss upcoming events and service opportunities",
+                    "date": "2025-05-20",
+                    "time": "3:30 PM - 4:30 PM",
+                    "location": "Room 205",
+                    "event_type": "meeting",
+                    "credit_hours": 0,
+                    "max_participants": null,
+                    "current_participants": 8
+                }
+            ]
+        }), 200
+    
+    try:
+        if not is_firebase_available():
+            return jsonify({"events": []}), 200
+        
+        # Get events from database
+        events_query = db.collection('NHS_Events').where('status', '==', 'active').order_by('date')
+        events = []
+        
+        for doc in events_query.stream():
+            event_data = doc.to_dict()
+            event_data['id'] = doc.id
+            event_data['current_participants'] = len(event_data.get('participants', []))
+            events.append(event_data)
+        
+        return jsonify({
+            "success": True,
+            "events": events
+        }), 200
+        
+    except Exception as e:
+        print(f"Error listing NHS events: {str(e)}")
+        return jsonify({"error": "Failed to fetch events"}), 500
+
+@app.route('/api/nhs/opportunities/list', methods=['GET'])
+def list_volunteer_opportunities():
+    """Get volunteer opportunities"""
+    auth_check = require_login()
+    if auth_check:
+        # Return mock data for testing when not authenticated
+        return jsonify({
+            "success": True,
+            "opportunities": [
+                {
+                    "id": "opp-1",
+                    "title": "Tutoring Program",
+                    "description": "Help younger students with homework and test preparation",
+                    "category": "tutoring",
+                    "hours_available": "Flexible",
+                    "contact": "Ms. Johnson",
+                    "location": "Library"
+                },
+                {
+                    "id": "opp-2",
+                    "title": "Environmental Cleanup",
+                    "description": "Join our monthly park cleanup initiative",
+                    "category": "community_service", 
+                    "hours_available": "Saturdays 8-12",
+                    "contact": "Mr. Davis",
+                    "location": "City Park"
+                }
+            ]
+        }), 200
+    
+    try:
+        if not is_firebase_available():
+            return jsonify({"opportunities": []}), 200
+        
+        # For now, return static opportunities
+        # In a full implementation, these would come from the database
+        opportunities = [
+            {
+                "id": "tutoring-program",
+                "title": "Peer Tutoring Program",
+                "description": "Help fellow students with academic subjects",
+                "category": "tutoring",
+                "hours_available": "After school, flexible",
+                "contact": "Academic Support Center",
+                "location": "Library"
+            },
+            {
+                "id": "community-garden",
+                "title": "School Community Garden",
+                "description": "Maintain and harvest vegetables for local food bank",
+                "category": "community_service",
+                "hours_available": "Weekends",
+                "contact": "Environmental Club",
+                "location": "School Garden"
+            },
+            {
+                "id": "reading-buddies",
+                "title": "Elementary Reading Buddies",
+                "description": "Read with elementary students to improve literacy",
+                "category": "community_service",
+                "hours_available": "Tuesdays & Thursdays 2-3 PM",
+                "contact": "Elementary School",
+                "location": "Lincoln Elementary"
+            }
+        ]
+        
+        return jsonify({
+            "success": True,
+            "opportunities": opportunities
+        }), 200
+        
+    except Exception as e:
+        print(f"Error listing volunteer opportunities: {str(e)}")
+        return jsonify({"error": "Failed to fetch opportunities"}), 500
+
 # NHS API Endpoints for Database Storage
 
 # Additional Class Management API Endpoints
@@ -3293,8 +3436,9 @@ def create_class():
             if not data.get(field):
                 return jsonify({"error": f"{field.replace('_', ' ').title()} is required"}), 400
         
-        # Generate class ID
+        # Generate class ID and join code
         class_id = str(uuid.uuid4())
+        join_code = generate_class_join_code()
         
         # Get teacher information
         teacher_name = f"{user_data.get('first_name', '')} {user_data.get('last_name', '')}".strip()
@@ -3314,10 +3458,18 @@ def create_class():
             'period': data.get('period', ''),
             'yearGroup': data.get('year_group', ''),
             'studentCount': 0,
+            'joinCode': join_code,
             'createdAt': datetime.datetime.now(),
             'updatedAt': datetime.datetime.now(),
             'syllabus': data.get('syllabus', ''),
             'syllabusFileUrl': data.get('syllabus_file_url', ''),
+            'settings': {
+                'visibility': data.get('visibility', 'school'),
+                'joinCode': join_code,
+                'allowStudentPosts': True,
+                'allowStudentFileUploads': True,
+                'requireApprovalForPosts': False
+            },
             'members': [
                 {
                     'userId': user_id,
