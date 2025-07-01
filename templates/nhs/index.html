@@ -1,17 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SciWeb 3.0 - National Honor Society</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% extends "base.html" %}
+
+{% block title %}NHS - SciWeb 3.0{% endblock %}
+
+{% block head %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/nhs.css') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-    /* Enhanced animated background with glowing specks */
+    /* Enhanced animated background */
     .animated-background {
         position: fixed;
         top: 0;
@@ -23,453 +17,222 @@
         background: linear-gradient(135deg, #ffeef8 0%, #fff5fd 50%, #f8f9ff 100%);
     }
 
-    /* Main floating particles */
     .floating-particle {
         position: absolute;
         border-radius: 50%;
         background: radial-gradient(circle at 30% 30%, rgba(255, 26, 117, 0.8), rgba(255, 26, 117, 0.2));
         animation: floatGlow 8s infinite ease-in-out;
-        box-shadow: 
-            0 0 20px rgba(255, 26, 117, 0.4),
-            0 0 40px rgba(255, 26, 117, 0.2),
-            0 0 60px rgba(255, 26, 117, 0.1);
+        box-shadow: 0 0 20px rgba(255, 26, 117, 0.4), 0 0 40px rgba(255, 26, 117, 0.2);
     }
 
-    /* Small glowing specks */
-    .glowing-speck {
-        position: absolute;
-        border-radius: 50%;
-        background: rgba(255, 26, 117, 0.9);
-        animation: glowPulse 3s infinite ease-in-out;
-        box-shadow: 
-            0 0 10px rgba(255, 26, 117, 0.6),
-            0 0 20px rgba(255, 26, 117, 0.4),
-            0 0 30px rgba(255, 26, 117, 0.2);
-    }
+    .floating-particle:nth-child(1) { width: 100px; height: 100px; top: 15%; left: 8%; animation-delay: 0s; }
+    .floating-particle:nth-child(2) { width: 80px; height: 80px; top: 65%; left: 85%; animation-delay: 2s; }
+    .floating-particle:nth-child(3) { width: 120px; height: 120px; top: 80%; left: 15%; animation-delay: 4s; }
 
-    /* Particle sizes and positions */
-    .floating-particle:nth-child(1) { width: 100px; height: 100px; top: 15%; left: 8%; animation-delay: 0s; animation-duration: 12s; }
-    .floating-particle:nth-child(2) { width: 80px; height: 80px; top: 65%; left: 85%; animation-delay: 2s; animation-duration: 15s; }
-    .floating-particle:nth-child(3) { width: 120px; height: 120px; top: 80%; left: 15%; animation-delay: 4s; animation-duration: 18s; }
-    .floating-particle:nth-child(4) { width: 60px; height: 60px; top: 25%; left: 75%; animation-delay: 1s; animation-duration: 10s; }
-    .floating-particle:nth-child(5) { width: 90px; height: 90px; top: 5%; left: 55%; animation-delay: 3s; animation-duration: 14s; }
-    .floating-particle:nth-child(6) { width: 70px; height: 70px; top: 45%; left: 40%; animation-delay: 5s; animation-duration: 16s; }
-
-    /* Small specks */
-    .glowing-speck:nth-child(7) { width: 6px; height: 6px; top: 20%; left: 30%; animation-delay: 0.5s; }
-    .glowing-speck:nth-child(8) { width: 8px; height: 8px; top: 60%; left: 60%; animation-delay: 1.5s; }
-    .glowing-speck:nth-child(9) { width: 5px; height: 5px; top: 85%; left: 70%; animation-delay: 2.5s; }
-    .glowing-speck:nth-child(10) { width: 7px; height: 7px; top: 35%; left: 25%; animation-delay: 3.5s; }
-    .glowing-speck:nth-child(11) { width: 6px; height: 6px; top: 75%; left: 90%; animation-delay: 4.5s; }
-    .glowing-speck:nth-child(12) { width: 9px; height: 9px; top: 10%; left: 80%; animation-delay: 0.8s; }
-    .glowing-speck:nth-child(13) { width: 5px; height: 5px; top: 50%; left: 10%; animation-delay: 1.8s; }
-    .glowing-speck:nth-child(14) { width: 7px; height: 7px; top: 90%; left: 45%; animation-delay: 2.8s; }
-    .glowing-speck:nth-child(15) { width: 6px; height: 6px; top: 15%; left: 95%; animation-delay: 3.8s; }
-    .glowing-speck:nth-child(16) { width: 8px; height: 8px; top: 40%; left: 5%; animation-delay: 4.8s; }
-
-    /* Enhanced float animation with glow */
     @keyframes floatGlow {
-        0%, 100% {
-            transform: translateY(0px) translateX(0px) scale(1) rotate(0deg);
-            opacity: 0.4;
-            box-shadow: 
-                0 0 20px rgba(255, 26, 117, 0.4),
-                0 0 40px rgba(255, 26, 117, 0.2),
-                0 0 60px rgba(255, 26, 117, 0.1);
-        }
-        25% {
-            transform: translateY(-40px) translateX(30px) scale(1.2) rotate(90deg);
-            opacity: 0.8;
-            box-shadow: 
-                0 0 30px rgba(255, 26, 117, 0.6),
-                0 0 60px rgba(255, 26, 117, 0.4),
-                0 0 90px rgba(255, 26, 117, 0.2);
-        }
-        50% {
-            transform: translateY(-80px) translateX(-20px) scale(0.9) rotate(180deg);
-            opacity: 1;
-            box-shadow: 
-                0 0 40px rgba(255, 26, 117, 0.8),
-                0 0 80px rgba(255, 26, 117, 0.6),
-                0 0 120px rgba(255, 26, 117, 0.3);
-        }
-        75% {
-            transform: translateY(-30px) translateX(40px) scale(1.1) rotate(270deg);
-            opacity: 0.6;
-            box-shadow: 
-                0 0 25px rgba(255, 26, 117, 0.5),
-                0 0 50px rgba(255, 26, 117, 0.3),
-                0 0 75px rgba(255, 26, 117, 0.15);
-        }
+        0%, 100% { transform: translateY(0px) translateX(0px); opacity: 0.4; }
+        50% { transform: translateY(-80px) translateX(-20px); opacity: 1; }
     }
 
-    /* Glow pulse animation for small specks */
-    @keyframes glowPulse {
-        0%, 100% {
-            opacity: 0.3;
-            transform: scale(1) translateY(0px) translateX(0px);
-            box-shadow: 
-                0 0 10px rgba(255, 26, 117, 0.3),
-                0 0 20px rgba(255, 26, 117, 0.2);
-        }
-        25% {
-            opacity: 0.8;
-            transform: scale(1.5) translateY(-15px) translateX(10px);
-            box-shadow: 
-                0 0 15px rgba(255, 26, 117, 0.6),
-                0 0 30px rgba(255, 26, 117, 0.4);
-        }
-        50% {
-            opacity: 1;
-            transform: scale(2) translateY(-25px) translateX(-5px);
-            box-shadow: 
-                0 0 20px rgba(255, 26, 117, 0.8),
-                0 0 40px rgba(255, 26, 117, 0.6),
-                0 0 60px rgba(255, 26, 117, 0.3);
-        }
-        75% {
-            opacity: 0.6;
-            transform: scale(1.2) translateY(-10px) translateX(15px);
-            box-shadow: 
-                0 0 12px rgba(255, 26, 117, 0.4),
-                0 0 25px rgba(255, 26, 117, 0.3);
-        }
-    }
-
-    /* Dark mode enhancements */
-    body.dark-mode .animated-background { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); }
-    body.dark-mode .floating-particle { background: radial-gradient(circle at 30% 30%, rgba(255, 26, 117, 0.6), rgba(255, 26, 117, 0.15)); box-shadow: 0 0 25px rgba(255, 26, 117, 0.3), 0 0 50px rgba(255, 26, 117, 0.2), 0 0 75px rgba(255, 26, 117, 0.1); }
-    body.dark-mode .glowing-speck { background: rgba(255, 26, 117, 0.7); box-shadow: 0 0 12px rgba(255, 26, 117, 0.5), 0 0 25px rgba(255, 26, 117, 0.3), 0 0 40px rgba(255, 26, 117, 0.2); }
-
-    /* Additional sparkle effect */
-    .sparkle {
-        position: absolute;
-        width: 3px;
-        height: 3px;
-        background: rgba(255, 255, 255, 0.8);
-        border-radius: 50%;
-        animation: sparkle 4s infinite ease-in-out;
-    }
-
-    .sparkle:nth-child(17) { top: 25%; left: 35%; animation-delay: 0.2s; }
-    .sparkle:nth-child(18) { top: 55%; left: 65%; animation-delay: 1.2s; }
-    .sparkle:nth-child(19) { top: 75%; left: 25%; animation-delay: 2.2s; }
-    .sparkle:nth-child(20) { top: 15%; left: 85%; animation-delay: 3.2s; }
-
-    @keyframes sparkle {
-        0%, 100% {
-            opacity: 0;
-            transform: scale(0);
-        }
-        50% {
-            opacity: 1;
-            transform: scale(1.5);
-        }
+    body.dark-mode .animated-background { 
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); 
     }
     </style>
-</head>
-<body>
-    <!-- Enhanced Animated Background -->
-    <div class="animated-background">
-        <!-- Main floating particles -->
-        <div class="floating-particle"></div>
-        <div class="floating-particle"></div>
-        <div class="floating-particle"></div>
-        <div class="floating-particle"></div>
-        <div class="floating-particle"></div>
-        <div class="floating-particle"></div>
-        
-        <!-- Small glowing specks -->
-        <div class="glowing-speck"></div>
-        <div class="glowing-speck"></div>
-        <div class="glowing-speck"></div>
-        <div class="glowing-speck"></div>
-        <div class="glowing-speck"></div>
-        <div class="glowing-speck"></div>
-        <div class="glowing-speck"></div>
-        <div class="glowing-speck"></div>
-        <div class="glowing-speck"></div>
-        <div class="glowing-speck"></div>
-        
-        <!-- Sparkle effects -->
-        <div class="sparkle"></div>
-        <div class="sparkle"></div>
-        <div class="sparkle"></div>
-        <div class="sparkle"></div>
+{% endblock %}
+
+{% block content %}
+<!-- Animated Background -->
+<div class="animated-background">
+    <div class="floating-particle"></div>
+    <div class="floating-particle"></div>
+    <div class="floating-particle"></div>
+</div>
+
+<!-- NHS Hero Section -->
+<section class="nhs-hero">
+    <h1>National Honor Society</h1>
+    <p>Character. Scholarship. Leadership. Service.</p>
+</section>
+
+<div class="nhs-container">
+    <!-- Statistics Summary -->
+    <div class="nhs-stats">
+        <div class="nhs-stat-card">
+            <div class="nhs-stat-value" id="total-members">120+</div>
+            <div class="nhs-stat-label">Active Members</div>
+        </div>
+        <div class="nhs-stat-card">
+            <div class="nhs-stat-value" id="service-hours">1,500+</div>
+            <div class="nhs-stat-label">Service Hours</div>
+        </div>
+        <div class="nhs-stat-card">
+            <div class="nhs-stat-value" id="tutoring-sessions">300+</div>
+            <div class="nhs-stat-label">Tutoring Sessions</div>
+        </div>
+        <div class="nhs-stat-card">
+            <div class="nhs-stat-value" id="active-projects">50+</div>
+            <div class="nhs-stat-label">Active Projects</div>
+        </div>
     </div>
 
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="logo-container">
-            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="logo">
-            <div class="logo-text">SciWeb</div>
+    <!-- About NHS Section -->
+    <div class="nhs-card">
+        <div class="nhs-card-header">
+            <h2 class="nhs-card-title">About Our NHS Chapter</h2>
         </div>
-        <ul class="nav-links">
-            <li><a href="/">Home</a></li>
-            <li><a href="/tree">Tree</a></li>
-            <li><a href="/schedule">Schedule</a></li>
-            <li><a href="/counselor">Counselor</a></li>
-            <li><a href="/nhs" class="active">NHS</a></li>
-            <li><a href="/signup">Sign Up</a></li>
-        </ul>
-        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
-    </nav>
-
-    <!-- NHS Hero Section -->
-    <section class="nhs-hero">
-        <h1>National Honor Society</h1>
-        <p>Character. Scholarship. Leadership. Service.</p>
-    </section>
-
-    <div class="nhs-container">
-        <!-- Statistics Summary -->
-        <div class="nhs-stats">
-            <div class="nhs-stat-card">
-                <div class="nhs-stat-value">120+</div>
-                <div class="nhs-stat-label">Active Members</div>
-            </div>
-            <div class="nhs-stat-card">
-                <div class="nhs-stat-value">1,500+</div>
-                <div class="nhs-stat-label">Community Service Hours</div>
-            </div>
-            <div class="nhs-stat-card">
-                <div class="nhs-stat-value">300+</div>
-                <div class="nhs-stat-label">Tutoring Sessions</div>
-            </div>
-            <div class="nhs-stat-card">
-                <div class="nhs-stat-value">50+</div>
-                <div class="nhs-stat-label">Ongoing Projects</div>
-            </div>
-        </div>
-
-        <!-- About NHS Section -->
-        <div class="nhs-card">
-            <div class="nhs-card-header">
-                <h2 class="nhs-card-title">About Our NHS Chapter</h2>
-            </div>
-            <div class="nhs-card-body">
-                <p>Our National Honor Society chapter recognizes students who demonstrate excellence in scholarship, service, leadership, and character. NHS members are committed to making a positive impact in both our school and the broader community.</p>
-                <p>Through a variety of service projects, tutoring initiatives, and leadership opportunities, we strive to foster personal growth and build a stronger, more supportive academic environment for all students.</p>
-                
-                <h3 style="margin-top: 1.5rem;">Our Four Pillars</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
-                    <div>
-                        <h4><i class="fas fa-book"></i> Scholarship</h4>
-                        <p>Maintaining a minimum 3.5 GPA and showing dedication to learning and academic growth.</p>
-                    </div>
-                    <div>
-                        <h4><i class="fas fa-hands-helping"></i> Service</h4>
-                        <p>Contributing time and energy to improve the school and community through volunteer activities.</p>
-                    </div>
-                    <div>
-                        <h4><i class="fas fa-chess-queen"></i> Leadership</h4>
-                        <p>Demonstrating initiative, positive influence, and the ability to inspire and guide others.</p>
-                    </div>
-                    <div>
-                        <h4><i class="fas fa-heart"></i> Character</h4>
-                        <p>Exhibiting qualities such as integrity, respect, and ethical behavior in all aspects of life.</p>
-                    </div>
+        <div class="nhs-card-body">
+            <p>Our National Honor Society chapter recognizes students who demonstrate excellence in scholarship, service, leadership, and character.</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
+                <div>
+                    <h4><i class="fas fa-book"></i> Scholarship</h4>
+                    <p>Maintaining a minimum 3.5 GPA and dedication to academic excellence.</p>
                 </div>
-            </div>
-        </div>
-
-        <!-- Portal Cards Section -->
-        <h2 style="margin-bottom: 1.5rem; color: var(--nhs-text);">NHS Portals</h2>
-        <div class="nhs-grid">
-            <!-- Administration Portal -->
-            <div class="nhs-card">
-                <div class="nhs-card-header">
-                    <h3 class="nhs-card-title">Administration</h3>
-                    <span class="nhs-badge nhs-badge-primary">Restricted Access</span>
+                <div>
+                    <h4><i class="fas fa-hands-helping"></i> Service</h4>
+                    <p>Contributing to school and community through volunteer activities.</p>
                 </div>
-                <div class="nhs-card-body">
-                    <p>Portal for NHS faculty advisors and administration to manage members, events, and approve service hours.</p>
-                    <ul style="margin: 1rem 0; padding-left: 1.5rem;">
-                        <li>Approve new member applications</li>
-                        <li>Review service hour submissions</li>
-                        <li>Manage events and announcements</li>
-                        <li>Generate reports and analytics</li>
-                    </ul>
-                    <a href="/nhs/admin" class="nhs-btn nhs-btn-primary" style="width: 100%;">
-                        <i class="fas fa-lock"></i> Admin Portal
-                    </a>
+                <div>
+                    <h4><i class="fas fa-chess-queen"></i> Leadership</h4>
+                    <p>Demonstrating initiative and the ability to inspire others.</p>
                 </div>
-            </div>
-
-            <!-- Member Portal -->
-            <div class="nhs-card">
-                <div class="nhs-card-header">
-                    <h3 class="nhs-card-title">Members</h3>
-                    <span class="nhs-badge nhs-badge-accent">Members Only</span>
+                <div>
+                    <h4><i class="fas fa-heart"></i> Character</h4>
+                    <p>Exhibiting integrity, respect, and ethical behavior.</p>
                 </div>
-                <div class="nhs-card-body">
-                    <p>Dashboard for current NHS members to log service hours, sign up for tutoring, and access resources.</p>
-                    <ul style="margin: 1rem 0; padding-left: 1.5rem;">
-                        <li>Log community service hours</li>
-                        <li>Sign up as a tutor</li>
-                        <li>View your progress and credits</li>
-                        <li>Access exclusive resources</li>
-                    </ul>
-                    <a href="/nhs/members" class="nhs-btn nhs-btn-accent" style="width: 100%;">
-                        <i class="fas fa-user-check"></i> Member Portal
-                    </a>
-                </div>
-            </div>
-
-            <!-- Student Portal -->
-            <div class="nhs-card">
-                <div class="nhs-card-header">
-                    <h3 class="nhs-card-title">Students</h3>
-                    <span class="nhs-badge nhs-badge-success">All Students</span>
-                </div>
-                <div class="nhs-card-body">
-                    <p>Access point for all students to request tutoring, check eligibility, and apply for NHS membership.</p>
-                    <ul style="margin: 1rem 0; padding-left: 1.5rem;">
-                        <li>Request tutoring sessions</li>
-                        <li>Check NHS eligibility</li>
-                        <li>Apply for membership</li>
-                        <li>View upcoming NHS events</li>
-                    </ul>
-                    <a href="/nhs/students" class="nhs-btn nhs-btn-success" style="width: 100%; background-color: var(--nhs-success);">
-                        <i class="fas fa-graduation-cap"></i> Student Portal
-                    </a>
-                </div>
-            </div>
-
-            <!-- Teacher Portal -->
-            <div class="nhs-card">
-                <div class="nhs-card-header">
-                    <h3 class="nhs-card-title">Teachers</h3>
-                    <span class="nhs-badge nhs-badge-warning">Faculty Only</span>
-                </div>
-                <div class="nhs-card-body">
-                    <p>Resources for teachers to recommend students, verify service hours, and coordinate with NHS tutors.</p>
-                    <ul style="margin: 1rem 0; padding-left: 1.5rem;">
-                        <li>Recommend students for NHS</li>
-                        <li>Verify student service activities</li>
-                        <li>Request NHS tutors for your class</li>
-                        <li>Provide student character references</li>
-                    </ul>
-                    <a href="/nhs/teachers" class="nhs-btn nhs-btn-warning" style="width: 100%; background-color: var(--nhs-warning);">
-                        <i class="fas fa-chalkboard-teacher"></i> Teacher Portal
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quick Access Section -->
-        <div class="nhs-card" style="margin-top: 2rem;">
-            <div class="nhs-card-header">
-                <h2 class="nhs-card-title">Quick Actions</h2>
-            </div>
-            <div class="nhs-card-body">
-                <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
-                    <a href="/nhs/credits" class="nhs-btn nhs-btn-primary">
-                        <i class="fas fa-star"></i> Submit Credits
-                    </a>
-                    <a href="/nhs/tutoring" class="nhs-btn nhs-btn-accent">
-                        <i class="fas fa-book-reader"></i> Sign Up for Tutoring
-                    </a>
-                    <a href="#" class="nhs-btn nhs-btn-secondary">
-                        <i class="fas fa-calendar-alt"></i> View Events Calendar
-                    </a>
-                    <a href="#" class="nhs-btn nhs-btn-gold" style="background-color: var(--nhs-gold);">
-                        <i class="fas fa-file-alt"></i> Application Guidelines
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Upcoming Events -->
-        <div class="nhs-card">
-            <div class="nhs-card-header">
-                <h2 class="nhs-card-title">Upcoming NHS Events</h2>
-                <a href="#" class="nhs-btn nhs-btn-secondary" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
-                    <i class="fas fa-calendar-alt"></i> View All
-                </a>
-            </div>
-            <div class="nhs-card-body">
-                <table class="nhs-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Event</th>
-                            <th>Location</th>
-                            <th>Category</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>May 5, 2025</td>
-                            <td>NHS Induction Ceremony</td>
-                            <td>School Auditorium</td>
-                            <td><span class="nhs-badge nhs-badge-primary">Ceremony</span></td>
-                        </tr>
-                        <tr>
-                            <td>May 10, 2025</td>
-                            <td>Community Clean-Up Day</td>
-                            <td>City Park</td>
-                            <td><span class="nhs-badge nhs-badge-success">Service</span></td>
-                        </tr>
-                        <tr>
-                            <td>May 15, 2025</td>
-                            <td>Final Exam Tutoring Marathon</td>
-                            <td>School Library</td>
-                            <td><span class="nhs-badge nhs-badge-accent">Tutoring</span></td>
-                        </tr>
-                        <tr>
-                            <td>May 25, 2025</td>
-                            <td>Senior NHS Member Recognition</td>
-                            <td>School Cafeteria</td>
-                            <td><span class="nhs-badge nhs-badge-gold">Recognition</span></td>
-                        </tr>
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-info">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SciWeb Logo" class="footer-logo">
-                <p>Building the future of education together.</p>
+    <!-- Portal Cards Section -->
+    <h2 style="margin-bottom: 1.5rem; color: var(--nhs-text);">NHS Portals</h2>
+    <div class="nhs-grid">
+        <!-- Administration Portal -->
+        <div class="nhs-card">
+            <div class="nhs-card-header">
+                <h3 class="nhs-card-title">Administration</h3>
+                <span class="nhs-badge nhs-badge-primary">Admin Only</span>
             </div>
-            <div class="footer-links">
-                <h3>Quick Links</h3>
-                <ul>
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/tree">Tree</a></li>
-                    <li><a href="/schedule">Schedule</a></li>
-                    <li><a href="/counselor">Counselor</a></li>
-                    <li><a href="/nhs">NHS</a></li>
+            <div class="nhs-card-body">
+                <p>Manage members, approve service hours, and oversee NHS operations.</p>
+                <ul style="margin: 1rem 0; padding-left: 1.5rem;">
+                    <li>Approve member applications</li>
+                    <li>Review service submissions</li>
+                    <li>Manage events</li>
+                    <li>Generate reports</li>
                 </ul>
-            </div>
-            <div class="footer-links">
-                <h3>NHS Resources</h3>
-                <ul>
-                    <li><a href="/nhs/credits">Credit Submission</a></li>
-                    <li><a href="/nhs/tutoring">Tutoring Program</a></li>
-                    <li><a href="#">Leadership Opportunities</a></li>
-                    <li><a href="#">Service Projects</a></li>
-                </ul>
-            </div>
-            <div class="footer-links">
-                <h3>Connect</h3>
-                <ul>
-                    <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
-                    <li><a href="#"><i class="fab fa-github"></i> GitHub</a></li>
-                    <li><a href="#"><i class="fab fa-discord"></i> Discord</a></li>
-                    <li><a href="#"><i class="fas fa-envelope"></i> Contact Us</a></li>
-                </ul>
+                <button class="nhs-btn nhs-btn-primary" style="width: 100%;" onclick="openAdminPortal()">
+                    <i class="fas fa-lock"></i> Admin Portal
+                </button>
             </div>
         </div>
-        <div class="footer-bottom">
-            <p>&copy; 2025 SciWeb. All rights reserved.</p>
-        </div>
-    </footer>
 
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-</body>
-</html> 
+        <!-- Member Portal -->
+        <div class="nhs-card">
+            <div class="nhs-card-header">
+                <h3 class="nhs-card-title">Members</h3>
+                <span class="nhs-badge nhs-badge-accent">Members Only</span>
+            </div>
+            <div class="nhs-card-body">
+                <p>Log service hours, manage tutoring, and track your progress.</p>
+                <ul style="margin: 1rem 0; padding-left: 1.5rem;">
+                    <li>Submit service hours</li>
+                    <li>Sign up as tutor</li>
+                    <li>View progress</li>
+                    <li>Access resources</li>
+                </ul>
+                <button class="nhs-btn nhs-btn-accent" style="width: 100%;" onclick="openMemberPortal()">
+                    <i class="fas fa-user-check"></i> Member Portal
+                </button>
+            </div>
+        </div>
+
+        <!-- Student Portal -->
+        <div class="nhs-card">
+            <div class="nhs-card-header">
+                <h3 class="nhs-card-title">Students</h3>
+                <span class="nhs-badge nhs-badge-success">All Students</span>
+            </div>
+            <div class="nhs-card-body">
+                <p>Request tutoring, check eligibility, and apply for NHS membership.</p>
+                <ul style="margin: 1rem 0; padding-left: 1.5rem;">
+                    <li>Request tutoring</li>
+                    <li>Check eligibility</li>
+                    <li>Apply for NHS</li>
+                    <li>View events</li>
+                </ul>
+                <button class="nhs-btn nhs-btn-success" style="width: 100%;" onclick="openStudentPortal()">
+                    <i class="fas fa-graduation-cap"></i> Student Portal
+                </button>
+            </div>
+        </div>
+
+        <!-- Teacher Portal -->
+        <div class="nhs-card">
+            <div class="nhs-card-header">
+                <h3 class="nhs-card-title">Teachers</h3>
+                <span class="nhs-badge nhs-badge-warning">Faculty Only</span>
+            </div>
+            <div class="nhs-card-body">
+                <p>Recommend students, verify hours, and coordinate with NHS.</p>
+                <ul style="margin: 1rem 0; padding-left: 1.5rem;">
+                    <li>Recommend students</li>
+                    <li>Verify service hours</li>
+                    <li>Request tutors</li>
+                    <li>Provide references</li>
+                </ul>
+                <button class="nhs-btn nhs-btn-warning" style="width: 100%;" onclick="openTeacherPortal()">
+                    <i class="fas fa-chalkboard-teacher"></i> Teacher Portal
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="nhs-card" style="margin-top: 2rem;">
+        <div class="nhs-card-header">
+            <h2 class="nhs-card-title">Quick Actions</h2>
+        </div>
+        <div class="nhs-card-body">
+            <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+                <button class="nhs-btn nhs-btn-primary" onclick="openServiceSubmission()">
+                    <i class="fas fa-star"></i> Submit Service Hours
+                </button>
+                <button class="nhs-btn nhs-btn-accent" onclick="openTutoringSignup()">
+                    <i class="fas fa-book-reader"></i> Tutoring Signup
+                </button>
+                <button class="nhs-btn nhs-btn-secondary" onclick="viewEventsCalendar()">
+                    <i class="fas fa-calendar-alt"></i> Events Calendar
+                </button>
+                <button class="nhs-btn nhs-btn-gold" onclick="viewApplicationGuidelines()">
+                    <i class="fas fa-file-alt"></i> Application Guidelines
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upcoming Events -->
+    <div class="nhs-card">
+        <div class="nhs-card-header">
+            <h2 class="nhs-card-title">Upcoming Events</h2>
+            <button class="nhs-btn nhs-btn-secondary" onclick="viewAllEvents()">
+                <i class="fas fa-calendar-alt"></i> View All
+            </button>
+        </div>
+        <div class="nhs-card-body" id="events-container">
+            <div id="events-loading" style="text-align: center; padding: 2rem;">
+                <i class="fas fa-spinner fa-spin"></i> Loading events...
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+<div id="modal-overlay" class="modal-overlay" onclick="closeModal()"></div>
+<div id="modal-container" class="modal-container"></div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/nhs/index.js') }}"></script>
+{% endblock %} 

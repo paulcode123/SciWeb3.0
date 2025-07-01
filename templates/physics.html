@@ -1,0 +1,490 @@
+{% extends "base.html" %}
+
+{% block title %}Physics Lab - SciWeb 3.0{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/physics.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="physics-container">
+    <!-- Hero Section -->
+    <div class="physics-hero">
+        <div class="hero-content">
+            <h1>Interactive Physics Lab</h1>
+            <p class="hero-subtitle">Explore physics concepts through visual simulations and AI-powered learning</p>
+        </div>
+        <div class="hero-visual">
+            <div class="atom-animation">
+                <div class="nucleus"></div>
+                <div class="electron electron-1"></div>
+                <div class="electron electron-2"></div>
+                <div class="electron electron-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Assistant Panel -->
+    <div class="ai-assistant-panel" id="ai-panel">
+        <div class="ai-header">
+            <div class="ai-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <h3>Physics AI Assistant</h3>
+            <button class="toggle-ai" id="toggle-ai">
+                <i class="fas fa-chevron-down"></i>
+            </button>
+        </div>
+        <div class="ai-content" id="ai-content">
+            <div class="ai-chat" id="ai-chat">
+                <div class="ai-message">
+                    <div class="message-content">
+                        Welcome! I'm your AI physics tutor. Ask me about any physics concept, and I'll help explain it with visual examples and connect it to your knowledge web.
+                    </div>
+                </div>
+            </div>
+            <div class="ai-input-area">
+                <input type="text" id="ai-input" placeholder="Ask about physics concepts, equations, or problems...">
+                <button id="ai-submit">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+            <div class="ai-quick-actions">
+                <button class="quick-btn" data-concept="newton's laws">Newton's Laws</button>
+                <button class="quick-btn" data-concept="energy conservation">Energy Conservation</button>
+                <button class="quick-btn" data-concept="wave motion">Wave Motion</button>
+                <button class="quick-btn" data-concept="electric fields">Electric Fields</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Physics Topics Grid -->
+    <div class="topics-grid">
+        <!-- Mechanics Section -->
+        <div class="topic-section">
+            <div class="topic-header">
+                <h2>
+                    <i class="fas fa-cogs"></i>
+                    Classical Mechanics
+                </h2>
+                <p>Motion, forces, and energy</p>
+            </div>
+            
+            <!-- Newton's Laws Simulation -->
+            <div class="simulation-card">
+                <div class="sim-header">
+                    <h3>Newton's Laws of Motion</h3>
+                    <button class="ai-explain-btn" data-topic="newton's laws">
+                        <i class="fas fa-brain"></i> AI Explain
+                    </button>
+                </div>
+                <div class="simulation-container">
+                    <iframe 
+                        src="https://phet.colorado.edu/sims/html/forces-and-motion-basics/latest/forces-and-motion-basics_en.html"
+                        width="100%" 
+                        height="400"
+                        frameborder="0"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                <div class="concept-explanation">
+                    <div class="law-card">
+                        <h4>First Law (Inertia)</h4>
+                        <p>An object at rest stays at rest, and an object in motion stays in motion, unless acted upon by an external force.</p>
+                        <div class="equation">F<sub>net</sub> = 0 → a = 0</div>
+                    </div>
+                    <div class="law-card">
+                        <h4>Second Law</h4>
+                        <p>The acceleration of an object is directly proportional to the net force acting on it.</p>
+                        <div class="equation">F = ma</div>
+                    </div>
+                    <div class="law-card">
+                        <h4>Third Law</h4>
+                        <p>For every action, there is an equal and opposite reaction.</p>
+                        <div class="equation">F<sub>AB</sub> = -F<sub>BA</sub></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Energy Conservation -->
+            <div class="simulation-card">
+                <div class="sim-header">
+                    <h3>Energy Conservation</h3>
+                    <button class="ai-explain-btn" data-topic="energy conservation">
+                        <i class="fas fa-brain"></i> AI Explain
+                    </button>
+                </div>
+                <div class="simulation-container">
+                    <iframe 
+                        src="https://phet.colorado.edu/sims/html/energy-skate-park/latest/energy-skate-park_en.html"
+                        width="100%" 
+                        height="400"
+                        frameborder="0"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                <div class="concept-explanation">
+                    <div class="energy-types">
+                        <div class="energy-card kinetic">
+                            <h4>Kinetic Energy</h4>
+                            <div class="equation">KE = ½mv²</div>
+                            <p>Energy of motion</p>
+                        </div>
+                        <div class="energy-card potential">
+                            <h4>Potential Energy</h4>
+                            <div class="equation">PE = mgh</div>
+                            <p>Stored energy due to position</p>
+                        </div>
+                        <div class="energy-card conservation">
+                            <h4>Conservation</h4>
+                            <div class="equation">KE + PE = constant</div>
+                            <p>Total mechanical energy remains constant</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Waves and Optics Section -->
+        <div class="topic-section">
+            <div class="topic-header">
+                <h2>
+                    <i class="fas fa-wave-square"></i>
+                    Waves & Optics
+                </h2>
+                <p>Wave motion, sound, and light</p>
+            </div>
+            
+            <div class="simulation-card">
+                <div class="sim-header">
+                    <h3>Wave Interference</h3>
+                    <button class="ai-explain-btn" data-topic="wave interference">
+                        <i class="fas fa-brain"></i> AI Explain
+                    </button>
+                </div>
+                <div class="simulation-container">
+                    <iframe 
+                        src="https://phet.colorado.edu/sims/html/wave-interference/latest/wave-interference_en.html"
+                        width="100%" 
+                        height="400"
+                        frameborder="0"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                <div class="concept-explanation">
+                    <div class="wave-properties">
+                        <div class="property-card">
+                            <h4>Wavelength (λ)</h4>
+                            <p>Distance between consecutive peaks</p>
+                        </div>
+                        <div class="property-card">
+                            <h4>Frequency (f)</h4>
+                            <p>Number of waves per second</p>
+                        </div>
+                        <div class="property-card">
+                            <h4>Wave Speed</h4>
+                            <div class="equation">v = fλ</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Electricity & Magnetism Section -->
+        <div class="topic-section">
+            <div class="topic-header">
+                <h2>
+                    <i class="fas fa-bolt"></i>
+                    Electricity & Magnetism
+                </h2>
+                <p>Electric fields, circuits, and magnetic forces</p>
+            </div>
+            
+            <div class="simulation-card">
+                <div class="sim-header">
+                    <h3>Electric Field & Charges</h3>
+                    <button class="ai-explain-btn" data-topic="electric fields">
+                        <i class="fas fa-brain"></i> AI Explain
+                    </button>
+                </div>
+                <div class="simulation-container">
+                    <iframe 
+                        src="https://phet.colorado.edu/sims/html/charges-and-fields/latest/charges-and-fields_en.html"
+                        width="100%" 
+                        height="400"
+                        frameborder="0"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                <div class="concept-explanation">
+                    <div class="electric-concepts">
+                        <div class="concept-card">
+                            <h4>Coulomb's Law</h4>
+                            <div class="equation">F = k(q₁q₂)/r²</div>
+                            <p>Force between two point charges</p>
+                        </div>
+                        <div class="concept-card">
+                            <h4>Electric Field</h4>
+                            <div class="equation">E = F/q</div>
+                            <p>Force per unit charge</p>
+                        </div>
+                        <div class="concept-card">
+                            <h4>Electric Potential</h4>
+                            <div class="equation">V = kq/r</div>
+                            <p>Potential energy per unit charge</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="simulation-card">
+                <div class="sim-header">
+                    <h3>Circuit Construction</h3>
+                    <button class="ai-explain-btn" data-topic="circuits">
+                        <i class="fas fa-brain"></i> AI Explain
+                    </button>
+                </div>
+                <div class="simulation-container">
+                    <iframe 
+                        src="https://phet.colorado.edu/sims/html/circuit-construction-kit-dc/latest/circuit-construction-kit-dc_en.html"
+                        width="100%" 
+                        height="400"
+                        frameborder="0"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                <div class="concept-explanation">
+                    <div class="circuit-laws">
+                        <div class="law-card">
+                            <h4>Ohm's Law</h4>
+                            <div class="equation">V = IR</div>
+                            <p>Relationship between voltage, current, and resistance</p>
+                        </div>
+                        <div class="law-card">
+                            <h4>Kirchhoff's Current Law</h4>
+                            <div class="equation">Σ I<sub>in</sub> = Σ I<sub>out</sub></div>
+                            <p>Current conservation at nodes</p>
+                        </div>
+                        <div class="law-card">
+                            <h4>Kirchhoff's Voltage Law</h4>
+                            <div class="equation">Σ V = 0</div>
+                            <p>Voltage sum around closed loops</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modern Physics Section -->
+        <div class="topic-section">
+            <div class="topic-header">
+                <h2>
+                    <i class="fas fa-atom"></i>
+                    Modern Physics
+                </h2>
+                <p>Quantum mechanics and relativity</p>
+            </div>
+            
+            <div class="simulation-card">
+                <div class="sim-header">
+                    <h3>Photoelectric Effect</h3>
+                    <button class="ai-explain-btn" data-topic="photoelectric effect">
+                        <i class="fas fa-brain"></i> AI Explain
+                    </button>
+                </div>
+                <div class="simulation-container">
+                    <iframe 
+                        src="https://phet.colorado.edu/sims/html/photoelectric/latest/photoelectric_en.html"
+                        width="100%" 
+                        height="400"
+                        frameborder="0"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                <div class="concept-explanation">
+                    <div class="quantum-concepts">
+                        <div class="concept-card">
+                            <h4>Photon Energy</h4>
+                            <div class="equation">E = hf</div>
+                            <p>Energy of a photon</p>
+                        </div>
+                        <div class="concept-card">
+                            <h4>Work Function</h4>
+                            <div class="equation">W = hf₀</div>
+                            <p>Minimum energy to remove electron</p>
+                        </div>
+                        <div class="concept-card">
+                            <h4>Einstein's Equation</h4>
+                            <div class="equation">hf = W + KE<sub>max</sub></div>
+                            <p>Energy conservation in photoelectric effect</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Physics Problem Solver -->
+    <div class="problem-solver-section">
+        <div class="solver-header">
+            <h2>
+                <i class="fas fa-calculator"></i>
+                AI Physics Problem Solver
+            </h2>
+            <p>Upload a physics problem and get step-by-step solutions with visual explanations</p>
+        </div>
+        
+        <div class="problem-input-area">
+            <div class="input-options">
+                <button class="input-option active" data-type="text">
+                    <i class="fas fa-keyboard"></i>
+                    Type Problem
+                </button>
+                <button class="input-option" data-type="image">
+                    <i class="fas fa-image"></i>
+                    Upload Image
+                </button>
+                <button class="input-option" data-type="voice">
+                    <i class="fas fa-microphone"></i>
+                    Voice Input
+                </button>
+            </div>
+            
+            <div class="problem-input text-input active">
+                <textarea id="problem-text" placeholder="Enter your physics problem here...&#10;&#10;Example: A 2 kg object is dropped from a height of 10 meters. What is its velocity just before hitting the ground?"></textarea>
+                <button id="solve-problem">
+                    <i class="fas fa-magic"></i>
+                    Solve with AI
+                </button>
+            </div>
+            
+            <div class="problem-input image-input">
+                <div class="upload-area" id="upload-area">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Drag and drop an image or click to upload</p>
+                    <input type="file" id="problem-image" accept="image/*">
+                </div>
+                <button id="solve-image-problem" style="display: none;">
+                    <i class="fas fa-magic"></i>
+                    Analyze Image
+                </button>
+            </div>
+            
+            <div class="problem-input voice-input">
+                <button id="voice-record" class="voice-btn">
+                    <i class="fas fa-microphone"></i>
+                    <span>Click to Record</span>
+                </button>
+                <div id="voice-status" class="voice-status"></div>
+            </div>
+        </div>
+        
+        <div class="solution-area" id="solution-area" style="display: none;">
+            <div class="solution-header">
+                <h3>AI Solution</h3>
+                <button class="add-to-web" id="add-to-web">
+                    <i class="fas fa-project-diagram"></i>
+                    Add to Knowledge Web
+                </button>
+            </div>
+            <div class="solution-content" id="solution-content">
+                <!-- AI solution will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Knowledge Web Integration -->
+    <div class="knowledge-web-section">
+        <div class="web-header">
+            <h2>
+                <i class="fas fa-project-diagram"></i>
+                Physics Knowledge Web
+            </h2>
+            <p>Connect physics concepts to your personal knowledge network</p>
+        </div>
+        
+        <div class="concept-connections" id="concept-connections">
+            <div class="connection-card">
+                <div class="concept-node">
+                    <i class="fas fa-cogs"></i>
+                    <span>Newton's Laws</span>
+                </div>
+                <div class="connection-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+                <div class="concept-node">
+                    <i class="fas fa-battery-three-quarters"></i>
+                    <span>Energy Conservation</span>
+                </div>
+                <button class="explore-connection">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                    Explore
+                </button>
+            </div>
+            
+            <div class="connection-card">
+                <div class="concept-node">
+                    <i class="fas fa-wave-square"></i>
+                    <span>Wave Motion</span>
+                </div>
+                <div class="connection-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+                <div class="concept-node">
+                    <i class="fas fa-bolt"></i>
+                    <span>Electromagnetic Waves</span>
+                </div>
+                <button class="explore-connection">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                    Explore
+                </button>
+            </div>
+            
+            <div class="connection-card">
+                <div class="concept-node">
+                    <i class="fas fa-atom"></i>
+                    <span>Quantum Mechanics</span>
+                </div>
+                <div class="connection-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+                <div class="concept-node">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>Photoelectric Effect</span>
+                </div>
+                <button class="explore-connection">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                    Explore
+                </button>
+            </div>
+        </div>
+        
+        <div class="web-actions">
+            <button class="web-btn" id="create-mindmap">
+                <i class="fas fa-brain"></i>
+                Create Physics Mind Map
+            </button>
+            <button class="web-btn" id="view-connections">
+                <i class="fas fa-project-diagram"></i>
+                View All Connections
+            </button>
+            <button class="web-btn" id="generate-quiz">
+                <i class="fas fa-question-circle"></i>
+                Generate Practice Quiz
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loading-overlay">
+    <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p>AI is thinking...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/physics.js') }}"></script>
+{% endblock %} 

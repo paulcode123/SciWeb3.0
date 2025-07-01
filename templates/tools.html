@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block title %}Tools Library - SciWeb 3.0{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tools.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="tools-container">
+    <!-- Hero Section -->
+    <div class="tools-hero">
+        <div class="hero-content">
+            <h1>Learning Tools Library</h1>
+            <p class="hero-subtitle">Explore interactive simulations, AI-powered assistants, and innovative learning experiences</p>
+        </div>
+        <div class="hero-visual">
+            <div class="floating-icons">
+                <i class="fas fa-atom"></i>
+                <i class="fas fa-calculator"></i>
+                <i class="fas fa-dna"></i>
+                <i class="fas fa-microscope"></i>
+                <i class="fas fa-brain"></i>
+                <i class="fas fa-rocket"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tools Grid -->
+    <div class="tools-grid">
+        <!-- Physics Lab Tool -->
+        <div class="tool-card featured">
+            <div class="tool-icon">
+                <i class="fas fa-atom"></i>
+            </div>
+            <div class="tool-content">
+                <h3>Physics Lab</h3>
+                <p class="tool-description">Interactive physics simulations with PhET integration and AI-powered problem solving</p>
+                <div class="tool-features">
+                    <span class="feature-tag">🧪 Virtual Labs</span>
+                    <span class="feature-tag">🤖 AI Assistant</span>
+                    <span class="feature-tag">📊 Real-time Simulations</span>
+                </div>
+                <div class="tool-stats">
+                    <div class="stat">
+                        <span class="stat-value">6</span>
+                        <span class="stat-label">Simulations</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">AI</span>
+                        <span class="stat-label">Powered</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">Free</span>
+                        <span class="stat-label">Access</span>
+                    </div>
+                </div>
+            </div>
+            <div class="tool-actions">
+                <a href="/physics" class="tool-btn primary">
+                    <i class="fas fa-play"></i>
+                    Launch Physics Lab
+                </a>
+                <button class="tool-btn secondary" onclick="showToolInfo('physics')">
+                    <i class="fas fa-info"></i>
+                    Learn More
+                </button>
+            </div>
+        </div>
+
+        <!-- Coming Soon Tools -->
+        <div class="tool-card coming-soon">
+            <div class="tool-icon">
+                <i class="fas fa-dna"></i>
+            </div>
+            <div class="tool-content">
+                <h3>Biology Lab</h3>
+                <p class="tool-description">Interactive biology simulations for cell structure, genetics, and molecular processes</p>
+                <div class="tool-features">
+                    <span class="feature-tag">🔬 Microscopy</span>
+                    <span class="feature-tag">🧬 Genetics</span>
+                    <span class="feature-tag">🦠 Cell Biology</span>
+                </div>
+            </div>
+            <div class="tool-actions">
+                <button class="tool-btn disabled">
+                    <i class="fas fa-clock"></i>
+                    Coming Soon
+                </button>
+            </div>
+            <div class="coming-soon-badge">Coming Soon</div>
+        </div>
+
+        <div class="tool-card coming-soon">
+            <div class="tool-icon">
+                <i class="fas fa-calculator"></i>
+            </div>
+            <div class="tool-content">
+                <h3>Math Studio</h3>
+                <p class="tool-description">Advanced mathematical visualization and problem-solving with graphing and calculations</p>
+                <div class="tool-features">
+                    <span class="feature-tag">📈 Graphing</span>
+                    <span class="feature-tag">∫ Calculus</span>
+                    <span class="feature-tag">📊 Statistics</span>
+                </div>
+            </div>
+            <div class="tool-actions">
+                <button class="tool-btn disabled">
+                    <i class="fas fa-clock"></i>
+                    Coming Soon
+                </button>
+            </div>
+            <div class="coming-soon-badge">Coming Soon</div>
+        </div>
+
+        <div class="tool-card coming-soon">
+            <div class="tool-icon">
+                <i class="fas fa-flask"></i>
+            </div>
+            <div class="tool-content">
+                <h3>Chemistry Lab</h3>
+                <p class="tool-description">Virtual chemistry experiments with molecular modeling and reaction simulations</p>
+                <div class="tool-features">
+                    <span class="feature-tag">⚗️ Reactions</span>
+                    <span class="feature-tag">🧪 Compounds</span>
+                    <span class="feature-tag">📋 Stoichiometry</span>
+                </div>
+            </div>
+            <div class="tool-actions">
+                <button class="tool-btn disabled">
+                    <i class="fas fa-clock"></i>
+                    Coming Soon
+                </button>
+            </div>
+            <div class="coming-soon-badge">Coming Soon</div>
+        </div>
+
+        <div class="tool-card coming-soon">
+            <div class="tool-icon">
+                <i class="fas fa-globe"></i>
+            </div>
+            <div class="tool-content">
+                <h3>Earth Science Studio</h3>
+                <p class="tool-description">Explore geology, weather patterns, and environmental science through interactive models</p>
+                <div class="tool-features">
+                    <span class="feature-tag">🌍 Geography</span>
+                    <span class="feature-tag">🌪️ Weather</span>
+                    <span class="feature-tag">🏔️ Geology</span>
+                </div>
+            </div>
+            <div class="tool-actions">
+                <button class="tool-btn disabled">
+                    <i class="fas fa-clock"></i>
+                    Coming Soon
+                </button>
+            </div>
+            <div class="coming-soon-badge">Coming Soon</div>
+        </div>
+
+        <div class="tool-card coming-soon">
+            <div class="tool-icon">
+                <i class="fas fa-brain"></i>
+            </div>
+            <div class="tool-content">
+                <h3>AI Study Assistant</h3>
+                <p class="tool-description">Comprehensive AI tutoring across all subjects with personalized learning paths</p>
+                <div class="tool-features">
+                    <span class="feature-tag">🎓 Tutoring</span>
+                    <span class="feature-tag">📚 Study Plans</span>
+                    <span class="feature-tag">🎯 Personalized</span>
+                </div>
+            </div>
+            <div class="tool-actions">
+                <button class="tool-btn disabled">
+                    <i class="fas fa-clock"></i>
+                    Coming Soon
+                </button>
+            </div>
+            <div class="coming-soon-badge">Coming Soon</div>
+        </div>
+    </div>
+
+    <!-- Tool Categories -->
+    <div class="tool-categories">
+        <h2>Browse by Category</h2>
+        <div class="categories-grid">
+            <div class="category-card">
+                <i class="fas fa-atom category-icon"></i>
+                <h4>Sciences</h4>
+                <p>Physics, Chemistry, Biology, Earth Science</p>
+                <span class="tool-count">1 tool available</span>
+            </div>
+            <div class="category-card">
+                <i class="fas fa-calculator category-icon"></i>
+                <h4>Mathematics</h4>
+                <p>Algebra, Calculus, Statistics, Geometry</p>
+                <span class="tool-count">Coming soon</span>
+            </div>
+            <div class="category-card">
+                <i class="fas fa-brain category-icon"></i>
+                <h4>AI Assistants</h4>
+                <p>Tutoring, Problem Solving, Study Planning</p>
+                <span class="tool-count">Coming soon</span>
+            </div>
+            <div class="category-card">
+                <i class="fas fa-gamepad category-icon"></i>
+                <h4>Interactive Games</h4>
+                <p>Educational games and simulations</p>
+                <span class="tool-count">Coming soon</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Access -->
+    <div class="quick-access">
+        <h2>Quick Access</h2>
+        <div class="quick-actions">
+            <a href="/physics" class="quick-btn">
+                <i class="fas fa-atom"></i>
+                <span>Physics Lab</span>
+            </a>
+            <button class="quick-btn disabled">
+                <i class="fas fa-dna"></i>
+                <span>Biology Lab</span>
+            </button>
+            <button class="quick-btn disabled">
+                <i class="fas fa-calculator"></i>
+                <span>Math Studio</span>
+            </button>
+            <button class="quick-btn disabled">
+                <i class="fas fa-flask"></i>
+                <span>Chemistry Lab</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Tool Info Modal -->
+<div id="tool-info-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modal-title">Tool Information</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="modal-body">
+            <!-- Content will be dynamically populated -->
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="loading-overlay">
+    <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Loading tool...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/tools.js') }}"></script>
+{% endblock %} 

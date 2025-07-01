@@ -12,7 +12,7 @@
     <div class="classes-header">
         <div class="header-content">
             <h1>My Classes</h1>
-            <p class="subtitle">Manage your enrolled classes and create new ones</p>
+            <p class="subtitle">Manage your enrolled classes and academic progress</p>
         </div>
         <div class="header-actions">
             <button class="btn btn-outline" id="join-class-btn">
@@ -26,54 +26,157 @@
         </div>
     </div>
 
-    <!-- Filter Section -->
-    <div class="filter-section">
-        <div class="filter-controls">
-            <select id="role-filter" class="filter-select">
-                <option value="">All Roles</option>
-                <option value="student">Student</option>
-                <option value="teacher">Teacher</option>
-            </select>
-            <select id="subject-filter" class="filter-select">
-                <option value="">All Subjects</option>
-                <option value="Math">Mathematics</option>
-                <option value="Science">Science</option>
-                <option value="English">English</option>
-                <option value="History">History</option>
-                <option value="Computer Science">Computer Science</option>
-                <option value="Other">Other</option>
-            </select>
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" id="class-search" placeholder="Search classes...">
+    <!-- Quick Stats -->
+    <div class="quick-stats" id="quick-stats">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value" id="total-classes">0</div>
+                <div class="stat-label">Total Classes</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-chalkboard-teacher"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value" id="teaching-classes">0</div>
+                <div class="stat-label">Teaching</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value" id="enrolled-classes">0</div>
+                <div class="stat-label">Enrolled</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-tasks"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value" id="pending-assignments">0</div>
+                <div class="stat-label">Pending Tasks</div>
             </div>
         </div>
     </div>
 
-    <!-- Classes Grid -->
-    <div class="classes-grid" id="classes-grid">
+    <!-- Filter and Search Section -->
+    <div class="filter-section">
+        <div class="filter-controls">
+            <div class="filter-group">
+                <label for="role-filter">Role</label>
+                <select id="role-filter" class="filter-select">
+                    <option value="">All Roles</option>
+                    <option value="student">Student</option>
+                    <option value="teacher">Teacher</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="subject-filter">Subject</label>
+                <select id="subject-filter" class="filter-select">
+                    <option value="">All Subjects</option>
+                    <option value="Mathematics">Mathematics</option>
+                    <option value="Science">Science</option>
+                    <option value="English">English</option>
+                    <option value="History">History</option>
+                    <option value="Computer Science">Computer Science</option>
+                    <option value="Art">Art</option>
+                    <option value="Music">Music</option>
+                    <option value="Physical Education">Physical Education</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="status-filter">Status</label>
+                <select id="status-filter" class="filter-select">
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="archived">Archived</option>
+                </select>
+            </div>
+            <div class="search-group">
+                <label for="class-search">Search</label>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="class-search" placeholder="Search classes, teachers, or subjects...">
+                </div>
+            </div>
+        </div>
+        <div class="view-controls">
+            <button class="view-btn active" data-view="grid" id="grid-view-btn">
+                <i class="fas fa-th"></i>
+                Grid
+            </button>
+            <button class="view-btn" data-view="list" id="list-view-btn">
+                <i class="fas fa-list"></i>
+                List
+            </button>
+        </div>
+    </div>
+
+    <!-- Classes Display -->
+    <div class="classes-display">
         <!-- Loading state -->
         <div class="loading-state" id="loading-state">
             <div class="loading-spinner"></div>
             <p>Loading your classes...</p>
         </div>
-    </div>
 
-    <!-- Empty State -->
-    <div class="empty-state" id="empty-state" style="display: none;">
-        <div class="empty-icon">
-            <i class="fas fa-graduation-cap"></i>
+        <!-- Classes Grid -->
+        <div class="classes-grid" id="classes-grid" style="display: none;">
+            <!-- Classes will be dynamically inserted here -->
         </div>
-        <h3>No Classes Found</h3>
-        <p>You haven't joined any classes yet. Create a new class or join one using a class code.</p>
-        <div class="empty-actions">
-            <button class="btn btn-primary" onclick="showCreateClassModal()">
-                <i class="fas fa-plus"></i>
-                Create Class
-            </button>
-            <button class="btn btn-outline" onclick="showJoinClassModal()">
-                <i class="fas fa-sign-in-alt"></i>
-                Join Class
+
+        <!-- Classes List -->
+        <div class="classes-list" id="classes-list" style="display: none;">
+            <div class="list-header">
+                <div class="list-col">Class</div>
+                <div class="list-col">Teacher</div>
+                <div class="list-col">Subject</div>
+                <div class="list-col">Students</div>
+                <div class="list-col">Role</div>
+                <div class="list-col">Actions</div>
+            </div>
+            <div class="list-body" id="list-body">
+                <!-- List items will be dynamically inserted here -->
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="empty-state" style="display: none;">
+            <div class="empty-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <h3>No Classes Found</h3>
+            <p>You haven't joined any classes yet. Create a new class or join one using a class code.</p>
+            <div class="empty-actions">
+                <button class="btn btn-primary" onclick="showCreateClassModal()">
+                    <i class="fas fa-plus"></i>
+                    Create Class
+                </button>
+                <button class="btn btn-outline" onclick="showJoinClassModal()">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Join Class
+                </button>
+            </div>
+        </div>
+
+        <!-- Error State -->
+        <div class="error-state" id="error-state" style="display: none;">
+            <div class="error-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3>Unable to Load Classes</h3>
+            <p>There was an error loading your classes. Please try again.</p>
+            <button class="btn btn-primary" onclick="initializeClassesPage()">
+                <i class="fas fa-redo"></i>
+                Retry
             </button>
         </div>
     </div>
@@ -90,47 +193,80 @@
         </div>
         <div class="modal-body">
             <form id="create-class-form">
-                <div class="form-group">
-                    <label for="class-name">Class Name*</label>
-                    <input type="text" id="class-name" name="name" required placeholder="e.g., AP Biology">
-                </div>
-                <div class="form-group">
-                    <label for="class-description">Description*</label>
-                    <textarea id="class-description" name="description" required placeholder="Brief description of the class"></textarea>
-                </div>
-                <div class="form-row">
+                <div class="form-section">
+                    <h4>Basic Information</h4>
                     <div class="form-group">
-                        <label for="class-subject">Subject*</label>
-                        <select id="class-subject" name="subject" required>
-                            <option value="">Select Subject</option>
-                            <option value="Math">Mathematics</option>
-                            <option value="Science">Science</option>
-                            <option value="English">English</option>
-                            <option value="History">History</option>
-                            <option value="Computer Science">Computer Science</option>
-                            <option value="Other">Other</option>
-                        </select>
+                        <label for="class-name">Class Name*</label>
+                        <input type="text" id="class-name" name="name" required placeholder="e.g., AP Biology" maxlength="100">
+                        <small class="form-help">Enter a clear, descriptive name for your class</small>
                     </div>
                     <div class="form-group">
-                        <label for="class-period">Period</label>
-                        <input type="text" id="class-period" name="period" placeholder="e.g., 3rd Period">
+                        <label for="class-description">Description*</label>
+                        <textarea id="class-description" name="description" required placeholder="Brief description of the class, learning objectives, and what students can expect" rows="4" maxlength="500"></textarea>
+                        <small class="form-help">Describe what students will learn in this class</small>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="class-year-group">Year Group</label>
-                    <input type="text" id="class-year-group" name="year_group" placeholder="e.g., 9-12">
+
+                <div class="form-section">
+                    <h4>Class Details</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="class-subject">Subject*</label>
+                            <select id="class-subject" name="subject" required>
+                                <option value="">Select Subject</option>
+                                <option value="Mathematics">Mathematics</option>
+                                <option value="Science">Science</option>
+                                <option value="English">English</option>
+                                <option value="History">History</option>
+                                <option value="Computer Science">Computer Science</option>
+                                <option value="Art">Art</option>
+                                <option value="Music">Music</option>
+                                <option value="Physical Education">Physical Education</option>
+                                <option value="Foreign Language">Foreign Language</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="class-period">Period/Time</label>
+                            <input type="text" id="class-period" name="period" placeholder="e.g., 3rd Period or 10:00 AM - 11:30 AM" maxlength="50">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="class-year-group">Grade Level</label>
+                            <input type="text" id="class-year-group" name="year_group" placeholder="e.g., 9-12 or Freshman" maxlength="20">
+                        </div>
+                        <div class="form-group">
+                            <label for="class-visibility">Visibility</label>
+                            <select id="class-visibility" name="visibility">
+                                <option value="school">School Only</option>
+                                <option value="public">Public</option>
+                                <option value="private">Private (Invite Only)</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="class-visibility">Visibility</label>
-                    <select id="class-visibility" name="visibility">
-                        <option value="school">School Only</option>
-                        <option value="public">Public</option>
-                        <option value="private">Private</option>
-                    </select>
+
+                <div class="form-section">
+                    <h4>Additional Settings</h4>
+                    <div class="form-group">
+                        <label for="office-hours">Office Hours</label>
+                        <textarea id="office-hours" name="office_hours" placeholder="e.g., Monday 3:00-4:00 PM, Wednesday 2:00-3:00 PM" rows="3" maxlength="200"></textarea>
+                        <small class="form-help">When are you available for student questions?</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="class-syllabus">Syllabus/Course Overview</label>
+                        <textarea id="class-syllabus" name="syllabus" placeholder="Course objectives, grading policy, important dates, etc." rows="4" maxlength="1000"></textarea>
+                        <small class="form-help">Optional: Detailed course information</small>
+                    </div>
                 </div>
+
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="hideCreateClassModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Create Class</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Create Class
+                    </button>
                 </div>
             </form>
         </div>
@@ -150,14 +286,80 @@
             <form id="join-class-form">
                 <div class="form-group">
                     <label for="join-code">Class Code*</label>
-                    <input type="text" id="join-code" name="join_code" required placeholder="Enter 6-character class code" maxlength="6">
-                    <small class="form-help">Ask your teacher for the class code</small>
+                    <input type="text" id="join-code" name="join_code" required placeholder="Enter 6-character class code" maxlength="6" style="text-transform: uppercase;">
+                    <small class="form-help">Ask your teacher for the class code (e.g., ABC123)</small>
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="hideJoinClassModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Join Class</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Join Class
+                    </button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Class Settings Modal -->
+<div class="modal" id="class-settings-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Class Settings</h3>
+            <button class="close-btn" onclick="hideClassSettingsModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="settings-tabs">
+                <button class="tab-btn active" data-tab="general">General</button>
+                <button class="tab-btn" data-tab="members">Members</button>
+                <button class="tab-btn" data-tab="advanced">Advanced</button>
+            </div>
+            
+            <div class="tab-content active" id="general-tab">
+                <form id="update-class-form">
+                    <input type="hidden" id="update-class-id" name="class_id">
+                    <!-- Form fields will be populated dynamically -->
+                </form>
+            </div>
+            
+            <div class="tab-content" id="members-tab">
+                <div class="members-list" id="class-members-list">
+                    <!-- Members will be loaded dynamically -->
+                </div>
+            </div>
+            
+            <div class="tab-content" id="advanced-tab">
+                <div class="advanced-settings">
+                    <div class="setting-item">
+                        <h4>Join Code</h4>
+                        <div class="join-code-display">
+                            <input type="text" id="current-join-code" readonly>
+                            <button class="btn btn-outline" onclick="regenerateJoinCode()">
+                                <i class="fas fa-sync"></i>
+                                Regenerate
+                            </button>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <h4>Archive Class</h4>
+                        <p>Archive this class to hide it from active classes while preserving all data.</p>
+                        <button class="btn btn-warning" onclick="archiveClass()">
+                            <i class="fas fa-archive"></i>
+                            Archive Class
+                        </button>
+                    </div>
+                    <div class="setting-item">
+                        <h4>Delete Class</h4>
+                        <p>Permanently delete this class and all associated data. This action cannot be undone.</p>
+                        <button class="btn btn-danger" onclick="deleteClass()">
+                            <i class="fas fa-trash"></i>
+                            Delete Class
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
