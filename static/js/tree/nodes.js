@@ -15,7 +15,7 @@ export let selectedNode = null;
 export let draggedNode = null;
 export let isDragging = false;
 export let isConnecting = false;
-export const nodeTypes = ['motivator', 'task', 'challenge', 'idea', 'class', 'assignment', 'test', 'project', 'essay', 'image', 'learningObjective', 'keyidea', 'question', 'problemtype', 'nhscredit'];
+export const nodeTypes = ['task', 'challenge', 'idea', 'class', 'assignment', 'test', 'project', 'essay', 'image', 'learningObjective', 'keyidea', 'question', 'problemtype', 'nhscredit'];
 
 // Function to update nextNodeId 
 export function setNextNodeId(value) {

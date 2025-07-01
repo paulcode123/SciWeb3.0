@@ -25,16 +25,6 @@ function saveNodeTypes(nodeTypes) {
 
 const NODE_LIBRARY = [
   {
-    id: 'motivator',
-    name: 'Motivator',
-    description: 'Represents your main goal or inspiration.',
-    color: '#FFD700',
-    icon: 'fa-star',
-    features: [
-      { name: 'Inspire', description: 'Motivational feature', icon: 'fa-bolt', color: '#FF9800', prompt: 'What inspires you?' }
-    ]
-  },
-  {
     id: 'task',
     name: 'Task',
     description: 'A specific task to complete.',

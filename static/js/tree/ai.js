@@ -7,7 +7,7 @@ import { getAreaSelectState } from './main.js';
 
 // AI State
 const OPENAI_API_KEY = 'sk-YOUR_SAMPLE_API_KEY_HERE'; // Replace with your actual key if using a real backend
-const nodeTypes = ['motivator', 'task', 'challenge', 'idea', 'class', 'assignment', 'test', 'project', 'essay', 'image'];
+const nodeTypes = ['task', 'challenge', 'idea', 'class', 'assignment', 'test', 'project', 'essay', 'image'];
 
 // Set up AI assistant
 export function setupAIAssistant() {

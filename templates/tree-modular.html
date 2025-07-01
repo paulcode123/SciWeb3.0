@@ -341,44 +341,28 @@
         <div class="nodes-container"></div>
         <!-- Toolbar -->
         <div class="tree-toolbar">
-            <button class="tool-button btn-motivator" data-tooltip="Add Motivator Node">
-                <i class="fas fa-star"></i>
-            </button>
-            <button class="tool-button btn-task" data-tooltip="Add Task Node">
+            <button class="tool-button btn-task" data-tooltip="Add Task Node" data-blurb="sample">
                 <i class="fas fa-tasks"></i>
             </button>
-            <button class="tool-button btn-challenge" data-tooltip="Add Challenge Node">
-                <i class="fas fa-mountain"></i>
-            </button>
-            <button class="tool-button btn-idea" data-tooltip="Add Idea Node">
+            <button class="tool-button btn-idea" data-tooltip="Add Idea Node" data-blurb="sample">
                 <i class="fas fa-lightbulb"></i>
             </button>
-            <button class="tool-button btn-learningObjective" data-tooltip="Add Learning Objective Node">
-                <i class="fas fa-bullseye"></i>
+            <button class="tool-button btn-assignment" data-type="assignment" data-tooltip="Add Assignment Node" data-blurb="sample">
+                <i class="fas fa-book"></i>
             </button>
-            <div class="school-menu">
-                <button class="tool-button btn-school" data-tooltip="School Items">
-                    <i class="fas fa-graduation-cap"></i>
-                </button>
-                <div class="school-submenu">
-                    <button class="submenu-button btn-assignment" data-type="assignment" data-tooltip="Assignment">
-                        <i class="fas fa-book"></i>
-                    </button>
-                    <button class="submenu-button btn-test" data-type="test" data-tooltip="Test">
-                        <i class="fas fa-clipboard-check"></i>
-                    </button>
-                    <button class="submenu-button btn-project" data-type="project" data-tooltip="Project">
-                        <i class="fas fa-project-diagram"></i>
-                    </button>
-                    <button class="submenu-button btn-essay" data-type="essay" data-tooltip="Essay">
-                        <i class="fas fa-file-alt"></i>
-                    </button>
-                </div>
-            </div>
-            <button class="tool-button btn-image" data-tooltip="Add Image Node">
+            <button class="tool-button btn-test" data-type="test" data-tooltip="Add Test Node" data-blurb="sample">
+                <i class="fas fa-clipboard-check"></i>
+            </button>
+            <button class="tool-button btn-project" data-type="project" data-tooltip="Add Project Node" data-blurb="sample">
+                <i class="fas fa-project-diagram"></i>
+            </button>
+            <button class="tool-button btn-essay" data-type="essay" data-tooltip="Add Essay Node" data-blurb="sample">
+                <i class="fas fa-file-alt"></i>
+            </button>
+            <button class="tool-button btn-image" data-tooltip="Add Image Node" data-blurb="sample">
                 <i class="fas fa-image"></i>
             </button>
-            <button class="tool-button btn-area-select" data-tooltip="Select Area">
+            <button class="tool-button btn-area-select" data-tooltip="Select Area" data-blurb="sample">
                 <i class="fas fa-object-group"></i>
             </button>
         </div>
@@ -437,6 +421,8 @@
         <!-- Bubble to exit area select mode -->
         <div class="area-select-bubble" style="display:none;">Show All Nodes</div>
     </div>
+
+    <div id="custom-tooltip" style="display:none; position:absolute; z-index:2000;"></div>
 {% endblock %}
 
 {% block scripts %}
@@ -459,4 +445,29 @@
         }
     </script>
     <script type="module" src="{{ url_for('static', filename='js/tree/tutorial.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toolbarButtons = document.querySelectorAll('.tree-toolbar .tool-button');
+            const tooltip = document.getElementById('custom-tooltip');
+            toolbarButtons.forEach(btn => {
+                btn.addEventListener('mouseenter', function(e) {
+                    const rect = btn.getBoundingClientRect();
+                    const blurb = btn.getAttribute('data-blurb') || '';
+                    tooltip.innerHTML = `<div style="font-weight:bold;">${btn.getAttribute('data-tooltip')}</div>${blurb ? `<div style='font-size:0.9em; color:#eee; margin-top:4px;'>${blurb}</div>` : ''}`;
+                    tooltip.style.display = 'block';
+                    tooltip.style.left = (rect.right + 10) + 'px';
+                    tooltip.style.top = (rect.top - 10) + 'px';
+                    tooltip.style.background = '#23233a';
+                    tooltip.style.color = '#fff';
+                    tooltip.style.padding = '10px 16px';
+                    tooltip.style.borderRadius = '8px';
+                    tooltip.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+                    tooltip.style.pointerEvents = 'none';
+                });
+                btn.addEventListener('mouseleave', function() {
+                    tooltip.style.display = 'none';
+                });
+            });
+        });
+    </script>
 {% endblock %} 
